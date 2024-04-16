@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground: #f7f7f7;
+  --background: #17191c;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Geist;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+* {
+  outline-offset: 3px;
+}
+
+*:focus {
+  outline: 1.5px solid #4ec8c8;
+  outline-offset: 2px;
+  transition: outline-offset 0.2s ease-out;
+}

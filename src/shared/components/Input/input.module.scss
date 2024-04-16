@@ -1,0 +1,14 @@
+.input {
+  height: 40px;
+  outline: none;
+  padding: 10px;
+  text-align: center;
+
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.input:focus {
+  outline: 1.5px solid #4ec8c8;
+  outline-offset: 2px;
+}
