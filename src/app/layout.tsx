@@ -1,3 +1,4 @@
+import { Toaster } from "@/shared/components";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 
@@ -13,7 +14,11 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <div id="portal"></div>
+        <Toaster />
+      </body>
     </html>
   );
 }

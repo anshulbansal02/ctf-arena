@@ -1,0 +1,51 @@
+.container {
+  display: flex;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0px 0.6px 1.1px rgba(0, 0, 0, 0.04),
+    0px 1.6px 3px rgba(0, 0, 0, 0.026),
+    0px 3.9px 7.2px rgba(0, 0, 0, 0.02),
+    0px 13px 24px rgba(0, 0, 0, 0.014);
+  background-color: #3c3c3e;
+
+  pointer-events: auto;
+  cursor: default;
+
+  .body {
+    display: grid;
+    place-items: center;
+    padding: 8px 0;
+    @apply text-base;
+  }
+
+  .icon {
+    padding: 0 12px;
+    display: grid;
+    place-items: center;
+  }
+
+  button.dismiss {
+    width: 24px;
+    height: 24px;
+    margin: 8px;
+    border-radius: 4px;
+    display: grid;
+    place-items: center;
+    background-color: transparent;
+    border-width: 0;
+    cursor: pointer;
+    fill: #888;
+    transition: fill 0.1s ease;
+
+    &:hover {
+      fill: #f0f0f0;
+    }
+  }
+}
+
+.container.error {
+  .title {
+    color: #bc2018;
+  }
+}
