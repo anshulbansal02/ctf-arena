@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 import { defaultToastStyles } from "@/shared/components/Toaster";
 
-import { useToasterActions, Toast } from "../components/Toaster/store";
+import { Toast, useToasterActions } from "../components/Toaster/store";
 
 interface ToastConfig extends Toast {
   timeout?: number;

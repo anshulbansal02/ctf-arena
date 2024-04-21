@@ -1,11 +1,11 @@
 "use client";
-import styles from "./toast-container.module.scss";
-import { createPortal } from "react-dom";
 import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Toast } from "../Toast/Toast";
 import { useToasterActions, useToasts } from "../store";
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import styles from "./toast-container.module.scss";
 
 const animationConfig = {
   toast: {

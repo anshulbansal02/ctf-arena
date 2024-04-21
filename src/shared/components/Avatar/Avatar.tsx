@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import styles from "./avatar.module.scss";
 import clsx from "clsx";
+import styles from "./avatar.module.scss";
 
 interface Props {
   size?: number;

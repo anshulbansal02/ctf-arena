@@ -1,7 +1,7 @@
-import { createServerClient } from "@/services/supabase/server";
-import { getIsUserOnboarded } from "./services";
-import { NextRequest, NextResponse } from "next/server";
 import { config } from "@/config";
+import { createServerClient } from "@/services/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getIsUserOnboarded } from "./services";
 
 export async function attachSession() {
   try {

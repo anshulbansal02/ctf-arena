@@ -6,8 +6,8 @@ import { joinNamesWithConjunction } from "@/lib/utils";
 import { useTeams } from "@/services/team/browser/useTeams";
 import { Button, Input, Shim } from "@/shared/components";
 import { useToaster } from "@/shared/hooks";
-import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 
 interface Props {
   onNext: (choice: "finish") => void;

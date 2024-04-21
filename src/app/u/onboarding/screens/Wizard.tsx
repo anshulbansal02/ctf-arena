@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { setUserOnboarded } from "@/services/auth/actions";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 
-import { CreateTeamStep } from "./CreateTeam";
-import { JoinTeamStep } from "./JoinTeam";
-import { FirstChoiceStep } from "./FirstChoice";
 import { AnimatePresence, motion } from "framer-motion";
+import { CreateTeamStep } from "./CreateTeam";
+import { FirstChoiceStep } from "./FirstChoice";
+import { JoinTeamStep } from "./JoinTeam";
 
 interface Props {
   username: string;

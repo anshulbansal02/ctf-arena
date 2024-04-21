@@ -1,6 +1,6 @@
 import { useAction } from "@/shared/hooks";
-import { getTeams } from "../actions";
 import { useEffect } from "react";
+import { getTeams } from "../actions";
 
 export function useTeams() {
   const { error, data, execute, loading } = useAction(getTeams);

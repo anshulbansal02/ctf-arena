@@ -1,6 +1,6 @@
+import { SvgInfoOutlined } from "@/assets/icons";
 import { Logo } from "@/shared/components";
 import { SignInWithAzure } from "./components";
-import { SvgInfoOutlined } from "@/assets/icons";
 
 export default function Home() {
   return (

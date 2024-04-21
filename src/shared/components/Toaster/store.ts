@@ -1,4 +1,4 @@
-import { atom, useAtomValue, useSetAtom, useAtom } from "jotai";
+import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
 
 export type Toast = {

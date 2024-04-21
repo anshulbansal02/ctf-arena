@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import { Toast as ToastType } from "./../store";
 
-import styles from "./toast.module.scss";
 import { SvgCross } from "@/assets/icons";
+import styles from "./toast.module.scss";
 
 interface ToastProps extends ToastType {
   onDismiss: (id: number) => void;

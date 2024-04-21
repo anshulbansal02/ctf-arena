@@ -1,5 +1,5 @@
-import { Avatar, Logo } from "@/shared/components";
 import { getUser } from "@/services/auth/server";
+import { Avatar, Logo } from "@/shared/components";
 
 export async function Header() {
   const user = await getUser();

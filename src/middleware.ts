@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { config as appConfig } from "@/config";
 import {
   attachSession,
   authenticatedUserRedirectionRules,
 } from "@/services/auth/server";
-import { config as appConfig } from "@/config";
+import { NextRequest, NextResponse } from "next/server";
 
 const routesType = {
   protected: [/^\/u/],

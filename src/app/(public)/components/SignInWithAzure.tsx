@@ -1,6 +1,6 @@
 "use client";
-import { Button } from "@/shared/components";
 import { signInWith } from "@/services/auth/browser";
+import { Button } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
 
 export function SignInWithAzure() {

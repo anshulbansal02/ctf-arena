@@ -1,8 +1,8 @@
 "use client";
-import clsx from "clsx";
-import styles from "./tags-input.module.scss";
-import { forwardRef, useRef } from "react";
 import { SvgCross } from "@/assets/icons";
+import clsx from "clsx";
+import { forwardRef, useRef } from "react";
+import styles from "./tags-input.module.scss";
 
 interface Props
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {

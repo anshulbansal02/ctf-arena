@@ -1,11 +1,11 @@
 "use client";
 
 import { SvgChevronLeft } from "@/assets/icons";
+import { createTeamAndSendInvites } from "@/services/team/actions";
 import { Button, Input, TagsInput } from "@/shared/components";
 import { useAction, useToaster } from "@/shared/hooks";
 import { FormEvent, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { createTeamAndSendInvites } from "@/services/team/actions";
 
 interface TeamDetails {
   name: string;
