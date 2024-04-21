@@ -9,11 +9,10 @@ interface ToastConfig extends Toast {
   persistent?: boolean;
 }
 
-const DEFAULT_TIMEOUT = 1000000; // 2.5 seconds
+const DEFAULT_TIMEOUT = 2500; // 2.5 seconds
 
 export function useToaster() {
-  const { removeToast, addToast, getNextToastId, getToast } =
-    useToasterActions();
+  const { removeToast, addToast, getToast } = useToasterActions();
 
   const make = useCallback(
     (defaultConfig: Partial<ToastConfig>) => {
@@ -22,19 +21,18 @@ export function useToaster() {
         if (typeof toastProps === "string") config.title = toastProps;
         else config = { ...config, ...toastProps };
 
-        config.id = getNextToastId();
+        const toastId = addToast(config as Toast);
 
         if (!config.persistent) {
           setTimeout(() => {
-            removeToast(config.id!);
+            removeToast(toastId);
           }, config.timeout ?? DEFAULT_TIMEOUT);
         }
-        addToast(config as Toast);
 
         return config.id;
       };
     },
-    [addToast, getNextToastId, removeToast],
+    [addToast, removeToast],
   );
 
   const dismissToast = useCallback(
@@ -51,6 +49,9 @@ export function useToaster() {
   const methods = {
     toast: make({}),
     error: make(defaultToastStyles.error),
+    info: make(defaultToastStyles.info),
+    success: make(defaultToastStyles.success),
+    warning: make(defaultToastStyles.warning),
     dismiss: dismissToast,
   };
 

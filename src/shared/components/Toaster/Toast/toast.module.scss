@@ -14,15 +14,31 @@
 
   .body {
     display: grid;
-    place-items: center;
     padding: 8px 0;
-    @apply text-base;
+
+    .title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .content {
+      color: rgba(255, 255, 255, 0.87);
+      font-size: 14px;
+      font-weight: 400;
+      margin-top: 1px;
+    }
   }
 
   .icon {
-    padding: 0 12px;
+    padding: 11px 8px 12px 12px;
     display: grid;
-    place-items: center;
+  }
+
+  &:not(:has(.title)) {
+    .icon {
+      padding-top: 12px;
+    }
   }
 
   button.dismiss {
@@ -35,7 +51,7 @@
     background-color: transparent;
     border-width: 0;
     cursor: pointer;
-    fill: #888;
+    fill: #ffffff57;
     transition: fill 0.1s ease;
 
     &:hover {
@@ -45,7 +61,45 @@
 }
 
 .container.error {
+  background-color: #450a0a;
+
+  border: 1px solid #991b1b;
+
+  .icon,
   .title {
-    color: #bc2018;
+    color: #fca5a5;
+  }
+}
+
+.container.info {
+  background-color: #082f49; /*950*/
+
+  border: 1px solid #075985; /*800*/
+
+  .icon,
+  .title {
+    color: #7dd3fc; /*300*/
+  }
+}
+
+.container.warning {
+  background-color: #422006; /*950*/
+
+  border: 1px solid #854d0e; /*800*/
+
+  .icon,
+  .title {
+    color: #fcd34d; /*300*/
+  }
+}
+
+.container.success {
+  background-color: #052e16; /*950*/
+
+  border: 1px solid #166534; /*800*/
+
+  .icon,
+  .title {
+    color: #86efac; /*300*/
   }
 }

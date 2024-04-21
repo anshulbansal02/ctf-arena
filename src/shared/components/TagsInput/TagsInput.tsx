@@ -11,9 +11,9 @@ interface Props
   onChange: (value: Array<string>) => void;
 }
 
-export const TagsInput = forwardRef(function TagsInput(
-  { className, value, delimiter = ",", onChange, ...props }: Props,
-  forwardRef: React.ForwardedRef<HTMLDivElement>,
+export const TagsInput = forwardRef<HTMLDivElement, Props>(function TagsInput(
+  { className, value, delimiter = ",", onChange, ...props },
+  ref,
 ) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,7 +55,7 @@ export const TagsInput = forwardRef(function TagsInput(
     <div
       className={clsx(styles.container, className)}
       onClick={focusInput}
-      ref={forwardRef}
+      ref={ref}
     >
       {value?.length !== 0 && (
         <ul className={styles.tags}>

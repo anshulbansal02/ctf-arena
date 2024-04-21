@@ -1,4 +1,7 @@
 export { default as SvgChevronLeft } from './tsx/chevron-left'
 export { default as SvgCross } from './tsx/cross'
+export { default as SvgError } from './tsx/error'
 export { default as SvgInfoOutlined } from './tsx/info-outlined'
 export { default as SvgPlus } from './tsx/plus'
+export { default as SvgSuccess } from './tsx/success'
+export { default as SvgWarning } from './tsx/warning'

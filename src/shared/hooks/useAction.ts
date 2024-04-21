@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
 
 type AsyncFunction<P, R> = (args: P) => Promise<R>;
 
@@ -54,21 +54,24 @@ export function useAction<ParamsType, ReturnType>(
     data: null,
   });
 
-  async function execute(params: ParamsType): Promise<ReturnType | undefined> {
-    dispatch({ type: "loading" });
-    try {
-      const result = await action(params);
-      dispatch({ type: "success", payload: result });
+  const execute = useCallback(
+    async (params: ParamsType): Promise<ReturnType | undefined> => {
+      dispatch({ type: "loading" });
+      try {
+        const result = await action(params);
+        dispatch({ type: "success", payload: result });
 
-      return result;
-    } catch (error) {
-      dispatch({ type: "error", payload: error });
-    }
-  }
+        return result;
+      } catch (error) {
+        dispatch({ type: "error", payload: error });
+      }
+    },
+    [action],
+  );
 
-  function reset() {
+  const reset = useCallback(() => {
     dispatch({ type: "reset" });
-  }
+  }, []);
 
   return { ...actionState, execute, reset };
 }

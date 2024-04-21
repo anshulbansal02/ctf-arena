@@ -1,4 +1,5 @@
 import { Toaster } from "@/shared/components";
+import { GlobalStoreProvider } from "@/shared/providers";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 
@@ -15,9 +16,11 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
-        <div id="portal"></div>
-        <Toaster />
+        <GlobalStoreProvider>
+          {children}
+          <div id="portal"></div>
+          <Toaster />
+        </GlobalStoreProvider>
       </body>
     </html>
   );

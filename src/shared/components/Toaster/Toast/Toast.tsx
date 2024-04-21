@@ -23,7 +23,12 @@ export function Toast({
       {icon && <div className={styles.icon}>{icon}</div>}
       <div className={styles.body} style={{ paddingLeft: icon ? 0 : "1rem" }}>
         {title && <h4 className={styles.title}>{title}</h4>}
-        {content}
+        {content &&
+          (typeof content === "string" ? (
+            <p className={styles.content}>{content}</p>
+          ) : (
+            content
+          ))}
       </div>
 
       {dismissible && (

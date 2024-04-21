@@ -4,16 +4,19 @@ import styles from "./button.module.scss";
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
+  variant?: "ghost" | "primary" | "outlined";
 }
 
-export function Button({ children, loading, className, ...props }: Props) {
+export function Button({
+  children,
+  loading,
+  className,
+  variant = "primary",
+  ...props
+}: Props) {
   return (
     <button
-      className={clsx(
-        styles.button,
-        { [styles.withLoader]: loading },
-        className,
-      )}
+      className={clsx(styles.button, styles[variant], className)}
       {...props}
     >
       {loading && <Spinner size={12} className={styles.loader} />}

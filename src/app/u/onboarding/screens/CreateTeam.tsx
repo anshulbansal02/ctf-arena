@@ -2,8 +2,10 @@
 
 import { SvgChevronLeft } from "@/assets/icons";
 import { Button, Input, TagsInput } from "@/shared/components";
-import { FormEvent, useState } from "react";
+import { useAction, useToaster } from "@/shared/hooks";
+import { FormEvent, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { createTeamAndSendInvites } from "@/services/team/actions";
 
 interface TeamDetails {
   name: string;
@@ -18,17 +20,53 @@ interface Props {
 export function CreateTeamStep(props: Props) {
   const [stage, setStage] = useState<"name" | "invite">("name");
 
-  const { register, control } = useForm<TeamDetails>();
+  const { register, control, getValues } = useForm<TeamDetails>();
+  const [teamInfoToast, setTeamInfoToast] = useState<{
+    timer?: Timer;
+    toastId?: number;
+  }>({});
 
-  function handleNext(e: FormEvent) {
+  const {
+    execute: createTeam,
+    loading,
+    error,
+  } = useAction(createTeamAndSendInvites);
+
+  const toaster = useToaster();
+
+  async function handleNext(e: FormEvent) {
     e.preventDefault();
     switch (stage) {
       case "name":
+        const timer = setTimeout(() => {
+          const toastId = toaster.info({
+            content: "A team can only have a maximum of 4 members.",
+            persistent: true,
+          });
+
+          setTeamInfoToast((t) => ({ ...t, toastId }));
+        }, 500);
+
+        setTeamInfoToast((t) => ({ ...t, timer }));
         return setStage("invite");
-      // case "invite":
-      //   return props.onNext("finish");
+      case "invite":
+        const formData = getValues();
+        await createTeam({
+          name: formData.name,
+          invitees: formData.inviteIds,
+        });
+      // return props.onNext("finish");
     }
   }
+
+  useEffect(() => {
+    const { timer, toastId } = teamInfoToast;
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (toastId) toaster.dismiss(toastId);
+    };
+  }, [teamInfoToast, toaster]);
 
   const CTALabel = {
     name: "Next",
@@ -38,9 +76,9 @@ export function CreateTeamStep(props: Props) {
   return (
     <div className="mt-36 min-w-[420px] text-center">
       <div className="flex items-center justify-center gap-4">
-        <button onClick={props.onBack}>
+        <Button onClick={props.onBack} variant="outlined">
           <SvgChevronLeft fill="#fff" />
-        </button>
+        </Button>
         <h2 className="text-3xl">Create your Team</h2>
       </div>
       <form
@@ -75,14 +113,19 @@ export function CreateTeamStep(props: Props) {
               )}
             />
 
-            <p className="mt-1.5  cursor-default text-xs text-slate-400">
-              Enter the email addresses of the members you would like to join
-              your team. You can only invite 4 members to your team.
+            <p className="mt-2  cursor-default text-xs text-slate-400">
+              Enter the email addresses of the users you would like to join your
+              team. You can send out invite to only 5 users.
             </p>
           </div>
         )}
 
-        <Button onClick={handleNext} type="button" className="mt-2">
+        <Button
+          onClick={handleNext}
+          type="button"
+          className="mt-2"
+          loading={loading}
+        >
           {CTALabel}
         </Button>
       </form>

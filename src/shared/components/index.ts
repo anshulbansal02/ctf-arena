@@ -5,3 +5,4 @@ export * from "./Avatar/Avatar";
 export * from "./Spinner/Spinner";
 export * from "./TagsInput/TagsInput";
 export * from "./Toaster";
+export * from "./Shim/Shim";

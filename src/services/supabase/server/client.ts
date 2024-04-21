@@ -4,13 +4,14 @@ import {
   type CookieOptions,
 } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { Database } from "../database.schema";
 
 export function createServerClient() {
   const cookieStore = cookies();
 
-  return supabaseServerClient(
+  return supabaseServerClient<Database>(
     config.supabase.projectURL,
-    config.supabase.projectKey,
+    config.supabase.adminKey,
     {
       cookies: {
         get(name: string) {
@@ -27,6 +28,6 @@ export function createServerClient() {
           } catch (_) {}
         },
       },
-    }
+    },
   );
 }

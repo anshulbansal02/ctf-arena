@@ -1,4 +1,5 @@
 import { atom, useAtomValue, useSetAtom, useAtom } from "jotai";
+import { useCallback } from "react";
 
 export type Toast = {
   id: number;
@@ -10,7 +11,6 @@ export type Toast = {
 };
 
 const toasts = atom<Array<Toast>>([]);
-const nextToastId = atom<number>(0);
 
 export function useToasts() {
   return useAtomValue(toasts);
@@ -19,27 +19,32 @@ export function useToasts() {
 export function useToasterActions() {
   const setToasts = useSetAtom(toasts);
   const toastsList = useToasts();
-  const [toastId, setNextToastId] = useAtom(nextToastId);
 
-  const getNextToastId = () => {
-    setNextToastId((id) => ++id);
-    return toastId;
-  };
+  const addToast = useCallback(
+    (toast: Toast) => {
+      const lastToast = toastsList.at(-1);
+      const id = (lastToast?.id ?? -1) + 1;
+      setToasts((toasts) => [...toasts, { ...toast, id }]);
+      return id;
+    },
+    [setToasts, toastsList],
+  );
 
-  const addToast = (toast: Toast) => {
-    setToasts((toasts) => [...toasts, toast]);
-  };
+  const removeToast = useCallback(
+    (toastId: Toast["id"]) => {
+      setToasts((toasts) => toasts.filter((t) => t.id !== toastId));
+    },
+    [setToasts],
+  );
 
-  const removeToast = (toastId: Toast["id"]) => {
-    setToasts((toasts) => toasts.filter((t) => t.id !== toastId));
-  };
-
-  const getToast = (toastId: Toast["id"]) => {
-    return toastsList.find((t) => t.id === toastId);
-  };
+  const getToast = useCallback(
+    (toastId: Toast["id"]) => {
+      return toastsList.find((t) => t.id === toastId);
+    },
+    [toastsList],
+  );
 
   return {
-    getNextToastId,
     addToast,
     removeToast,
     getToast,
