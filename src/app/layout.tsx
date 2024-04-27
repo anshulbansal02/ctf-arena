@@ -1,6 +1,6 @@
 import { Toaster } from "@/shared/components";
 import { GlobalStoreProvider } from "@/shared/providers";
-import "@/styles/globals.css";
+import "@/styles/globals.scss";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

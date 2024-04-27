@@ -40,7 +40,9 @@ export function CreateTeamStep(props: Props) {
       case "name":
         const timer = setTimeout(() => {
           const toastId = toaster.info({
-            content: "A team can only have a maximum of 4 members.",
+            title: "A team can only have a maximum of 4 members.",
+            content:
+              "You can send out invites to only 5 users, the first 3 users to accept your invite become your team members.",
             persistent: true,
           });
 
@@ -55,7 +57,7 @@ export function CreateTeamStep(props: Props) {
           name: formData.name,
           invitees: formData.inviteIds,
         });
-      // return props.onNext("finish");
+        return props.onNext("finish");
     }
   }
 
@@ -113,9 +115,11 @@ export function CreateTeamStep(props: Props) {
               )}
             />
 
-            <p className="mt-2  cursor-default text-xs text-slate-400">
+            <p className="mt-2 cursor-default text-xs leading-5 text-slate-400">
               Enter the email addresses of the users you would like to join your
-              team. You can send out invite to only 5 users.
+              team.
+              <br /> Press <kbd>,</kbd> or <kbd>Enter</kbd> after you type in
+              the email address.
             </p>
           </div>
         )}

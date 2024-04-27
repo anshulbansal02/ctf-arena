@@ -1,13 +1,18 @@
 "use client";
-import { signInWith } from "@/services/auth/browser";
+import { signInWith, useSession } from "@/services/auth/browser";
 import { Button } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
 
 export function SignInWithAzure() {
+  console.log("Called SignInWithAzure");
+
   const { execute: handleSignIn, loading } = useAction(signInWith);
+  const l = useSession();
+
+  const refreshing = Boolean(l.loading || loading || l.data?.data.session);
 
   return (
-    <Button onClick={() => handleSignIn("azure")} loading={loading}>
+    <Button onClick={() => handleSignIn("azure")} loading={refreshing}>
       <svg
         width={16}
         viewBox="0 0 2499.6 2500"

@@ -20,7 +20,8 @@ export default function Home() {
         <SignInWithAzure />
 
         <p className="mt-1.5 flex cursor-default items-center justify-center gap-1 text-xs text-slate-400">
-          <SvgInfoOutlined /> Sign In with your Veersa Account
+          <SvgInfoOutlined fill="currentColor" /> Sign In with your Veersa
+          Account
         </p>
       </div>
     </main>

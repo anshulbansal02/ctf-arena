@@ -1,11 +1,5 @@
 import { createServerClient } from "@/services/supabase/server";
 
-export async function signOut() {
-  const supa = createServerClient();
-
-  return await supa.auth.signOut();
-}
-
 export async function getSessionUser() {
   const supa = createServerClient();
   const user = await supa.auth.getUser();

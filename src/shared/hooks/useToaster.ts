@@ -29,7 +29,7 @@ export function useToaster() {
           }, config.timeout ?? DEFAULT_TIMEOUT);
         }
 
-        return config.id;
+        return toastId;
       };
     },
     [addToast, removeToast],

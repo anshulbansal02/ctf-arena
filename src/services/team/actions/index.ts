@@ -8,12 +8,12 @@ export async function createTeamAndSendInvites(data: {
   invitees: Array<string>;
 }) {
   const supa = createServerClient();
-
   const user = await getUser();
 
   await supa.rpc("create_team_with_leader", {
     team_name: data.name,
     leader: user.id,
+    invitee_emails: data.invitees,
   });
 }
 
