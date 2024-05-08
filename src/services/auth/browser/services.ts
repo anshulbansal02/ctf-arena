@@ -5,8 +5,6 @@ import { createBrowserClient } from "@/services/supabase/browser";
 type AuthProvider = "azure";
 
 export async function signInWith(provider: AuthProvider) {
-  console.log("Called signInWith");
-
   const supa = createBrowserClient();
 
   return await supa.auth.signInWithOAuth({

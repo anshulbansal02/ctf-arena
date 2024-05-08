@@ -1,12 +1,22 @@
 import { getUser } from "@/services/auth/server";
 import { Avatar, Logo } from "@/shared/components";
 import { SignOutButton } from "./SignOutButton";
+import clsx from "clsx";
 
-export async function Header() {
+interface Props {
+  className?: string;
+}
+
+export async function Header({ className }: Props) {
   const user = await getUser();
 
   return (
-    <header className="flex h-[80px] w-full items-center p-4 sm:px-4 md:px-8 lg:px-16">
+    <header
+      className={clsx(
+        "flex h-[80px] w-full items-center bg-[#17191C] p-4 shadow-lg sm:px-4 md:px-8 lg:px-16",
+        className,
+      )}
+    >
       <div className="w-40"></div>
       <Logo className="flex-1" />
 

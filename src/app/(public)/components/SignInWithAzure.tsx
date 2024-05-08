@@ -4,8 +4,6 @@ import { Button } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
 
 export function SignInWithAzure() {
-  console.log("Called SignInWithAzure");
-
   const { execute: handleSignIn, loading } = useAction(signInWith);
   const l = useSession();
 

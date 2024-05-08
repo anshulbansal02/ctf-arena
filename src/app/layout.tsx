@@ -1,3 +1,4 @@
+import { GeistSans } from "geist/font/sans";
 import { Toaster } from "@/shared/components";
 import { GlobalStoreProvider } from "@/shared/providers";
 import "@/styles/globals.scss";
@@ -14,7 +15,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={GeistSans.className}>
       <body>
         <GlobalStoreProvider>
           {children}

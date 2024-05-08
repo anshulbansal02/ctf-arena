@@ -2,9 +2,11 @@ import { emailService, renderTemplate } from "@/services/email";
 import { createServerClient } from "@/services/supabase/server";
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as { invite_id: string };
+  const body = (await request.json()) as {
+    record: { id: number };
+  };
 
-  if (!body.invite_id) return Response.json("1", { status: 400 });
+  if (!body.record.id) return Response.json("1", { status: 400 });
 
   const supa = createServerClient();
 
@@ -14,6 +16,7 @@ export async function POST(request: Request) {
       .select(
         "...teams(team_name:name), status, metadata, ...users!created_by(inviter_name:full_name, inviter_email:email), user_email",
       )
+      .eq("id", body.record.id)
   ).data?.[0];
 
   if (!invite) return Response.json("2", { status: 400 });
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
   await emailService.send({
     address: {
       from: "onboarding@resend.dev",
-      to: "anshulbansal02@outlook.com",
+      to: invite.user_email!,
     },
     subject: `Join ${invite.team_name} on CTF Arena`,
     body: emailBody,

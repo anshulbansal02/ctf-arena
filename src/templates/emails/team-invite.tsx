@@ -36,7 +36,7 @@ export const TeamInviteEmail = ({
     <Html>
       <Head />
 
-      <Preview>Join {teamName} on CTF Arena</Preview>
+      <Preview>{inviterName} is inviting you to join their team.</Preview>
 
       <Tailwind>
         <Body className="mx-auto my-auto bg-white px-2 font-sans">

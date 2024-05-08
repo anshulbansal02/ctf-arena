@@ -45,7 +45,6 @@ export const TagsInput = forwardRef<HTMLDivElement, Props>(function TagsInput(
   }
 
   function handleRemove(tagIndex: number) {
-    console.log("tag", tagIndex);
     onChange(value?.toSpliced(tagIndex, 1) ?? []);
   }
 
