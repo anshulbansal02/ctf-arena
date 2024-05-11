@@ -18,7 +18,6 @@ export default function Home() {
       </div>
       <div className="mt-24 text-center">
         <SignInWithAzure />
-
         <p className="mt-1.5 flex cursor-default items-center justify-center gap-1 text-xs text-slate-400">
           <SvgInfoOutlined fill="currentColor" /> Sign In with your Veersa
           Account

@@ -12,8 +12,10 @@ export async function signInWith(provider: AuthProvider) {
     provider,
     options: {
       scopes: "profile email offline_access",
-      redirectTo: new URL(config.auth.cbRedirectPath, window.location.origin)
-        .href,
+      redirectTo: new URL(
+        config.routes.auth.cbRedirectPath,
+        window.location.origin,
+      ).href,
     },
   });
 }

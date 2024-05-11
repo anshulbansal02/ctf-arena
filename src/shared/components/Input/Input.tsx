@@ -3,13 +3,20 @@ import clsx from "clsx";
 import { ForwardedRef, forwardRef } from "react";
 import styles from "./input.module.scss";
 
-interface Props extends React.InputHTMLAttributes<HTMLInputElement> {}
+interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
+  leftSlot?: React.ReactNode;
+  rightSlot?: React.ReactNode;
+}
 
 export const Input = forwardRef(function Input(
-  { children, className, ...props }: Props,
+  { children, className, leftSlot, rightSlot, ...props }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
   return (
-    <input ref={ref} className={clsx(styles.input, className)} {...props} />
+    <div className={clsx(styles.wrapper, className)}>
+      <span className={styles.leftSlot}>{leftSlot}</span>
+      <input ref={ref} className={styles.input} {...props} />
+      <span className={styles.rightSlot}>{rightSlot}</span>
+    </div>
   );
 });

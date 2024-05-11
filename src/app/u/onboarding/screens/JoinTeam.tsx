@@ -7,12 +7,22 @@ import { useTeams } from "@/services/team/client";
 import { Button, Input, Shim } from "@/shared/components";
 import { useToaster } from "@/shared/hooks";
 import { AnimatePresence, motion } from "framer-motion";
+import { nanoid } from "nanoid";
 import { useState } from "react";
 
 interface Props {
   onNext: (choice: "finish") => void;
   onBack: () => void;
 }
+
+const randomArray = Array(4).fill(0).map(nanoid);
+const TeamsListSkeleton = () => {
+  return randomArray.map((r) => (
+    <li key={r}>
+      <Shim classNames="w-full h-12" />
+    </li>
+  ));
+};
 
 export function JoinTeamStep(props: Props) {
   const toaster = useToaster();
@@ -23,10 +33,10 @@ export function JoinTeamStep(props: Props) {
   function toggleRequest(teamId: number) {
     if (
       !joinRequestsDraft.includes(teamId) &&
-      joinRequestsDraft.length === config.team.REQUEST_TEAM_LIMIT
+      joinRequestsDraft.length === config.app.team.REQUEST_TEAM_LIMIT
     ) {
       return toaster.error({
-        title: `Can not request more than ${config.team.REQUEST_TEAM_LIMIT} teams at a time.`,
+        title: `Can not request more than ${config.app.team.REQUEST_TEAM_LIMIT} teams at a time.`,
         content:
           "You can withdraw other requests to send request to other teams.",
         timeout: 5000,
@@ -51,8 +61,8 @@ export function JoinTeamStep(props: Props) {
         <h2 className="text-3xl">Choose your Team</h2>
       </div>
       <p className="mt-4 text-balance">
-        You can only send request to {config.team.REQUEST_TEAM_LIMIT} teams at a
-        time. First team to accept your request becomes your team.
+        You can only send request to {config.app.team.REQUEST_TEAM_LIMIT} teams
+        at a time. First team to accept your request becomes your team.
       </p>
       <div className="mx-auto mt-8 flex flex-col items-center gap-4">
         <Input
@@ -62,43 +72,35 @@ export function JoinTeamStep(props: Props) {
         />
 
         <ul className="mt-8 flex w-full list-none flex-col gap-6">
-          {loading
-            ? Array(4)
-                .fill(0)
-                .map((i) => (
-                  <li key={i}>
-                    <Shim classNames="w-full h-12" />
-                  </li>
-                ))
-            : teams.map((team) => (
-                <li
-                  key={team.id}
-                  className="flex items-center justify-between gap-8"
-                >
-                  <div className="text-left">
-                    <h4 className="text-xl font-medium">{team.name}</h4>
-                    <p>
-                      {joinNamesWithConjunction(
-                        team.members.map((m) => m.name!),
-                      )}
-                    </p>
-                  </div>
-                  <div>
-                    <Button
-                      onClick={() => toggleRequest(team.id)}
-                      variant={
-                        joinRequestsDraft.includes(team.id)
-                          ? "ghost"
-                          : "primary"
-                      }
-                    >
-                      {joinRequestsDraft.includes(team.id)
-                        ? "Withdraw Request"
-                        : "Request To Join"}
-                    </Button>
-                  </div>
-                </li>
-              ))}
+          {loading ? (
+            <TeamsListSkeleton />
+          ) : (
+            teams.map((team) => (
+              <li
+                key={team.id}
+                className="flex items-center justify-between gap-8"
+              >
+                <div className="text-left">
+                  <h4 className="text-xl font-medium">{team.name}</h4>
+                  <p>
+                    {joinNamesWithConjunction(team.members.map((m) => m.name!))}
+                  </p>
+                </div>
+                <div>
+                  <Button
+                    onClick={() => toggleRequest(team.id)}
+                    variant={
+                      joinRequestsDraft.includes(team.id) ? "ghost" : "primary"
+                    }
+                  >
+                    {joinRequestsDraft.includes(team.id)
+                      ? "Withdraw Request"
+                      : "Request To Join"}
+                  </Button>
+                </div>
+              </li>
+            ))
+          )}
         </ul>
       </div>
 

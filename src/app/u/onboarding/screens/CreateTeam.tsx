@@ -1,11 +1,14 @@
 "use client";
 
-import { SvgChevronLeft } from "@/assets/icons";
-import { createTeamAndSendInvites } from "@/services/team";
+import { SvgChevronLeft, SvgPenSparkle } from "@/assets/icons";
+import { config } from "@/config";
+import { createTeamAndSendInvites, generateTeamName } from "@/services/team";
 import { Button, Input, TagsInput } from "@/shared/components";
 import { useAction, useToaster } from "@/shared/hooks";
-import { FormEvent, useEffect, useState } from "react";
+import clsx from "clsx";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import validator from "validator";
 
 interface TeamDetails {
   name: string;
@@ -19,12 +22,22 @@ interface Props {
 
 export function CreateTeamStep(props: Props) {
   const [stage, setStage] = useState<"name" | "invite">("name");
-
-  const { register, control, getValues } = useForm<TeamDetails>();
   const [teamInfoToast, setTeamInfoToast] = useState<{
     timer?: Timer;
     toastId?: number;
   }>({});
+
+  const toaster = useToaster();
+
+  const {
+    register,
+    control,
+    setValue,
+    handleSubmit,
+    formState: { errors: formErrors },
+  } = useForm<TeamDetails>({
+    mode: "onSubmit",
+  });
 
   const {
     execute: createTeam,
@@ -32,10 +45,7 @@ export function CreateTeamStep(props: Props) {
     error,
   } = useAction(createTeamAndSendInvites);
 
-  const toaster = useToaster();
-
-  async function handleNext(e: FormEvent) {
-    e.preventDefault();
+  function handleNext(formData: TeamDetails) {
     switch (stage) {
       case "name":
         const timer = setTimeout(() => {
@@ -51,9 +61,9 @@ export function CreateTeamStep(props: Props) {
 
         setTeamInfoToast((t) => ({ ...t, timer }));
         return setStage("invite");
+
       case "invite":
-        const formData = getValues();
-        await createTeam({
+        createTeam({
           name: formData.name,
           invitees: formData.inviteIds,
         });
@@ -61,19 +71,20 @@ export function CreateTeamStep(props: Props) {
     }
   }
 
+  const { execute: generateName, loading: settingName } = useAction(
+    async () => {
+      setValue("name", await generateTeamName());
+    },
+  );
+
+  // Clean up info toast
   useEffect(() => {
     const { timer, toastId } = teamInfoToast;
-
     return () => {
       if (timer) clearTimeout(timer);
       if (toastId) toaster.dismiss(toastId);
     };
-  }, [teamInfoToast, toaster]);
-
-  const CTALabel = {
-    name: "Next",
-    invite: "Let's Go",
-  }[stage];
+  }, [teamInfoToast]);
 
   return (
     <div className="mt-36 min-w-[420px] text-center">
@@ -85,24 +96,64 @@ export function CreateTeamStep(props: Props) {
       </div>
       <form
         className="mx-auto mt-8 flex flex-col gap-4 text-center"
-        onSubmit={handleNext}
+        onSubmit={handleSubmit(handleNext)}
       >
         <div>
-          <h4 className="text-lg">Let&apos;s name it</h4>
+          <label className="text-lg">Let&apos;s name it</label>
           <Input
             type="text"
             autoFocus
+            disabled={settingName}
             className="mt-2 w-full"
             placeholder="How about Rangers?"
-            {...register("name")}
+            {...register("name", {
+              required: {
+                message: "Please enter a name before proceeding",
+                value: true,
+              },
+              minLength: {
+                message: "Please enter a name with at least 3 characters",
+                value: 3,
+              },
+            })}
+            rightSlot={
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={generateName}
+                title="Generate a cool name"
+              >
+                <SvgPenSparkle
+                  width={20}
+                  height={20}
+                  className={clsx({ "animate-pulse": settingName })}
+                />
+              </Button>
+            }
           />
+          <p className="mt-2 text-sm text-red-300">
+            {formErrors.name?.message}
+          </p>
         </div>
 
         {stage === "invite" && (
           <div className="mt-2">
-            <h4 className="text-lg">Invite your team members</h4>
+            <label className="text-lg">Invite your team members</label>
             <Controller
-              {...register("inviteIds")}
+              {...register("inviteIds", {
+                validate: (emails) => {
+                  const emailsValid = emails.every((e) => validator.isEmail(e));
+                  if (!emailsValid) return "Please enter valid email addresses";
+                  const orgsValid = emails.every((e) =>
+                    config.app.organizations.includes(
+                      e.split("@")[1].toLowerCase(),
+                    ),
+                  );
+                  if (!orgsValid)
+                    return "Cannot invite users outside of organization";
+                  return true;
+                },
+              })}
               control={control}
               render={({ field }) => (
                 <TagsInput
@@ -115,6 +166,10 @@ export function CreateTeamStep(props: Props) {
               )}
             />
 
+            <p className="mt-2 text-sm text-red-300">
+              {formErrors.inviteIds?.message}
+            </p>
+
             <p className="mt-2 cursor-default text-xs leading-5 text-slate-400">
               Enter the email addresses of the users you would like to join your
               team.
@@ -124,13 +179,13 @@ export function CreateTeamStep(props: Props) {
           </div>
         )}
 
-        <Button
-          onClick={handleNext}
-          type="button"
-          className="mt-2"
-          loading={loading}
-        >
-          {CTALabel}
+        <Button type="submit" className="mt-2" loading={loading}>
+          {
+            {
+              name: "Next",
+              invite: "Let's Go",
+            }[stage]
+          }
         </Button>
       </form>
     </div>

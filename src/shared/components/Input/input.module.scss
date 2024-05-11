@@ -6,9 +6,28 @@
 
   background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
+  width: 100%;
 }
 
 .input:focus {
   outline: 1.5px solid #4ec8c8;
   outline-offset: 2px;
+}
+
+.wrapper {
+  position: relative;
+}
+
+.leftSlot,
+.rightSlot {
+  position: absolute;
+  top: 0;
+}
+
+.rightSlot {
+  right: 0;
+}
+
+.leftSlot {
+  left: 0;
 }

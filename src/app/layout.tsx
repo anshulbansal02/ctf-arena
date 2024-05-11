@@ -6,14 +6,14 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "CTF Arena",
-  description: "",
+  description: "A platform challenging users to show their technical prowess",
 };
 
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+interface LayoutProps {
+  readonly children: React.ReactNode;
+}
+
+export default async function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en" className={GeistSans.className}>
       <body>

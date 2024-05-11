@@ -7,3 +7,11 @@ export function joinNamesWithConjunction(
     items.slice(items.length - 2).join(` ${conjunction} `),
   ].join(", ");
 }
+
+function getRandomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
+
+export function randomItem<T>(array: Array<T>): T {
+  return array[getRandomInt(0, array.length)];
+}

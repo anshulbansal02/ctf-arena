@@ -9,8 +9,10 @@ import {
   index,
   jsonb,
   pgView,
+  PgView,
 } from "drizzle-orm/pg-core";
 import { TB_users } from "../user";
+import { eq, isNull } from "drizzle-orm";
 
 export const Enum_teamRequestStatus = pgEnum("team_request_status", [
   "queued",
@@ -74,3 +76,15 @@ export const TB_teamRequest = pgTable("team_requests", {
     .defaultNow()
     .$onUpdate(() => new Date()),
 });
+
+export const View_currentTeamMembers = pgView("current_team_members").as((q) =>
+  q
+    .select({
+      teamId: TB_teams.id,
+      teamName: TB_teams.name,
+      memberId: TB_teamMembers.userId,
+    })
+    .from(TB_teams)
+    .leftJoin(TB_teamMembers, eq(TB_teams.id, TB_teamMembers.teamId))
+    .where(isNull(TB_teamMembers.leftAt)),
+);
