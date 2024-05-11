@@ -1,5 +1,5 @@
 "use client";
-import { signInWith, useSession } from "@/services/auth/browser";
+import { signInWith, useSession } from "@/services/auth/client";
 import { Button } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { SvgChevronLeft } from "@/assets/icons";
-import { createTeamAndSendInvites } from "@/services/team/actions";
+import { createTeamAndSendInvites } from "@/services/team";
 import { Button, Input, TagsInput } from "@/shared/components";
 import { useAction, useToaster } from "@/shared/hooks";
 import { FormEvent, useEffect, useState } from "react";

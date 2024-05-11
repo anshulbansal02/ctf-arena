@@ -3,7 +3,7 @@
 import { SvgChevronLeft } from "@/assets/icons";
 import { config } from "@/config";
 import { joinNamesWithConjunction } from "@/lib/utils";
-import { useTeams } from "@/services/team/browser/useTeams";
+import { useTeams } from "@/services/team/client";
 import { Button, Input, Shim } from "@/shared/components";
 import { useToaster } from "@/shared/hooks";
 import { AnimatePresence, motion } from "framer-motion";

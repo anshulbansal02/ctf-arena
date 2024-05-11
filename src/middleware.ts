@@ -2,7 +2,7 @@ import { config as appConfig } from "@/config";
 import {
   attachSession,
   authenticatedUserRedirectionRules,
-} from "@/services/auth/server";
+} from "@/services/auth/middlewares";
 import { NextRequest, NextResponse } from "next/server";
 
 const routesType = {

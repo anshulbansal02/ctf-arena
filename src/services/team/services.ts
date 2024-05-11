@@ -1,6 +1,6 @@
 "use server";
 
-import { getUser } from "@/services/auth/server";
+import { getUser } from "@/services/auth";
 import { createServerClient } from "@/services/supabase/server";
 
 export async function createTeamAndSendInvites(data: {

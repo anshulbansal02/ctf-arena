@@ -1,4 +1,4 @@
-import { getUser } from "@/services/auth/server";
+import { getUser } from "@/services/auth";
 import { Header } from "../components";
 import { OnboardingWizard } from "./screens";
 

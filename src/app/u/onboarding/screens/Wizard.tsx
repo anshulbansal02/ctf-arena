@@ -1,6 +1,6 @@
 "use client";
 
-import { setUserOnboarded } from "@/services/auth/actions";
+import { setUserOnboarded } from "@/services/auth";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 

@@ -17,4 +17,8 @@ export const config = {
     REQUEST_TEAM_LIMIT: 4,
     INVITE_USER_LIMIT: 5,
   },
+
+  auth: {
+    cbRedirectPath: "/auth/callback",
+  },
 };

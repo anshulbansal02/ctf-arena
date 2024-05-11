@@ -1,4 +1,4 @@
-import { getUser } from "@/services/auth/server";
+import { getUser } from "@/services/auth";
 import { Avatar, Logo } from "@/shared/components";
 import { SignOutButton } from "./SignOutButton";
 import clsx from "clsx";
