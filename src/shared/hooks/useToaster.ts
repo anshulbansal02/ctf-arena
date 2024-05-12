@@ -52,6 +52,7 @@ export function useToaster() {
     info: make(defaultToastStyles.info),
     success: make(defaultToastStyles.success),
     warning: make(defaultToastStyles.warning),
+    loading: make(defaultToastStyles.loading),
     dismiss: dismissToast,
   };
 

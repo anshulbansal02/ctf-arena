@@ -84,3 +84,25 @@ export async function getTeamDetails(teamId: number) {
 
   return team;
 }
+
+export async function sendTeamRequest(teamId: number) {
+  const user = await getUser();
+
+  await db.insert(TB_teamRequest).values({
+    type: "request",
+    teamId,
+    createdBy: user.id,
+  });
+}
+
+export async function sendTeamRequests(teamIds: Array<number>) {
+  const user = await getUser();
+
+  await db.insert(TB_teamRequest).values(
+    teamIds.map((teamId) => ({
+      type: "request" as any,
+      teamId,
+      createdBy: user.id,
+    })),
+  );
+}

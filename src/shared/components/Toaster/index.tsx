@@ -5,6 +5,7 @@ import {
   SvgWarning,
 } from "@/assets/icons";
 import { ToastContainer } from "./ToastContainer/ToastContainer";
+import { Spinner } from "../Spinner/Spinner";
 
 export const defaultToastStyles = {
   info: {
@@ -26,6 +27,11 @@ export const defaultToastStyles = {
     title: "Success",
     icon: <SvgSuccess fill="currentColor" />,
     className: "success",
+  },
+  loading: {
+    title: "Loading",
+    icon: <Spinner color="#fff" size={10} />,
+    className: "loading",
   },
 } as const;
 

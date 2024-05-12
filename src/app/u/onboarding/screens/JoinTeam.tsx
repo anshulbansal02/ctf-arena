@@ -5,12 +5,13 @@ import { config } from "@/config";
 import { joinNamesWithConjunction } from "@/lib/utils";
 import { useTeams } from "@/services/team/client";
 import { Button, Input, Shim } from "@/shared/components";
-import { useToaster } from "@/shared/hooks";
+import { useAction, useToaster } from "@/shared/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { nanoid } from "nanoid";
 import { useState } from "react";
 import AstronautImage from "@/assets/media/astronaut.png";
 import Image from "next/image";
+import { sendTeamRequests } from "@/services/team";
 
 interface Props {
   onNext: (choice: "finish") => void;
@@ -53,6 +54,14 @@ export function JoinTeamStep(props: Props) {
       setReadyToFinish(true);
     }, 100);
   }
+
+  const {
+    execute: sendRequests,
+    loading: sendingRequests,
+    error,
+  } = useAction(async () => {
+    await sendTeamRequests(joinRequestsDraft);
+  });
 
   return (
     <div className="mt-24 text-center">
@@ -135,7 +144,13 @@ export function JoinTeamStep(props: Props) {
             animate={{ y: 0, opacity: 1 }}
           >
             <div className="absolute bottom-[-30px] mx-auto h-[100px] w-[400px] bg-teal-900 blur-2xl"></div>
-            <Button className="mb-6 w-[320px]">Let&apos;s Go</Button>
+            <Button
+              className="mb-6 w-[320px]"
+              onClick={sendRequests}
+              loading={sendingRequests}
+            >
+              Let&apos;s Go
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>

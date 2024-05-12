@@ -7,7 +7,7 @@ export default async function OnboardingPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center">
-      <Header className="fixed top-0" />
+      <Header className="fixed top-0 z-10" />
       <section className="mt-[80px] max-w-[480px] px-4">
         <OnboardingWizard username={user.user_metadata.full_name} />
       </section>

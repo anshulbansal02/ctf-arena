@@ -17,6 +17,7 @@ export function Button({
   return (
     <button
       className={clsx(styles.button, styles[variant], className)}
+      disabled={loading}
       {...props}
     >
       {loading && <Spinner size={12} className={styles.loader} />}

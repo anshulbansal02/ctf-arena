@@ -11,7 +11,7 @@ export default async function Dashboard() {
 
   return (
     <div>
-      <Header className="fixed top-0" />
+      <Header className="fixed top-0 z-10" />
       <main className="mt-[80px] flex min-h-screen min-w-[420px] flex-col items-center px-4 text-center">
         <section className="mt-8 w-[420px]">
           <h2 className="text-2xl">Your Team</h2>

@@ -138,6 +138,7 @@ export function CreateTeamStep(props: Props) {
             <Controller
               {...register("inviteIds", {
                 validate: (emails) => {
+                  if (!emails) return true;
                   const emailsValid = emails.every((e) => validator.isEmail(e));
                   if (!emailsValid) return "Please enter valid email addresses";
                   const orgsValid = emails.every((e) =>

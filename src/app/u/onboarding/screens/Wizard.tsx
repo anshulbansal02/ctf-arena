@@ -22,7 +22,7 @@ export function OnboardingWizard(props: Props) {
   async function handleChoice(choice: "join" | "create" | "finish") {
     if (choice === "finish") {
       await setUserOnboarded();
-      router.refresh();
+      location.reload();
     } else {
       setStep(choice);
     }

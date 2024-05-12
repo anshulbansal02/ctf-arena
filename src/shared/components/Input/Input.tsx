@@ -15,7 +15,7 @@ export const Input = forwardRef(function Input(
   return (
     <div className={clsx(styles.wrapper, className)}>
       <span className={styles.leftSlot}>{leftSlot}</span>
-      <input ref={ref} className={styles.input} {...props} />
+      <input ref={ref} className={styles.input} {...props} autoComplete="off" />
       <span className={styles.rightSlot}>{rightSlot}</span>
     </div>
   );
