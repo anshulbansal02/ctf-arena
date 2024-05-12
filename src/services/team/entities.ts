@@ -9,7 +9,6 @@ import {
   index,
   jsonb,
   pgView,
-  PgView,
 } from "drizzle-orm/pg-core";
 import { TB_users } from "../user";
 import { eq, isNull } from "drizzle-orm";
@@ -32,7 +31,7 @@ export const TB_teams = pgTable("teams", {
   leader: uuid("leader")
     .notNull()
     .unique()
-    .references(() => TB_users.id),
+    .references(() => TB_users.id, { onDelete: "restrict" }),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 
@@ -41,10 +40,10 @@ export const TB_teamMembers = pgTable(
   {
     userId: uuid("user_id")
       .notNull()
-      .references(() => TB_users.id),
+      .references(() => TB_users.id, { onDelete: "cascade" }),
     teamId: integer("team_id")
       .notNull()
-      .references(() => TB_teams.id),
+      .references(() => TB_teams.id, { onDelete: "no action" }),
     joinedAt: timestamp("joined_at").notNull().defaultNow(),
     leftAt: timestamp("left_at"),
   },
@@ -64,7 +63,7 @@ export const TB_teamRequest = pgTable("team_requests", {
   id: serial("id").primaryKey(),
   teamId: integer("team_id")
     .notNull()
-    .references(() => TB_teams.id),
+    .references(() => TB_teams.id, { onDelete: "cascade" }),
   status: Enum_teamRequestStatus("status").notNull().default("queued"),
   type: Enum_teamRequestType("type").notNull(),
   createdBy: uuid("created_by").notNull(),

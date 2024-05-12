@@ -4,7 +4,6 @@ import {
   uuid,
   timestamp,
   integer,
-  pgEnum,
   text,
   jsonb,
 } from "drizzle-orm/pg-core";
@@ -24,10 +23,10 @@ export const TB_contestSubmissions = pgTable("contests_submissions", {
   id: serial("id").primaryKey(),
   submittedByTeam: integer("submitted_by_team")
     .notNull()
-    .references(() => TB_teams.id),
+    .references(() => TB_teams.id, { onDelete: "no action" }),
   submittedByUser: uuid("submitted_by_user")
     .notNull()
-    .references(() => TB_users.id),
+    .references(() => TB_users.id, { onDelete: "no action" }),
   submission: text("submission"),
   contestId: integer("contest_id").notNull(),
   metadata: jsonb("metadata"),

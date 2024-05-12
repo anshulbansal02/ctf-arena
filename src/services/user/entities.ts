@@ -6,6 +6,7 @@ import {
   timestamp,
   pgEnum,
   pgSchema,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const Enum_userNotificationStatus = pgEnum("user_notification_status", [
@@ -19,7 +20,7 @@ export const TB_userNotifications = pgTable("user_notifications", {
   status: Enum_userNotificationStatus("status").notNull().default("queued"),
   for_user_id: uuid("for_user_id")
     .notNull()
-    .references(() => TB_users.id),
+    .references(() => TB_users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -34,8 +35,8 @@ export const TB_users = pgTable("users", {
     .notNull()
     .references(() => SupabaseAuthUsers.id, { onDelete: "cascade" }),
   full_name: varchar("full_name", { length: 100 }).notNull(),
-  email: varchar("full_name", { length: 100 }).notNull(),
-  metadata: varchar("full_name", { length: 100 }).notNull(),
+  email: varchar("email").notNull(),
+  metadata: jsonb("metadata").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()
