@@ -104,7 +104,7 @@ export function CreateTeamStep(props: Props) {
             type="text"
             autoFocus
             disabled={settingName}
-            className="mt-2 w-full"
+            className={clsx({ "animate-pulse": settingName }, "mt-2 w-full")}
             placeholder="How about Rangers?"
             {...register("name", {
               required: {
@@ -123,11 +123,7 @@ export function CreateTeamStep(props: Props) {
                 onClick={generateName}
                 title="Generate a cool name"
               >
-                <SvgPenSparkle
-                  width={20}
-                  height={20}
-                  className={clsx({ "animate-pulse": settingName })}
-                />
+                <SvgPenSparkle width={20} height={20} />
               </Button>
             }
           />

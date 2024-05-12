@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "iconify": "./scripts/transform_svgs.sh",
-    "dev:email": "email dev"
+    "iconify": "/scripts/transform_svgs.sh",
+    "dev:email": "email dev",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate --config=drizzle.config.ts"
   },
   "dependencies": {
     "@react-email/components": "^0.0.17",
@@ -24,7 +26,7 @@
     "jotai": "^2.8.0",
     "nanoid": "^5.0.7",
     "next": "^14.2.3",
-    "postgres": "^3.4.4",
+    "pg": "^8.11.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.51.4",
@@ -34,10 +36,12 @@
   "devDependencies": {
     "@svgr/cli": "^8.1.0",
     "@types/node": "^20.12.11",
+    "@types/pg": "^8.11.6",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
     "@types/validator": "^13.11.9",
     "autoprefixer": "^10.4.19",
+    "drizzle-kit": "^0.21.1",
     "eslint": "^9.2.0",
     "eslint-config-next": "^14.2.3",
     "postcss": "^8.4.38",

@@ -1,16 +1,10 @@
 "use server";
 
 import { getUser } from "@/services/auth";
-import { createServerClient } from "@/services/supabase/server";
 import { db } from "../db";
-import {
-  TB_teamMembers,
-  TB_teamRequest,
-  TB_teams,
-  View_currentTeamMembers,
-} from "./entities";
+import { TB_teamMembers, TB_teamRequest, TB_teams } from "./entities";
 import { TB_users } from "../user";
-import { eq, sql } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 import { randomItem } from "@/lib/utils";
 import teamNames from "./team_names.json";
 
@@ -40,21 +34,53 @@ export async function createTeamAndSendInvites(data: {
 }
 
 export async function getTeams() {
-  const teams = await db
+  const records = await db
     .select({
-      id: View_currentTeamMembers.teamId,
-      name: View_currentTeamMembers.teamName,
-      members: sql<
-        { name: string }[]
-      >`array_agg(json_build_object('name', ${TB_users.full_name}))`,
+      teamId: TB_teams.id,
+      teamName: TB_teams.name,
+      memberId: TB_teamMembers.userId,
+      memberName: TB_users.full_name,
     })
-    .from(View_currentTeamMembers)
-    .innerJoin(TB_users, eq(View_currentTeamMembers.memberId, TB_users.id))
-    .groupBy(View_currentTeamMembers.teamId);
+    .from(TB_teams)
+    .innerJoin(TB_teamMembers, eq(TB_teams.id, TB_teamMembers.teamId))
+    .innerJoin(TB_users, eq(TB_teamMembers.userId, TB_users.id))
+    .where(isNull(TB_teamMembers.leftAt));
 
-  return teams;
+  const teams = records.reduce<
+    Record<
+      number,
+      { id: number; name: string; members: Array<{ name: string; id: string }> }
+    >
+  >((agg, record) => {
+    if (!agg[record.teamId])
+      agg[record.teamId] = {
+        id: record.teamId,
+        name: record.teamName,
+        members: [],
+      };
+    agg[record.teamId].members.push({
+      id: record.memberId,
+      name: record.memberName,
+    });
+
+    return agg;
+  }, {});
+
+  return Object.values(teams);
 }
 
 export async function generateTeamName(): Promise<string> {
   return randomItem(teamNames);
+}
+
+export async function getTeamDetails(teamId: number) {
+  /**
+   * id, name, leader, members
+   */
+
+  const team = (
+    await db.select().from(TB_teams).where(eq(TB_teams.id, teamId))
+  ).at(0);
+
+  return team;
 }

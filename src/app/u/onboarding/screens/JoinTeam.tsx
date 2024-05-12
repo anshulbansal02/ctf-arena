@@ -9,6 +9,8 @@ import { useToaster } from "@/shared/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { nanoid } from "nanoid";
 import { useState } from "react";
+import AstronautImage from "@/assets/media/astronaut.png";
+import Image from "next/image";
 
 interface Props {
   onNext: (choice: "finish") => void;
@@ -18,7 +20,7 @@ interface Props {
 const randomArray = Array(4).fill(0).map(nanoid);
 const TeamsListSkeleton = () => {
   return randomArray.map((r) => (
-    <li key={r}>
+    <li key={r} className={r}>
       <Shim classNames="w-full h-12" />
     </li>
   ));
@@ -101,6 +103,25 @@ export function JoinTeamStep(props: Props) {
               </li>
             ))
           )}
+
+          {!loading && teams.length === 0 ? (
+            <li>
+              <Image
+                src={AstronautImage}
+                alt="Picture of the author"
+                className="mx-auto opacity-50 invert"
+                width={100}
+                height={100}
+              />
+              <h4 className="mt-8 text-lg font-medium text-gray-200">
+                So Empty... No Teams Found
+              </h4>
+              <p className="mt-2 leading-tight text-gray-400">
+                You can wait for others to create teams or you can create your
+                own by going back.
+              </p>
+            </li>
+          ) : null}
         </ul>
       </div>
 

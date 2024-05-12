@@ -2,7 +2,11 @@ import { useAction } from "@/shared/hooks";
 import { useEffect } from "react";
 import { getTeams } from "../services";
 
-export function useTeams() {
+interface Options {
+  search?: string;
+}
+
+export function useTeams(opts?: Options) {
   const { error, data, execute, loading } = useAction(getTeams);
 
   useEffect(() => {
