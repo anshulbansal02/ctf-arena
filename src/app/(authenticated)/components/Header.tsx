@@ -18,10 +18,10 @@ export async function Header({ className }: Props) {
       )}
     >
       <div className="w-40"></div>
-      <Logo className="flex-1" />
+      <Logo className="flex-shrink-[0.5] flex-grow" />
 
       <div className="flex w-40 justify-end gap-4">
-        <Avatar size={40} username={user.id.split("-").at(-1)!} />
+        <Avatar size={40} username={user.id} />
 
         <SignOutButton />
       </div>

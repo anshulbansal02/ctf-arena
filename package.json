@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "iconify": "/scripts/transform_svgs.sh",
+    "iconify": "./scripts/transform_svgs.sh",
     "dev:email": "email dev",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate --config=drizzle.config.ts"

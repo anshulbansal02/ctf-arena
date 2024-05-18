@@ -32,7 +32,7 @@ export const TB_teams = pgTable("teams", {
     .notNull()
     .unique()
     .references(() => TB_users.id, { onDelete: "restrict" }),
-  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const TB_teamMembers = pgTable(

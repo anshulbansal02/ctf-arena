@@ -1,4 +1,5 @@
 "use client";
+import { SvgSignOut } from "@/assets/icons";
 import { signOut } from "@/services/auth/client";
 import { Button } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
@@ -15,7 +16,10 @@ export function SignOutButton() {
 
   return (
     <Button variant="outlined" onClick={execute} loading={loading}>
-      Sign Out
+      <span className="hidden sm:block">Sign Out</span>
+      <span className="sm:hidden">
+        <SvgSignOut />
+      </span>
     </Button>
   );
 }

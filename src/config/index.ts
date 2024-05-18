@@ -10,7 +10,7 @@ export const config = {
   routes: {
     default: {
       NO_AUTH: "/",
-      AUTH: "/u/dashboard",
+      AUTH: "/home",
     },
     auth: {
       cbRedirectPath: "/auth/callback",

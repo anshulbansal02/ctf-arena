@@ -15,3 +15,7 @@ function getRandomInt(min: number, max: number) {
 export function randomItem<T>(array: Array<T>): T {
   return array[getRandomInt(0, array.length)];
 }
+
+export function scrambleText(text: string): string {
+  return "";
+}

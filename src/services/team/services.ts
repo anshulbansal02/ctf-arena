@@ -4,7 +4,7 @@ import { getUser } from "@/services/auth";
 import { db } from "../db";
 import { TB_teamMembers, TB_teamRequest, TB_teams } from "./entities";
 import { TB_users } from "../user";
-import { eq, isNull, sql } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import { randomItem } from "@/lib/utils";
 import teamNames from "./team_names.json";
 

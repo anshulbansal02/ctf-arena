@@ -8,6 +8,20 @@
       "when": 1715498294420,
       "tag": "0000_uneven_zeigeist",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1715512166602,
+      "tag": "0001_remarkable_fantastic_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1715590774330,
+      "tag": "0002_lazy_stranger",
+      "breakpoints": true
     }
   ]
 }

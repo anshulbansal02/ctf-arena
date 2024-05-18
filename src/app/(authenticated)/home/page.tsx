@@ -1,7 +1,7 @@
 import { Avatar } from "@/shared/components";
 import { Header } from "../components";
 
-export default async function Dashboard() {
+export default async function HomePage() {
   const members = [
     { id: 1, name: "Prohaska", isLeader: true },
     { id: 2, name: "Raul Frami" },

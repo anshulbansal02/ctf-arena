@@ -4,19 +4,16 @@ import styles from "./floating-nav.module.scss";
 export function FloatingNav() {
   const navItems = [
     {
-      id: 1,
       label: "Home",
-      to: "dashboard",
+      to: "home",
     },
     {
-      id: 2,
       label: "Team",
       to: "team",
     },
     {
-      id: 3,
-      label: "LeaderBoard",
-      to: "leaderboard",
+      label: "Contests",
+      to: "contests",
     },
   ];
 
@@ -24,7 +21,7 @@ export function FloatingNav() {
     <nav className={styles.nav}>
       <ul>
         {navItems.map((item) => (
-          <li key={item.id}>
+          <li key={item.to}>
             <Link href={item.to}>{item.label}</Link>
           </li>
         ))}

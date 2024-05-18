@@ -21,7 +21,12 @@ export const TB_userNotifications = pgTable("user_notifications", {
   for_user_id: uuid("for_user_id")
     .notNull()
     .references(() => TB_users.id, { onDelete: "cascade" }),
+  content: jsonb("content").default({}),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 const SupabaseAuthSchema = pgSchema("auth");

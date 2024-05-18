@@ -1,4 +1,4 @@
-import { FloatingNav } from "./components";
+import { FloatingNav } from "./home/components";
 
 export default async function Layout({
   children,
@@ -7,8 +7,8 @@ export default async function Layout({
 }>) {
   return (
     <>
-      <FloatingNav />
       {children}
+      <FloatingNav />
     </>
   );
 }

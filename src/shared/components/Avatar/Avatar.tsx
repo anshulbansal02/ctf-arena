@@ -15,7 +15,7 @@ export function Avatar({ size = 48, ...props }: Props) {
         width={size}
         height={size}
         style={{ borderRadius: size / 6 }}
-        src={`https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${props.username + "a"}`}
+        src={`https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${props.username}`}
         alt={props.username}
       />
     </div>

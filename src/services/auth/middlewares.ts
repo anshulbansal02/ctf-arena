@@ -15,11 +15,11 @@ export async function authenticatedUserRedirectionRules(request: NextRequest) {
 
   // Check if authenticated user is onboarded
   const isUserOnboarded = await getIsUserOnboarded();
-  if (isUserOnboarded && route === "/u/onboarding") {
+  if (isUserOnboarded && route === "/onboarding") {
     return NextResponse.redirect(
       new URL(config.routes.default.AUTH, request.url),
     );
-  } else if (!isUserOnboarded && route !== "/u/onboarding") {
+  } else if (!isUserOnboarded && route !== "/onboarding") {
     return NextResponse.redirect(new URL("onboarding", request.url));
   }
 }
