@@ -22,6 +22,27 @@
       "when": 1715590774330,
       "tag": "0002_lazy_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1716021095211,
+      "tag": "0003_blue_lightspeed",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1716021541162,
+      "tag": "0004_jazzy_winter_soldier",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1716021652039,
+      "tag": "0005_clean_terror",
+      "breakpoints": true
     }
   ]
 }
