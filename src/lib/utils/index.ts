@@ -12,10 +12,6 @@ function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
-export function randomItem<T>(array: Array<T>): T {
-  return array[getRandomInt(0, array.length)];
-}
-
-export function scrambleText(text: string): string {
-  return "";
+export function randomItem<T>(items: Array<T> | string): T | string {
+  return items[getRandomInt(0, items.length)];
 }

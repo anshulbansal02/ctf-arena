@@ -7,7 +7,6 @@ import {
   text,
   jsonb,
   doublePrecision,
-  interval,
 } from "drizzle-orm/pg-core";
 import { TB_users } from "../user";
 import { TB_teams } from "../team";
@@ -30,12 +29,13 @@ export const TB_contestChallenges = pgTable("contest_challenges", {
     .references(() => TB_contests.id, {
       onDelete: "cascade",
     }),
+  order: integer("order").notNull(),
   maxPoints: integer("max_points").notNull(),
   minPoints: integer("min_points").default(0),
   answer: text("answer").notNull(),
   // How points should depreciated over time (concretely every minute)
   pointsDecayFactor: doublePrecision("points_decay_factor"),
-  hints: jsonb("hints").default({}),
+  hints: jsonb("hints").default([]),
 });
 
 export const TB_contestSubmissions = pgTable("contest_submissions", {
@@ -46,9 +46,12 @@ export const TB_contestSubmissions = pgTable("contest_submissions", {
   submittedByUser: uuid("submitted_by_user")
     .notNull()
     .references(() => TB_users.id, { onDelete: "no action" }),
-  timeTaken: interval("time_taken"),
+  timeTaken: integer("time_taken").notNull(),
   submission: text("submission"),
   score: integer("score").notNull(),
+  contestId: integer("contest_id")
+    .notNull()
+    .references(() => TB_contests.id),
   challengeId: integer("challenge_id")
     .notNull()
     .references(() => TB_contestChallenges.id),
@@ -63,6 +66,7 @@ export const TB_contestEvents = pgTable("contest_events", {
   challengeId: integer("challenge_id").references(
     () => TB_contestChallenges.id,
   ),
+  teamId: integer("team_id").references(() => TB_teams.id),
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   data: jsonb("data").default({}),
