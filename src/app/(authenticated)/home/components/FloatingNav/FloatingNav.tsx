@@ -5,15 +5,15 @@ export function FloatingNav() {
   const navItems = [
     {
       label: "Home",
-      to: "home",
+      to: "/home",
     },
     {
       label: "Team",
-      to: "team",
+      to: "/team",
     },
     {
       label: "Contests",
-      to: "contests",
+      to: "/contests",
     },
   ];
 
