@@ -8,10 +8,14 @@ export function joinNamesWithConjunction(
   ].join(", ");
 }
 
-function getRandomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min) + min);
+export function randomReal(min: number, max: number) {
+  return Math.random() * (max - min) + min;
 }
 
-export function randomItem<T>(items: Array<T> | string): T | string {
-  return items[getRandomInt(0, items.length)];
+export function randomInt(min: number, max: number) {
+  return Math.floor(randomReal(min, max));
+}
+
+export function randomItem<T>(items: Array<T>): T {
+  return items[randomInt(0, items.length)];
 }

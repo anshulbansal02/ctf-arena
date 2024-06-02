@@ -1,22 +1,40 @@
+import { randomInt, randomReal } from "@/lib/utils";
 import { Particle } from "./Particle";
 
 export class RibbonParticle extends Particle {
-  dimensions: Coords;
-  scale: Coords;
-  rotation: number;
-  constants: { drag: number; gravity: number; terminalVelocity: number };
-  randomness: number;
+  private dimensions: Coords;
+  private scale: Coords;
+  private rotation: number;
+  private constants: {
+    drag: number;
+    gravity: number;
+    terminalVelocity: number;
+  } = {
+    drag: 0.075,
+    gravity: 0.3,
+    terminalVelocity: 3,
+  };
+  private randomness: number;
 
-  constructor() {
-    super();
-    this.dimensions = { x: 0, y: 0 };
-    this.scale = { x: 0, y: 0 };
-    this.rotation = 0;
-    this.constants = { drag: 0, gravity: 0, terminalVelocity: 0 };
-    this.randomness = 0;
+  constructor(init: {
+    dimensions: Coords;
+    scale: Coords;
+    color: Color2D;
+    velocity: Coords;
+  }) {
+    super(init);
+    this.dimensions = init.dimensions;
+    this.scale = init.scale;
+    this.rotation = randomReal(0, 2 * Math.PI);
+    this.randomness = randomReal(0, 99);
   }
 
   render(ctx: CanvasRenderingContext2D, mask: Coords): void {
+    if (!this.position)
+      throw new Error(
+        "Particle's initial position not set. Set by calling `setInitialPosition`",
+      );
+
     const width = this.dimensions.x * this.scale.x;
     const height = this.dimensions.y * this.scale.y;
 
@@ -48,7 +66,11 @@ export class RibbonParticle extends Particle {
   }
 
   protected applyPhysics() {
-    // apply forces to velocity
+    if (!this.position)
+      throw new Error(
+        "Particle's initial position not set. Set by calling `setInitialPosition`",
+      );
+
     this.velocity.x -= this.velocity.x * this.constants.drag;
     this.velocity.y = Math.min(
       this.velocity.y + this.constants.gravity,

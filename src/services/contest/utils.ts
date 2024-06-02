@@ -5,9 +5,9 @@ export function submissionComparator(keyA: string, keyB: string) {
 }
 
 export function scrambleText(str: string) {
-  const lowerAlpha = "abcdefghijklmnopqrstuvwxyz";
-  const upperAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const numbers = "0123456789";
+  const lowerAlpha = "abcdefghijklmnopqrstuvwxyz".split("");
+  const upperAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const numbers = "0123456789".split("");
 
   return [...str]
     .map((c) => {

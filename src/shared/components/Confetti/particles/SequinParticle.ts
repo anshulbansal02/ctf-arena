@@ -1,17 +1,20 @@
 import { Particle } from "./Particle";
 
-class SequinParticle extends Particle {
+export class SequinParticle extends Particle {
   radius: number;
-  constants: { drag: number; gravity: number };
+  constants: { drag: number; gravity: number } = { drag: 0.02, gravity: 0.55 };
 
-  constructor() {
-    super();
-    this.radius = 0;
-
-    this.constants = { drag: 0, gravity: 0 };
+  constructor(init: { color: Color2D; velocity: Coords; radius: number }) {
+    super(init);
+    this.radius = init.radius;
   }
 
   render(ctx: CanvasRenderingContext2D, mask: Coords): void {
+    if (!this.position)
+      throw new Error(
+        "Particle's initial position not set. Set by calling `setInitialPosition`",
+      );
+
     // move canvas to position
     ctx.translate(this.position.x, this.position.y);
 
@@ -41,6 +44,11 @@ class SequinParticle extends Particle {
   }
 
   protected applyPhysics() {
+    if (!this.position)
+      throw new Error(
+        "Particle's initial position not set. Set by calling `setInitialPosition`",
+      );
+
     // apply forces to velocity
     this.velocity.x -= this.velocity.x * this.constants.drag;
     this.velocity.y = this.velocity.y + this.constants.gravity;

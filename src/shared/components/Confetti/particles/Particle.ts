@@ -1,14 +1,17 @@
 export abstract class Particle {
-  position: Coords;
+  position: Coords | null = null;
   velocity: Coords;
-  color: { front: string; back: string };
+  color: Color2D;
 
-  constructor() {
-    this.position = { x: 0, y: 0 };
-    this.color = { front: "", back: "" };
-    this.velocity = { x: 0, y: 0 };
+  constructor(init: { color: Color2D; velocity: Coords }) {
+    this.color = init.color;
+    this.velocity = init.velocity;
   }
 
   abstract render(ctx: CanvasRenderingContext2D, mask: Coords): void;
   protected abstract applyPhysics(): void;
+
+  setInitialPosition(position: Coords) {
+    this.position = position;
+  }
 }
