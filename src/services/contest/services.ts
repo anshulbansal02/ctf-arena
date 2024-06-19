@@ -91,11 +91,12 @@ export async function getContest(contestId: number) {
  * @param submission
  * @returns
  */
-export async function checkAndCreateSubmission(
-  contestId: number,
-  challengeId: number,
-  submission: string,
-): Promise<boolean> {
+export async function checkAndCreateSubmission(data: {
+  contestId: number;
+  challengeId: number;
+  submission: string;
+}): Promise<boolean> {
+  const { contestId, challengeId, submission } = data;
   // Get challenge info
   const [challenge] = await db
     .select({

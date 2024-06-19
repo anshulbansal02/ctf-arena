@@ -22,10 +22,7 @@ interface Props {
 
 export function CreateTeamStep(props: Props) {
   const [stage, setStage] = useState<"name" | "invite">("name");
-  const [teamInfoToast, setTeamInfoToast] = useState<{
-    timer?: Timer;
-    toastId?: number;
-  }>({});
+  const [teamInfoToastTimer, setTeamInfoToastTimer] = useState<Timer>();
 
   const toaster = useToaster();
 
@@ -49,17 +46,16 @@ export function CreateTeamStep(props: Props) {
     switch (stage) {
       case "name":
         const timer = setTimeout(() => {
-          const toastId = toaster.info({
+          toaster.info({
             title: "A team can only have a maximum of 4 members.",
             content:
               "You can send out invites to only 5 users, the first 3 users to accept your invite become your team members.",
             persistent: true,
+            scoped: true,
           });
-
-          setTeamInfoToast((t) => ({ ...t, toastId }));
         }, 500);
 
-        setTeamInfoToast((t) => ({ ...t, timer }));
+        setTeamInfoToastTimer(timer);
         return setStage("invite");
 
       case "invite":
@@ -79,12 +75,10 @@ export function CreateTeamStep(props: Props) {
 
   // Clean up info toast
   useEffect(() => {
-    const { timer, toastId } = teamInfoToast;
     return () => {
-      if (timer) clearTimeout(timer);
-      if (toastId) toaster.dismiss(toastId);
+      clearTimeout(teamInfoToastTimer);
     };
-  }, [teamInfoToast]);
+  }, [teamInfoToastTimer]);
 
   return (
     <div className="mt-36 min-w-[420px] text-center">

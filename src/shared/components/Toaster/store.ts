@@ -16,15 +16,18 @@ export function useToasts() {
   return useAtomValue(toasts);
 }
 
+let nextToastId = 0;
+
 export function useToasterActions() {
   const setToasts = useSetAtom(toasts);
   const toastsList = useToasts();
 
   const addToast = useCallback(
     (toast: Toast) => {
-      const lastToast = toastsList.at(-1);
-      const id = (lastToast?.id ?? 0) + 1;
-      setToasts((toasts) => [...toasts, { ...toast, id }]);
+      const id = nextToastId++;
+      setToasts((toasts) => {
+        return [...toasts, { ...toast, id }];
+      });
       return id;
     },
     [setToasts, toastsList],

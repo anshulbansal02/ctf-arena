@@ -18,11 +18,8 @@ export class ConfettiPopper {
 
     popper.canvas = document.querySelector(canvasSelector) as HTMLCanvasElement;
 
-    popper.canvas.width = window.innerWidth;
-    popper.canvas.height = window.innerHeight;
-
     const SequinCount = 20;
-    const RibbonCount = 50;
+    const RibbonCount = 40;
 
     popper.particles = [
       ...new Array(RibbonCount)
@@ -36,12 +33,10 @@ export class ConfettiPopper {
     return popper;
   }
 
-  private count = 0;
-
-  private renderFrame(render: Function) {
-    if (this.count++ === 400) return;
-    render();
-    window.requestAnimationFrame(this.renderFrame.bind(this, render));
+  private renderFrame(render: () => boolean) {
+    const renderNextFrame = render();
+    if (renderNextFrame)
+      window.requestAnimationFrame(this.renderFrame.bind(this, render));
   }
 
   pop(origin: Coords) {
@@ -69,6 +64,14 @@ export class ConfettiPopper {
       this.particles.forEach((particle) => {
         particle.render(ctx, origin);
       });
+
+      // Remove offscreen particles
+      this.particles.forEach((particle, i) => {
+        if (particle.position!.y >= ctx.canvas.height)
+          this.particles.splice(i, 1);
+      });
+
+      return Boolean(this.particles.length);
     });
   }
 }

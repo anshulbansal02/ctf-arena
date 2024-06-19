@@ -1,4 +1,4 @@
-import { FloatingNav } from "./home/components";
+import { FloatingNav } from "./components/FloatingNav";
 
 export default async function Layout({
   children,

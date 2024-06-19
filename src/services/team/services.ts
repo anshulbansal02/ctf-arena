@@ -4,7 +4,7 @@ import { getUser } from "@/services/auth";
 import { db } from "../db";
 import { TB_teamMembers, TB_teamRequest, TB_teams } from "./entities";
 import { TB_users } from "../user";
-import { eq, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { randomItem } from "@/lib/utils";
 import teamNames from "./team_names.json";
 
@@ -83,6 +83,16 @@ export async function getTeamDetails(teamId: number) {
   ).at(0);
 
   return team;
+}
+
+export async function getUserTeam(userId: string) {
+  const team = await db
+    .select()
+    .from(TB_teamMembers)
+    .leftJoin(TB_teamMembers, eq(TB_teams.id, TB_teamMembers.teamId))
+    .where(
+      and(isNull(TB_teamMembers.leftAt), eq(TB_teamMembers.userId, userId)),
+    );
 }
 
 export async function sendTeamRequest(teamId: number) {

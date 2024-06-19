@@ -43,6 +43,7 @@ export function JoinTeamStep(props: Props) {
         content:
           "You can withdraw other requests to send request to other teams.",
         timeout: 5000,
+        scoped: true,
       });
     }
     setJoinRequestsDraft((requests) => {

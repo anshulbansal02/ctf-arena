@@ -1,6 +1,6 @@
 import { getUser } from "@/services/auth";
-import { Header } from "../components";
 import { OnboardingWizard } from "./components";
+import { Header } from "../components/Header";
 
 export default async function OnboardingPage() {
   const user = await getUser();

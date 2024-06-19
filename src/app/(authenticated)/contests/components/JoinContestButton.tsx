@@ -1,5 +1,5 @@
 "use client";
-import { joinContest } from "@/services/contest/services";
+// import { joinContest } from "@/services/contest/services";
 import { Button } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
 
@@ -9,7 +9,8 @@ interface Props {
 
 export function JoinContestButton(props: Props) {
   const { execute: enterContest, loading } = useAction(() =>
-    joinContest(props.contestId),
+    Promise.resolve(true)
+    // joinContest(props.contestId),
   );
 
   return (

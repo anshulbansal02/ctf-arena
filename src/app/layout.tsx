@@ -7,6 +7,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "CTF Arena",
   description: "A platform challenging users to show their technical prowess",
+  icons: [
+    {
+      rel: "icon",
+      url: "assets/favicon/icon.svg",
+    },
+  ],
 };
 
 interface LayoutProps {

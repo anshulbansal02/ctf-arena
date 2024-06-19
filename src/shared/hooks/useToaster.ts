@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { defaultToastStyles } from "@/shared/components/Toaster";
 
@@ -7,12 +7,23 @@ import { Toast, useToasterActions } from "../components/Toaster/store";
 interface ToastConfig extends Toast {
   timeout?: number;
   persistent?: boolean;
+  scoped?: boolean;
 }
 
 const DEFAULT_TIMEOUT = 2500; // 2.5 seconds
 
 export function useToaster() {
   const { removeToast, addToast, getToast } = useToasterActions();
+
+  const scopedToastsRef = useRef<Array<number>>([]);
+
+  useEffect(() => {
+    return () => {
+      scopedToastsRef.current.forEach((toastId) => {
+        removeToast(toastId);
+      });
+    };
+  }, []);
 
   const make = useCallback(
     (defaultConfig: Partial<ToastConfig>) => {
@@ -22,6 +33,8 @@ export function useToaster() {
         else config = { ...config, ...toastProps };
 
         const toastId = addToast(config as Toast);
+
+        if (config.scoped) scopedToastsRef.current.push(toastId);
 
         if (!config.persistent) {
           setTimeout(() => {
@@ -38,6 +51,7 @@ export function useToaster() {
   const dismissToast = useCallback(
     (toastId: Toast["id"]) => {
       const toast = getToast(toastId);
+
       if (toast) {
         removeToast(toastId);
         if (toast?.onDismiss) toast.onDismiss(toastId);

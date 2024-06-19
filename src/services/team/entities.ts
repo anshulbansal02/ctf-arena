@@ -17,6 +17,7 @@ export const Enum_teamRequestStatus = pgEnum("team_request_status", [
   "queued",
   "delivered",
   "accepted",
+  "cancelled",
   "rejected",
 ]);
 

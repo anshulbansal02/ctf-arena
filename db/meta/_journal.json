@@ -1,47 +1,12 @@
 {
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1715498294420,
-      "tag": "0000_uneven_zeigeist",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1715512166602,
-      "tag": "0001_remarkable_fantastic_four",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1715590774330,
-      "tag": "0002_lazy_stranger",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1716021095211,
-      "tag": "0003_blue_lightspeed",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1716021541162,
-      "tag": "0004_jazzy_winter_soldier",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1716021652039,
-      "tag": "0005_clean_terror",
+      "version": "7",
+      "when": 1718726331855,
+      "tag": "0000_smooth_cassandra_nova",
       "breakpoints": true
     }
   ]

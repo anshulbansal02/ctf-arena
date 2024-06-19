@@ -6,5 +6,5 @@ const connection = new Client({
   connectionString: config.db.url,
 });
 
-await connection.connect();
+// await connection.connect();
 export const db = drizzle(connection);

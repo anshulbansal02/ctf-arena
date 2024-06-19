@@ -5,7 +5,7 @@ import styles from "./avatar.module.scss";
 interface Props {
   size?: number;
   className?: string;
-  username: string;
+  username: string | number;
 }
 
 export function Avatar({ size = 48, ...props }: Props) {
@@ -16,7 +16,7 @@ export function Avatar({ size = 48, ...props }: Props) {
         height={size}
         style={{ borderRadius: size / 6 }}
         src={`https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${props.username}`}
-        alt={props.username}
+        alt={props.username.toString()}
       />
     </div>
   );
