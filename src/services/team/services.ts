@@ -95,6 +95,18 @@ export async function getUserTeam(userId: string) {
     );
 }
 
+export async function getUserTeamId(userId: string): Promise<number> {
+  const [team] = await db
+    .select({ id: TB_teamMembers.teamId })
+    .from(TB_teamMembers)
+    .leftJoin(TB_teamMembers, eq(TB_teams.id, TB_teamMembers.teamId))
+    .where(
+      and(isNull(TB_teamMembers.leftAt), eq(TB_teamMembers.userId, userId)),
+    );
+
+  return team.id;
+}
+
 export async function sendTeamRequest(teamId: number) {
   const user = await getUser();
 
@@ -112,6 +124,26 @@ export async function sendTeamRequests(teamIds: Array<number>) {
     teamIds.map((teamId) => ({
       type: "request" as any,
       teamId,
+      createdBy: user.id,
+    })),
+  );
+}
+
+export async function cancelTeamRequest(requestId: number) {
+  await db
+    .update(TB_teamRequest)
+    .set({ status: "cancelled" })
+    .where(eq(TB_teamRequest.id, requestId));
+}
+
+export async function sendInvites(teamId: number, emails: string[]) {
+  const user = await getUser();
+
+  await db.insert(TB_teamRequest).values(
+    emails.map((email) => ({
+      type: "invite" as any,
+      teamId,
+      userEmail: email,
       createdBy: user.id,
     })),
   );
