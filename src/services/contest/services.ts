@@ -18,9 +18,10 @@ import {
   TB_contests,
 } from "./entities";
 import { getUser } from "../auth";
-import { TB_teamMembers, getUserTeam, getUserTeamId } from "../team";
+import { TB_teamMembers, getUserTeamId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
+import { cache } from "@/services/cache";
 
 /**
  * Join a contest by contest id
@@ -82,12 +83,7 @@ export async function getContest(contestId: number) {
       description: TB_C.description,
       startsAt: TB_C.startsAt,
       endsAt: TB_C.endsAt,
-      challenges: {
-        id: TB_CC.id,
-        order: TB_CC.order,
-        name: TB_CC.name,
-        description: TB_CC.description,
-      },
+      noOfChallenges: count(),
     })
     .from(TB_C)
     .leftJoin(TB_CC, eq(TB_CC.contestId, contestId))
@@ -254,6 +250,9 @@ export async function getLeaderBoard(contestId: number) {
   // get from cache
   // if found return
   // if not make
+  // Rank, Team, Score, Total Solved
+  // Quickest to solve - Challenge Number, Team, Time Taken
+  // Sprinters (30 minutes) - Team Name, Total Solved
 }
 
 async function makeLeaderBoard(contestId: number) {

@@ -1,42 +1,54 @@
+import { db } from "@/services/db";
 import { emailService, renderTemplate } from "@/services/email";
-import { createServerClient } from "@/services/supabase/server";
+import { TB_teamRequest, TB_teams } from "@/services/team";
+import { TB_users } from "@/services/user";
+import { and, eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
   const body = (await request.json()) as {
     record: { id: number };
   };
+  if (!body.record.id) return Response.json("Invalid request", { status: 400 });
 
-  if (!body.record.id) return Response.json("1", { status: 400 });
+  const TB_T = TB_teams,
+    TB_TR = TB_teamRequest,
+    TB_U = TB_users;
 
-  const supa = createServerClient();
+  const [invite] = await db
+    .select({
+      teamName: TB_T.name,
+      status: TB_TR.status,
+      metadata: TB_TR.metadata,
+      inviter: {
+        email: TB_U.email,
+        name: TB_U.full_name,
+      },
+      inviteeEmail: TB_TR.userEmail,
+    })
+    .from(TB_TR)
+    .leftJoin(TB_T, eq(TB_T.id, TB_TR.teamId))
+    .leftJoin(TB_U, eq(TB_U.email, TB_TR.userEmail))
+    .where(and(eq(TB_TR.id, body.record.id), eq(TB_TR.type, "invite")))
+    .limit(1);
 
-  const invite = (
-    await supa
-      .from("team_requests")
-      .select(
-        "...teams(team_name:name), status, metadata, ...users!created_by(inviter_name:full_name, inviter_email:email), user_email",
-      )
-      .eq("id", body.record.id)
-  ).data?.[0];
-
-  if (!invite) return Response.json("2", { status: 400 });
+  if (!invite) return Response.json("Invite not found", { status: 400 });
 
   const emailBody = renderTemplate("team-invite", {
-    inviteeEmail: invite.user_email!,
-    inviterEmail: invite.inviter_email!,
+    inviteeEmail: invite.inviteeEmail!,
+    inviterEmail: invite.inviter?.email!,
     inviteLink: "",
-    inviterName: invite.inviter_name!,
-    teamName: invite.team_name,
+    inviterName: invite.inviter?.name!,
+    teamName: invite.teamName!,
   });
 
   await emailService.send({
     address: {
       from: "onboarding@resend.dev",
-      to: invite.user_email!,
+      to: invite.inviteeEmail!,
     },
-    subject: `Join ${invite.team_name} on CTF Arena`,
+    subject: `Join ${invite.teamName} on CTF Arena`,
     body: emailBody,
   });
 
-  return Response.json("Sent", { status: 200 });
+  return Response.json("Invite sent", { status: 200 });
 }

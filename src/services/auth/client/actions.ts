@@ -11,7 +11,7 @@ export async function signInWith(provider: AuthProvider) {
   return await supa.auth.signInWithOAuth({
     provider,
     options: {
-      scopes: "profile email offline_access",
+      scopes: "openid profile email offline_access",
       redirectTo: new URL(
         config.routes.auth.cbRedirectPath,
         window.location.origin,

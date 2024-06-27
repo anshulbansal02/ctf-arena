@@ -1,6 +1,11 @@
+import { getUser } from "@/services/auth";
+import { getUserTeam } from "@/services/team";
 import { Button } from "@/shared/components";
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const user = await getUser();
+  const team = await getUserTeam(user.id);
+
   return (
     <section className="mx-auto flex min-h-screen max-w-[480px] flex-col items-center">
       <h2 className="mt-8 text-center text-2xl">My Team</h2>

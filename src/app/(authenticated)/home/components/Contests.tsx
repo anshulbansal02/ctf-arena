@@ -1,4 +1,11 @@
-export function Contests() {
+import { getContests } from "@/services/contest/services";
+
+export async function Contests() {
+  const [activeContests, upcomingContests] = await Promise.all([
+    getContests("active"),
+    getContests("upcoming"),
+  ]);
+
   return (
     <section className="mt-16 w-[560px]">
       <h2 className="text-2xl">Contests</h2>
