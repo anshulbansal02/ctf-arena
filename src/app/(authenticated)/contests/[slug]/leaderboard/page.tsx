@@ -1,4 +1,3 @@
-import { Avatar } from "@/shared/components";
 import { MainLeaderboard } from "./components/MainLeaderboard";
 import { QuickestAtLeaderboard } from "./components/QuickestAtLeaderboard";
 import { SprintersLeaderboard } from "./components/SprintersLeaderboard";
@@ -34,6 +33,96 @@ export default function LeaderboardPage() {
       challengesSolved: 2,
       score: 432,
       members: [143, 213, 3113, 443],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
+    },
+    {
+      team: "ADs",
+      challengesSolved: 2,
+      score: 432,
+      members: [153, 211, 5313, 453],
     },
     {
       team: "ADs",
@@ -120,9 +209,11 @@ export default function LeaderboardPage() {
       <div className="mt-32 flex flex-col gap-12 lg:flex-row">
         <section className="flex-[2]">
           <h1 className="text-center text-3xl font-normal text-slate-300">
-            Leaderboard
+            Leaderboard &gt; CTF Challenge 1.0
           </h1>
-          <MainLeaderboard data={leaderboard} />
+          <div className="mt-8">
+            <MainLeaderboard contestId={1} />
+          </div>
         </section>
 
         <section className="mt-20 flex-1 lg:-order-1">
@@ -132,7 +223,9 @@ export default function LeaderboardPage() {
           <p className="mt-2 text-balance text-center text-sm text-zinc-500">
             Least time taken (in seconds) to solve challenge
           </p>
-          <QuickestAtLeaderboard data={challengeTiming} />
+          <div className="mt-8">
+            <QuickestAtLeaderboard data={challengeTiming} />
+          </div>
         </section>
 
         <section className="mt-20 flex-1">
@@ -142,8 +235,9 @@ export default function LeaderboardPage() {
           <p className="mt-2 text-balance text-center text-sm text-zinc-500">
             Most number of challenges solved in last 30 minutes
           </p>
-
-          <SprintersLeaderboard data={leaderboard} />
+          <div className="mt-8">
+            <SprintersLeaderboard data={leaderboard} />
+          </div>
         </section>
       </div>
     </div>

@@ -22,6 +22,7 @@ import { TB_teamMembers, getUserTeamId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
 import { cache } from "@/services/cache";
+import { QueryResult } from "pg";
 
 /**
  * Join a contest by contest id
@@ -261,19 +262,25 @@ async function makeLeaderBoard(contestId: number) {
 }
 
 async function sumOfScores(contestId: number) {
-  const cs = TB_contestSubmissions;
-  const sumOfScoresRes = await db
-    .select({
-      teamId: cs.submittedByTeam,
-      totalScore: sum(cs.score),
-      totalSubmissions: count(),
-    })
-    .from(cs)
-    .where(eq(cs.contestId, contestId))
-    .groupBy(cs.submittedByTeam)
-    .orderBy(sql`total_score DESC`);
+  type Record = {
+    teamId: number;
+    teamName: string;
+    totalScore: number;
+    submissions: number;
+    rank: number;
+  };
 
-  return sumOfScoresRes;
+  const res = await db.execute(
+    sql`
+    SELECT t.id "teamId", t.name "teamName", SUM(cs.score) "totalScore", COUNT(t.id) "submissions, RANK() OVER (ORDER BY sum(cs.score) DESC) rank"
+    FROM contest_submissions cs LEFT JOIN teams t ON t.id = cs.submitted_by_team
+    WHERE cs.contest_id = ${contestId}
+    GROUP BY cs.submitted_by_team
+    ORDER BY totalScore DESC;
+    `,
+  );
+
+  return null;
 }
 
 async function quickestInChallenge(contestId: number) {

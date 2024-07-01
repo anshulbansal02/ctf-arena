@@ -1,9 +1,11 @@
+"use client";
 import { Avatar } from "@/shared/components";
 import Image, { StaticImageData } from "next/image";
 
 import GoldMedal from "@/assets/media/gold-medal.png";
 import SilverMedal from "@/assets/media/silver-medal.png";
 import BronzeMedal from "@/assets/media/bronze-medal.png";
+import { useEffect, useState } from "react";
 
 const medalURIs: Record<number, StaticImageData> = {
   1: GoldMedal,
@@ -12,12 +14,7 @@ const medalURIs: Record<number, StaticImageData> = {
 };
 
 interface Props {
-  data: Array<{
-    team: string;
-    challengesSolved: number;
-    score: number;
-    members: Array<number>;
-  }>;
+  contestId: number;
 }
 
 function Rank({ index }: { index: number }) {
@@ -47,6 +44,38 @@ function ProgressBar(props: { total: number; value: number }) {
 }
 
 export function MainLeaderboard(props: Props) {
+  const [leaderboard, setLeaderboard] = useState<
+    Array<{
+      team: string;
+      challengesSolved: number;
+      score: number;
+      members: Array<number>;
+    }>
+  >([]);
+
+  useEffect(() => {
+    const leaderboardEvents = new EventSource(
+      `/hook/leaderboard/${props.contestId}/update`,
+    );
+
+    leaderboardEvents.onmessage = (event) => {
+      const data = event.data;
+
+      try {
+        const updatedLeaderboard = JSON.parse(data);
+        setLeaderboard(updatedLeaderboard);
+      } catch {}
+    };
+
+    leaderboardEvents.onerror = () => {
+      leaderboardEvents.close();
+    };
+
+    return () => {
+      leaderboardEvents.close();
+    };
+  }, [props.contestId]);
+
   return (
     <div role="table" className="relative flex w-full flex-col gap-2">
       <div
@@ -67,7 +96,7 @@ export function MainLeaderboard(props: Props) {
         </div>
       </div>
       <div className="no-scrollbar flex max-h-[560px] w-full flex-col gap-2 overflow-auto rounded-xl">
-        {props.data.map((entry, i) => (
+        {leaderboard.map((entry, i) => (
           <div
             role="row"
             className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-950 p-3"

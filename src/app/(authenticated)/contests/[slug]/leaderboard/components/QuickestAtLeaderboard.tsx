@@ -8,7 +8,7 @@ interface Props {
 
 export function QuickestAtLeaderboard(props: Props) {
   return (
-    <div role="table" className="mt-8 flex w-full flex-col gap-2">
+    <div role="table" className="flex w-full flex-col gap-2">
       <div
         role="rowheader"
         className="flex gap-4 px-3 py-1 text-left text-base text-zinc-400"
