@@ -1,10 +1,10 @@
 import { getUser } from "@/services/auth";
-import { getUserTeam } from "@/services/team";
+import { getTeamDetailsByUserId } from "@/services/team";
 import { Button } from "@/shared/components";
 
 export default async function TeamPage() {
   const user = await getUser();
-  const team = await getUserTeam(user.id);
+  const team = await getTeamDetailsByUserId(user.id);
 
   return (
     <section className="mx-auto flex min-h-screen max-w-[480px] flex-col items-center">

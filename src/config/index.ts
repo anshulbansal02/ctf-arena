@@ -24,5 +24,7 @@ export const config = {
     },
 
     organizations: ["veersatech.com", "veersalabs.com"],
+
+    sourceEmailAddress: "invitation@ctf-arena.app",
   },
 };

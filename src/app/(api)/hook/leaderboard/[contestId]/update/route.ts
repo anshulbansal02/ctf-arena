@@ -1,7 +1,7 @@
 import { cache } from "@/services/cache";
+import * as leaderboard from "@/services/contest/leaderboard";
 
 export const runtime = "nodejs";
-// This is required to enable streaming
 export const dynamic = "force-dynamic";
 
 export async function GET(
@@ -10,26 +10,35 @@ export async function GET(
 ) {
   const responseStream = new TransformStream();
   const encoder = new TextEncoder();
-
   const writer = responseStream.writable.getWriter();
 
-  writer.write(
-    encoder.encode(`data: You are on contest id ${params.contestId}\n\n`),
+  const type = new URL(request.url).searchParams.get(
+    "type",
+  ) as leaderboard.Leaderboard;
+
+  const send = (data: any) => {
+    writer.write(encoder.encode(`data: ${data}\n\n`));
+  };
+
+  const contestId = +params.contestId;
+  if (isNaN(contestId)) throw new Error("Invalid contest id");
+
+  const leaderboardListener = async () => {
+    const updatedLeaderboard = await leaderboard.getByName(type, contestId);
+    send(updatedLeaderboard);
+  };
+
+  cache.subscribe(
+    leaderboard.leaderboardUpdateChannel(type, contestId),
+    leaderboardListener,
   );
 
-  cache.subscribe("", (m, c) => {});
-
-  const interval = setInterval(() => {
-    writer.write(encoder.encode("data: Some raw string\n\n"));
-  }, 1000);
-
-  setTimeout(() => {
-    clearInterval(interval);
-    writer.close();
-  }, 10000);
-
   request.signal.addEventListener("abort", () => {
-    clearInterval(interval);
+    cache.unsubscribe(
+      leaderboard.leaderboardUpdateChannel(type, contestId),
+      leaderboardListener,
+    );
+
     writer.close();
   });
 

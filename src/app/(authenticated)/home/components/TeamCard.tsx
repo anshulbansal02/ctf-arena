@@ -1,4 +1,4 @@
-import { getUserTeam, getTeamDetails } from "@/services/team";
+import { getTeamDetailsByUserId, getTeamDetails } from "@/services/team";
 import { Avatar, Button } from "@/shared/components";
 
 type TeamCardProps = { teamId: number } | { userId: string };
@@ -6,7 +6,7 @@ type TeamCardProps = { teamId: number } | { userId: string };
 export async function TeamCard(props: TeamCardProps) {
   let team: any;
   if ("teamId" in props) team = await getTeamDetails(props.teamId);
-  else team = await getUserTeam(props.userId);
+  else team = await getTeamDetailsByUserId(props.userId);
 
   return team ? (
     <div className="team-card mt-4 rounded-lg bg-black px-6 py-4">

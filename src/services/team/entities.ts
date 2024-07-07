@@ -15,6 +15,7 @@ import { eq, isNull } from "drizzle-orm";
 
 export const Enum_teamRequestStatus = pgEnum("team_request_status", [
   "queued",
+  "sent",
   "delivered",
   "accepted",
   "cancelled",
@@ -62,12 +63,17 @@ export const TB_teamMembers = pgTable(
 
 export const TB_teamRequest = pgTable("team_requests", {
   id: serial("id").primaryKey(),
+  // Invite sent by team/Request sent to team
   teamId: integer("team_id")
     .notNull()
     .references(() => TB_teams.id, { onDelete: "cascade" }),
+  // Queued/Delivered/Accepted/Cancelled/Rejected
   status: Enum_teamRequestStatus("status").notNull().default("queued"),
+  // Request/Invite
   type: Enum_teamRequestType("type").notNull(),
+  // User who sent sent Request/Invite
   createdBy: uuid("created_by").notNull(),
+  // Invitee email
   userEmail: varchar("user_email", { length: 255 }),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

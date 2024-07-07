@@ -1,15 +1,4 @@
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  isNull,
-  lt,
-  sql,
-  sum,
-} from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, isNull, lt } from "drizzle-orm";
 import { db } from "../db";
 import {
   TB_contestChallenges,
@@ -18,11 +7,14 @@ import {
   TB_contests,
 } from "./entities";
 import { getUser } from "../auth";
-import { TB_teamMembers, getUserTeamId } from "../team";
+import { TB_teamMembers, getTeamIdByUserId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
-import { cache } from "@/services/cache";
-import { QueryResult } from "pg";
+import { cache } from "../cache";
+
+export const contestChannel = (subChannel: "submission") => {
+  return `channel:contest:${subChannel}`;
+};
 
 /**
  * Join a contest by contest id
@@ -108,7 +100,7 @@ export async function checkAndCreateSubmission(data: {
   const { contestId, challengeId, submission } = data;
   const now = new Date();
   const user = await getUser();
-  const teamId = await getUserTeamId(user.id);
+  const teamId = await getTeamIdByUserId(user.id);
 
   const [contest] = await db
     .select({
@@ -129,6 +121,7 @@ export async function checkAndCreateSubmission(data: {
       maxPoints: TB_contestChallenges.maxPoints,
       minPoints: TB_contestChallenges.minPoints,
       pointsDecayFactor: TB_contestChallenges.pointsDecayFactor,
+      order: TB_contestChallenges.order,
     })
     .from(TB_contestChallenges)
     .where(eq(TB_contestChallenges.id, challengeId));
@@ -151,7 +144,7 @@ export async function checkAndCreateSubmission(data: {
     .from(TB_contestEvents)
     .where(
       and(
-        eq(TB_contestEvents.teamId, teamId),
+        eq(TB_contestEvents.teamId, teamId!),
         eq(TB_contestEvents.name, CONTEST_EVENTS.HINT_TAKEN),
       ),
     )) as Array<{ data: { cost: number } }>;
@@ -165,15 +158,35 @@ export async function checkAndCreateSubmission(data: {
       challenge.minPoints ?? 0,
     ) - hintsDeduction;
 
-  await db.insert(TB_contestSubmissions).values({
-    contestId,
-    challengeId,
-    score,
-    submittedByTeam: teamId,
-    submittedByUser: user.id,
-    submission,
-    timeTaken,
-  });
+  const [newSubmission] = await db
+    .insert(TB_contestSubmissions)
+    .values({
+      contestId,
+      challengeId,
+      score,
+      submittedByTeam: teamId!,
+      submittedByUser: user.id,
+      submission,
+      timeTaken,
+    })
+    .returning({
+      id: TB_contestSubmissions.id,
+      createdAt: TB_contestSubmissions.createdAt,
+    });
+
+  cache.publish(
+    contestChannel("submission"),
+    JSON.stringify({
+      submissionId: newSubmission.id,
+      contestId,
+      challengeId,
+      challengeOrder: challenge.order,
+      teamId,
+      score,
+      timeTaken,
+      createdAt: newSubmission.createdAt,
+    }),
+  );
 
   return true;
 }
@@ -230,7 +243,7 @@ export async function revealHint(challengeId: number, hintIndex: number) {
 
   const hintTaken = (res.hints as any[])[hintIndex];
 
-  const teamId = await getUserTeamId((await getUser()).id);
+  const teamId = await getTeamIdByUserId((await getUser()).id);
 
   await db.insert(TB_contestEvents).values({
     challengeId,
@@ -241,82 +254,4 @@ export async function revealHint(challengeId: number, hintIndex: number) {
   });
 
   return hintTaken;
-}
-
-/**
- * Get current leaderboard status for contest
- * @param contestId
- */
-export async function getLeaderBoard(contestId: number) {
-  // get from cache
-  // if found return
-  // if not make
-  // Rank, Team, Score, Total Solved
-  // Quickest to solve - Challenge Number, Team, Time Taken
-  // Sprinters (30 minutes) - Team Name, Total Solved
-}
-
-async function makeLeaderBoard(contestId: number) {
-  // Use sum of scores method to make a leaderboard
-  return sumOfScores(contestId);
-}
-
-async function sumOfScores(contestId: number) {
-  type Record = {
-    teamId: number;
-    teamName: string;
-    totalScore: number;
-    submissions: number;
-    rank: number;
-  };
-
-  const res = await db.execute(
-    sql`
-    SELECT t.id "teamId", t.name "teamName", SUM(cs.score) "totalScore", COUNT(t.id) "submissions, RANK() OVER (ORDER BY sum(cs.score) DESC) rank"
-    FROM contest_submissions cs LEFT JOIN teams t ON t.id = cs.submitted_by_team
-    WHERE cs.contest_id = ${contestId}
-    GROUP BY cs.submitted_by_team
-    ORDER BY totalScore DESC;
-    `,
-  );
-
-  return null;
-}
-
-async function quickestInChallenge(contestId: number) {
-  const cc = TB_contestChallenges,
-    cs = TB_contestSubmissions;
-
-  const minTimeTakenToSolveChallenges = await db
-    .select({
-      challengeId: cc.id,
-      teamId: cs.submittedByTeam,
-      timeTaken: sum(cs.timeTaken),
-    })
-    .from(cc)
-    .leftJoin(cs, eq(cc.id, cs.challengeId))
-    .where(eq(cc.contestId, contestId))
-    .groupBy(cc.id)
-    .orderBy(asc(cc.order));
-
-  return minTimeTakenToSolveChallenges;
-}
-
-async function sprintingTeam(contestId: number, interval: number) {
-  // return {teamId, interval, challengesSolved}
-  /**
-   
-   */
-
-  const cs = TB_contestSubmissions;
-
-  const mostChallengesSolvedInInterval = await db
-    .select({
-      teamId: cs.submittedByTeam,
-      challengesSolved: count(),
-    })
-    .from(cs)
-    .where(eq(cs.contestId, contestId))
-    .groupBy(cs.submittedByTeam)
-    .orderBy();
 }
