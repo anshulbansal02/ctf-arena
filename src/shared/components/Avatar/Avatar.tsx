@@ -7,12 +7,14 @@ interface Props {
   className?: string;
   username: string | number;
   rounded?: boolean;
+  title?: string;
 }
 
 export function Avatar({ size = 48, ...props }: Props) {
   return (
     <div className={clsx(styles.avatar, props.className)}>
       <img
+        title={props.title}
         width={size}
         height={size}
         style={{ borderRadius: props.rounded ? size : size / 6 }}

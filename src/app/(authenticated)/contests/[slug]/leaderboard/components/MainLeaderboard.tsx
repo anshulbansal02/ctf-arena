@@ -5,7 +5,8 @@ import Image, { StaticImageData } from "next/image";
 import GoldMedal from "@/assets/media/gold-medal.png";
 import SilverMedal from "@/assets/media/silver-medal.png";
 import BronzeMedal from "@/assets/media/bronze-medal.png";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTeamsById } from "@/services/team/client";
 
 const medalURIs: Record<number, StaticImageData> = {
   1: GoldMedal,
@@ -46,12 +47,19 @@ function ProgressBar(props: { total: number; value: number }) {
 export function MainLeaderboard(props: Props) {
   const [leaderboard, setLeaderboard] = useState<
     Array<{
-      team: string;
-      challengesSolved: number;
+      rank: number;
+      teamId: number;
       score: number;
-      members: Array<number>;
+      challengesSolved: number;
     }>
   >([]);
+
+  const teamsOnLeaderboard = useMemo(
+    () => leaderboard.map((l) => l.teamId),
+    [leaderboard],
+  );
+
+  const { teamsById } = useTeamsById({ teamIds: teamsOnLeaderboard });
 
   useEffect(() => {
     const leaderboardEvents = new EventSource(
@@ -60,15 +68,10 @@ export function MainLeaderboard(props: Props) {
 
     leaderboardEvents.onmessage = (event) => {
       const data = event.data;
-
       try {
         const updatedLeaderboard = JSON.parse(data);
         setLeaderboard(updatedLeaderboard);
       } catch {}
-    };
-
-    leaderboardEvents.onerror = () => {
-      leaderboardEvents.close();
     };
 
     return () => {
@@ -106,17 +109,18 @@ export function MainLeaderboard(props: Props) {
             </div>
             <div role="cell" className="flex flex-[4] items-center gap-2">
               <div className="flex items-center">
-                {entry.members.map((id) => (
+                {teamsById[entry.teamId]?.members?.map((member) => (
                   <Avatar
                     rounded
-                    username={id}
+                    username={member.id}
+                    title={member.name}
                     size={20}
                     className="-ml-2 rounded-full border border-zinc-950 first:ml-0"
                   />
                 ))}
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap text-nowrap">
-                {entry.team}
+                {teamsById[entry.teamId]?.name}
               </div>
             </div>
             <div role="cell" className="flex flex-[4] items-center gap-2">

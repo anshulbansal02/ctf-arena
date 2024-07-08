@@ -11,7 +11,7 @@ import { cache } from "../cache";
 import { emailService, renderTemplate } from "../email";
 import { config } from "@/config";
 
-type TeamDetails = {
+export type TeamDetails = {
   id: number;
   name: string;
   members: Array<{ id: string; name: string }>;

@@ -108,8 +108,8 @@ export async function getQuickestFirsts(contestId: number) {
     .map<{
       challengeId: number;
       order: number;
-      teamId: number;
-      timing: number;
+      teamId: number | null;
+      timing: number | null;
     }>(([challengeId, record]) => ({
       challengeId,
       ...JSON.parse(record),
@@ -163,7 +163,7 @@ export async function getSumOfScores(contestId: number) {
 
   let currentRank = 0,
     lastScore = 0;
-  const leaderboard = scores.map(async (entry) => {
+  const leaderboard = scores.map((entry) => {
     const { score, value: teamId } = entry;
 
     if (lastScore !== score) currentRank++;
@@ -171,8 +171,9 @@ export async function getSumOfScores(contestId: number) {
 
     return {
       rank: currentRank,
-      teamId,
+      teamId: +teamId,
       score,
+      challengesSolved: 0,
     };
   });
 
