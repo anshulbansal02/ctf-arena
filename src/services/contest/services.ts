@@ -255,3 +255,17 @@ export async function revealHint(challengeId: number, hintIndex: number) {
 
   return hintTaken;
 }
+
+export async function getContestsStartingInOneHour() {
+  const now = new Date();
+  const after1Hour = new Date(+now + 1 * (60 * 60 * 1000));
+
+  const contestsStartingInOneHour = await db
+    .select()
+    .from(TB_contests)
+    .where(
+      and(gt(TB_contests.startsAt, now), lt(TB_contests.startsAt, after1Hour)),
+    );
+
+  return contestsStartingInOneHour;
+}

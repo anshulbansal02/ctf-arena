@@ -1,5 +1,4 @@
 import { cache } from "@/services/cache";
-import { getTeamDetails } from "../team";
 
 type ContestSubmission = {
   submissionId: number;
@@ -28,8 +27,12 @@ export const leaderboardUpdateChannel = (
   contestId: number,
 ) => `channel:${leaderboardKey(type, contestId, "prepared")}:update`;
 
-async function purgeCacheAndNotify(type: Leaderboard, contestId: number) {
+export async function purgeBuildAndNotify(
+  type: Leaderboard,
+  contestId: number,
+) {
   await cache.del(leaderboardKey(type, contestId, "prepared"));
+  await getByName(type, contestId);
   cache.publish(
     leaderboardUpdateChannel(type, contestId),
     JSON.stringify(Date.now()),
@@ -45,7 +48,7 @@ export async function sumOfScoresProcessor(submission: ContestSubmission) {
     teamId.toString(),
   );
 
-  purgeCacheAndNotify("sum_of_scores", contestId);
+  purgeBuildAndNotify("sum_of_scores", contestId);
 }
 
 export async function quickestFirstsProcessor(submission: ContestSubmission) {
@@ -76,7 +79,7 @@ export async function quickestFirstsProcessor(submission: ContestSubmission) {
 
   if (newRecord) {
     await cache.hSet(key, challengeId.toString(), JSON.stringify(newRecord));
-    purgeCacheAndNotify("quickest_firsts", contestId);
+    purgeBuildAndNotify("quickest_firsts", contestId);
   }
 }
 
@@ -89,7 +92,7 @@ export async function sprintingTeamsProcessor(submission: ContestSubmission) {
     { score, value: teamId.toString() },
   ]);
 
-  purgeCacheAndNotify("sprinting_teams", contestId);
+  purgeBuildAndNotify("sprinting_teams", contestId);
 }
 
 export async function getQuickestFirsts(contestId: number) {
