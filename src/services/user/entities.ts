@@ -72,7 +72,7 @@ export const TB_userSessions = pgTable("session", {
 });
 
 export const TB_userVerificationTokens = pgTable(
-  "verificationToken",
+  "verification_token",
   {
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),

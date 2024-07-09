@@ -21,10 +21,6 @@ interface TeamInviteEmailProps {
   inviteLink: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "";
-
 export const TeamInviteEmail = ({
   inviteeEmail,
   inviterName,
@@ -114,12 +110,3 @@ export const TeamInviteEmail = ({
 };
 
 export default TeamInviteEmail;
-
-// TeamInviteEmail.PreviewProps = {
-//   inviteeEmail: "Kory.Johnston@yahoo.com",
-//   inviteLink:
-//     "https://ctf-arena.sh/teams/invite?t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-//   inviterEmail: "Haylee_Botsford@gmail.com",
-//   inviterName: "Darrell Pfannerstill",
-//   teamName: "Roxanne Club",
-// } as TeamInviteEmailProps;
