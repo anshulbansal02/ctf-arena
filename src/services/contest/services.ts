@@ -10,7 +10,6 @@ import { getAuthUser } from "../auth";
 import { TB_teamMembers, getTeamIdByUserId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
-import { cache } from "../cache";
 import { contestQueue } from "../queue";
 
 export const contestChannel = (subChannel: "submission") => {

@@ -4,7 +4,7 @@ import { getIsUserOnboarded, getSession } from "./services";
 
 export async function attachSession() {
   try {
-    getSession();
+    return getSession();
   } catch (_) {}
 }
 

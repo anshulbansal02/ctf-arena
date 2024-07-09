@@ -1,6 +1,6 @@
 import { Timer } from "@/shared/components";
 import { JoinContestButton } from "../components/JoinContestButton";
-import { getContest } from "@/services/contest/services";
+import { getContest } from "@/services/contest";
 
 export default async function ContestPage({
   params,

@@ -23,15 +23,14 @@ function isRouteType(patterns: Array<RegExp>, route: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const session = await attachSession();
-
   if (isRouteType(routesType.protected, request.nextUrl.pathname)) {
-    if (!(session && session.data.user))
+    if (!(session && session.user))
       return NextResponse.redirect(
         new URL(appConfig.routes.default.NO_AUTH, request.url),
       );
     else return authenticatedUserRedirectionRules(request);
   } else if (isRouteType(routesType.public, request.nextUrl.pathname)) {
-    if (session && session.data.user) {
+    if (session && session.user) {
       return NextResponse.redirect(
         new URL(appConfig.routes.default.AUTH, request.url),
       );

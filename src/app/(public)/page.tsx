@@ -2,7 +2,7 @@ import { SvgInfoOutlined } from "@/assets/icons";
 import { signIn } from "@/services/auth";
 import { Button, Logo } from "@/shared/components";
 
-export default function Home() {
+export default async function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center px-4">
       <header className="mt-36">

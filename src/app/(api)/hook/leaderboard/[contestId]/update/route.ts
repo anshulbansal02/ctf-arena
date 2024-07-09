@@ -1,4 +1,4 @@
-import { cache, subCache } from "@/services/cache";
+import { subCache } from "@/services/cache";
 import * as leaderboard from "@/services/contest/leaderboard";
 
 export const runtime = "nodejs";
@@ -34,7 +34,7 @@ export async function GET(
   );
 
   request.signal.addEventListener("abort", () => {
-    cache.unsubscribe(
+    subCache.unsubscribe(
       leaderboard.leaderboardUpdateChannel(type, contestId),
       leaderboardListener,
     );

@@ -10,4 +10,6 @@ export const connection = new Client({
   password: config.db.password,
 });
 
+// connection.connect();
+
 export const db = drizzle(connection);

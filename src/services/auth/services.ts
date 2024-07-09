@@ -36,6 +36,7 @@ const { handlers, signIn, signOut, auth } = NextAuth({
     sessionsTable: TB_userSessions,
     verificationTokensTable: TB_userVerificationTokens,
   }),
+  session: { strategy: "jwt" },
   callbacks: {
     session({ session, user }) {
       session.user.id = user.id;
@@ -79,8 +80,8 @@ export async function loadUsersOnboardedIntoCache() {
     .from(TB_users)
     .where(sql`metadata->>'onboarded' = 'true'`);
   const usersOnboarded = users.map((u) => u.id);
-
-  await cache.sAdd("cache:users:onboarded", "");
+  if (usersOnboarded.length)
+    await cache.sAdd("cache:users:onboarded", usersOnboarded);
 }
 
 export async function setUserOnboarded() {

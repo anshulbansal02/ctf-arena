@@ -182,7 +182,7 @@ export async function getSumOfScores(contestId: number) {
   return leaderboard;
 }
 
-export function getByName(name: Leaderboard, contestId: number) {
+export async function getByName(name: Leaderboard, contestId: number) {
   switch (name) {
     case "sum_of_scores":
       return getSumOfScores(contestId);

@@ -1,4 +1,4 @@
-import { getContests } from "@/services/contest/services";
+import { getContests } from "@/services/contest";
 
 export async function Contests() {
   const [activeContests, upcomingContests] = await Promise.all([

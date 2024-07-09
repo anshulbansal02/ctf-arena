@@ -319,7 +319,8 @@ export async function batchSendInvitations() {
 
   // Lock invites
   const invitationsToProcess = invites.map((i) => i.id.toString());
-  await cache.sAdd("lock:invitation:processing", invitationsToProcess);
+  // if (invitationsToProcess)
+  //   await cache.sAdd("lock:invitation:processing", invitationsToProcess);
 
   // Store which invites were sent successfully
   const invitesSent: Array<number> = [];
@@ -350,11 +351,13 @@ export async function batchSendInvitations() {
     }),
   );
 
-  // Update status
-  await db
-    .update(TB_TR)
-    .set({ status: "sent" })
-    .where(inArray(TB_TR.id, invitesSent));
+  if (invitesSent.length)
+    // Update status
+    await db
+      .update(TB_TR)
+      .set({ status: "sent" })
+      .where(inArray(TB_TR.id, invitesSent));
   // Release lock
-  await cache.sRem("lock:invitation:processing", invitationsToProcess);
+  if (invitationsToProcess.length)
+    await cache.sRem("lock:invitation:processing", invitationsToProcess);
 }
