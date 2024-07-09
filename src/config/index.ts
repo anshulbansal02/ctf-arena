@@ -5,6 +5,11 @@ export const config = {
     user: process.env.DB_USER!,
     password: process.env.DB_PASS!,
   },
+  cache: {
+    host: process.env.REDIS_HOST!,
+    port: +process.env.REDIS_PORT!,
+    password: process.env.REDIS_PASS!,
+  },
   routes: {
     default: {
       NO_AUTH: "/",

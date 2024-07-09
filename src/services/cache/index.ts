@@ -1,7 +1,12 @@
+import { config } from "@/config";
 import { createClient } from "redis";
 
-const redisClient = await createClient()
-  .on("error", (err) => console.log("Redis Client Error", err))
-  .connect();
+const redisClient = createClient({
+  password: config.cache.password,
+  socket: {
+    host: config.cache.host,
+    port: config.cache.port,
+  },
+});
 
 export { redisClient as cache };

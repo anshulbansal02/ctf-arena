@@ -9,9 +9,26 @@ import { connection as dbConnection } from "@/services/db";
 import Bull from "bull";
 import { loadUsersOnboardedIntoCache } from "./services/auth";
 
-export async function register() {
-  await dbConnection.connect();
+async function bootstrapServer() {
+  try {
+    console.info(`[Bootstrap] Connecting to database ${dbConnection.host}`);
+    await dbConnection.connect();
+    console.info(`[Bootstrap] Successfully connected to database`);
+  } catch (e) {
+    console.error(`[Bootstrap] Failed to connect to database: `, e);
+    throw e;
+  }
 
+  try {
+    console.info(`[Bootstrap] Connecting to cache`);
+    await cache.connect();
+    console.info(`[Bootstrap] Successfully connected to cache`);
+  } catch (e) {
+    console.error(`[Bootstrap] Failed to connect to cache: `, e);
+    throw e;
+  }
+
+  console.info("[Bootstrap] Instantiating job queues.");
   const jobQueue = new Bull("general-job-queue");
 
   jobQueue.process("batch-send-invitations", async () => {
@@ -66,4 +83,11 @@ export async function register() {
   });
 
   await loadUsersOnboardedIntoCache();
+}
+
+export async function register() {
+  console.log(process.env.NEXT_RUNTIME);
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    await bootstrapServer();
+  }
 }
