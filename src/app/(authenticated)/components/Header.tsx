@@ -1,7 +1,7 @@
-import { getAuthUser } from "@/services/auth";
-import { Avatar, Logo } from "@/shared/components";
-import { SignOutButton } from "./SignOutButton";
+import { getAuthUser, signOut } from "@/services/auth";
+import { Avatar, Button, Logo } from "@/shared/components";
 import clsx from "clsx";
+import { SvgSignOut } from "@/assets/icons";
 
 interface Props {
   className?: string;
@@ -23,7 +23,19 @@ export async function Header({ className }: Props) {
       <div className="flex w-40 justify-end gap-4">
         <Avatar size={40} username={user.id} />
 
-        <SignOutButton />
+        <form
+          action={async () => {
+            "use server";
+            await signOut();
+          }}
+        >
+          <Button variant="outlined">
+            <span className="hidden sm:block">Sign Out</span>
+            <span className="sm:hidden">
+              <SvgSignOut />
+            </span>
+          </Button>
+        </form>
       </div>
     </header>
   );

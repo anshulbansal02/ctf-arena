@@ -1,9 +1,4 @@
 export const config = {
-  supabase: {
-    projectURL: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    projectKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    adminKey: process.env.SUPABASE_ADMIN_KEY!,
-  },
   db: {
     host: process.env.DB_HOST!,
     port: +process.env.DB_PORT!,

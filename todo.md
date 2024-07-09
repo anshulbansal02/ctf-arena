@@ -63,7 +63,6 @@ leaderboard creation
   - teams taking part are collected from contest_enter event
   - each team's points are aggregated from contest id,
   - also fetch the challenge numbers solved or level they are at
-  - use supabase realtime to create an inmemory leaderboard
   - this leaderboard is consumed via server sent events
   - whole snapshot of the data is sent instead of individual changes.
   - if no leaderboard is present for a contest, create one using db data.

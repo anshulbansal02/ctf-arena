@@ -1,12 +1,10 @@
 import { config } from "@/config";
-import { createServerClient } from "@/services/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { getIsUserOnboarded } from "./services";
+import { getIsUserOnboarded, getSession } from "./services";
 
 export async function attachSession() {
   try {
-    const supabase = createServerClient();
-    return await supabase.auth.getUser();
+    getSession();
   } catch (_) {}
 }
 
