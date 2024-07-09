@@ -6,7 +6,7 @@ import {
   TB_contestSubmissions,
   TB_contests,
 } from "./entities";
-import { getUser } from "../auth";
+import { getAuthUser } from "../auth";
 import { TB_teamMembers, getTeamIdByUserId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
@@ -21,7 +21,7 @@ export const contestChannel = (subChannel: "submission") => {
  * @param contestId
  */
 export async function joinContest(contestId: number) {
-  const user = await getUser();
+  const user = await getAuthUser();
 
   const [team] = await db
     .select({ id: TB_teamMembers.teamId })
@@ -99,7 +99,7 @@ export async function checkAndCreateSubmission(data: {
 }): Promise<boolean> {
   const { contestId, challengeId, submission } = data;
   const now = new Date();
-  const user = await getUser();
+  const user = await getAuthUser();
   const teamId = await getTeamIdByUserId(user.id);
 
   const [contest] = await db
@@ -243,7 +243,7 @@ export async function revealHint(challengeId: number, hintIndex: number) {
 
   const hintTaken = (res.hints as any[])[hintIndex];
 
-  const teamId = await getTeamIdByUserId((await getUser()).id);
+  const teamId = await getTeamIdByUserId((await getAuthUser()).id);
 
   await db.insert(TB_contestEvents).values({
     challengeId,

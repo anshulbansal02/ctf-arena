@@ -1,6 +1,6 @@
 "use server";
 
-import { getUser } from "@/services/auth";
+import { getAuthUser } from "@/services/auth";
 import { db } from "../db";
 import { TB_teamMembers, TB_teamRequest, TB_teams } from "./entities";
 import { TB_users } from "../user";
@@ -40,7 +40,7 @@ export async function createTeamAndSendInvites(props: {
   name: string;
   invitees: Array<string>;
 }) {
-  const user = await getUser();
+  const user = await getAuthUser();
 
   if (await getTeamIdByUserId(user.id))
     throw new Error("User is already in a team");
@@ -76,7 +76,7 @@ export async function getTeams(): Promise<Array<TeamDetails>> {
       name: t.name,
       members: sql<
         Array<{ id: string; name: string }>
-      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.full_name))`,
+      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.name))`,
     })
     .from(t)
     .leftJoin(ctm, eq(ctm.teamId, t.id))
@@ -100,7 +100,7 @@ export async function getTeamsDetailsByIds(
       name: t.name,
       members: sql<
         Array<{ id: string; name: string }>
-      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.full_name))`,
+      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.name))`,
     })
     .from(t)
     .leftJoin(ctm, eq(ctm.teamId, t.id))
@@ -128,7 +128,7 @@ export async function getTeamDetails(
       name: t.name,
       members: sql<
         Array<{ id: string; name: string }>
-      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.full_name))`,
+      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.name))`,
     })
     .from(t)
     .leftJoin(ctm, eq(ctm.teamId, t.id))
@@ -162,7 +162,7 @@ export async function getTeamIdByUserId(
 }
 
 export async function sendTeamRequests(teamIds: Array<number>) {
-  const user = await getUser();
+  const user = await getAuthUser();
 
   await db.insert(TB_teamRequest).values(
     teamIds.map((teamId) => ({
@@ -174,7 +174,7 @@ export async function sendTeamRequests(teamIds: Array<number>) {
 }
 
 export async function sendTeamInvites(teamId: number, emails: string[]) {
-  const user = await getUser();
+  const user = await getAuthUser();
 
   await db.insert(TB_teamRequest).values(
     emails.map((email) => ({
@@ -254,7 +254,7 @@ export async function respondToTeamRequest(
 }
 
 export async function leaveTeam() {
-  const user = await getUser();
+  const user = await getAuthUser();
   const teamId = await getTeamIdByUserId(user.id);
 
   if (!teamId) throw new Error("User is not in a team.");
@@ -300,7 +300,7 @@ export async function batchSendInvitations() {
       metadata: TB_TR.metadata,
       inviter: {
         email: TB_U.email,
-        name: TB_U.full_name,
+        name: TB_U.name,
       },
       inviteeEmail: TB_TR.userEmail,
     })

@@ -5,7 +5,10 @@ export const config = {
     adminKey: process.env.SUPABASE_ADMIN_KEY!,
   },
   db: {
-    url: process.env.DATABASE_URL!,
+    host: process.env.DB_HOST!,
+    port: +process.env.DB_PORT!,
+    user: process.env.DB_USER!,
+    password: process.env.DB_PASS!,
   },
   routes: {
     default: {

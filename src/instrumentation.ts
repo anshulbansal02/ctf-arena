@@ -7,6 +7,7 @@ import {
 } from "@/services/contest/services";
 import { connection as dbConnection } from "@/services/db";
 import Bull from "bull";
+import { loadUsersOnboardedIntoCache } from "./services/auth";
 
 export async function register() {
   await dbConnection.connect();
@@ -63,4 +64,6 @@ export async function register() {
     leaderboard.sumOfScoresProcessor(submission);
     leaderboard.sprintingTeamsProcessor(submission);
   });
+
+  await loadUsersOnboardedIntoCache();
 }

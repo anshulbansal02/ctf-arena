@@ -1,9 +1,9 @@
-import { getUser } from "@/services/auth";
+import { getAuthUser } from "@/services/auth";
 import { getTeamDetailsByUserId } from "@/services/team";
 import { Button } from "@/shared/components";
 
 export default async function TeamPage() {
-  const user = await getUser();
+  const user = await getAuthUser();
   const team = await getTeamDetailsByUserId(user.id);
 
   return (

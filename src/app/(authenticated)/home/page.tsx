@@ -1,10 +1,10 @@
 import { Header } from "../components/Header";
-import { getUser } from "@/services/auth";
+import { getAuthUser } from "@/services/auth";
 import { TeamCard } from "./components/TeamCard";
 import { Contests } from "./components/Contests";
 
 export default async function HomePage() {
-  const user = await getUser();
+  const user = await getAuthUser();
 
   return (
     <div>

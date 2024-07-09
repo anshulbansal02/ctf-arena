@@ -1,4 +1,4 @@
-import { getUser } from "@/services/auth";
+import { getAuthUser } from "@/services/auth";
 import { Avatar, Logo } from "@/shared/components";
 import { SignOutButton } from "./SignOutButton";
 import clsx from "clsx";
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export async function Header({ className }: Props) {
-  const user = await getUser();
+  const user = await getAuthUser();
 
   return (
     <header
@@ -21,7 +21,7 @@ export async function Header({ className }: Props) {
       <Logo className="flex-shrink-[0.5] flex-grow" />
 
       <div className="flex w-40 justify-end gap-4">
-        <Avatar size={40} username={user?.id ?? "241"} />
+        <Avatar size={40} username={user.id} />
 
         <SignOutButton />
       </div>
