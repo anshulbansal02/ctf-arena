@@ -1,7 +1,7 @@
 import { config } from "@/config";
 import { createClient } from "redis";
 
-const redisClient = createClient({
+const cacheClient = createClient({
   password: config.cache.password,
   socket: {
     host: config.cache.host,
@@ -9,4 +9,6 @@ const redisClient = createClient({
   },
 });
 
-export { redisClient as cache };
+const subCacheClient = cacheClient.duplicate({ readonly: true });
+
+export { cacheClient as cache, subCacheClient as subCache };

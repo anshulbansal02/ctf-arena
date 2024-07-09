@@ -1,15 +1,18 @@
+import Bull from "bull";
 import * as leaderboard from "@/services/contest/leaderboard";
-import { cache } from "@/services/cache";
+// import { cache } from "@/services/cache";
 import { batchSendInvitations } from "@/services/team";
 import {
   contestChannel,
   getContestsStartingInOneHour,
 } from "@/services/contest/services";
 import { connection as dbConnection } from "@/services/db";
-import Bull from "bull";
 import { loadUsersOnboardedIntoCache } from "./services/auth";
+import { contestQueue, jobQueue } from "@/services/queue";
 
 async function bootstrapServer() {
+  const { cache } = await import("@/services/cache");
+
   try {
     console.info(`[Bootstrap] Connecting to database ${dbConnection.host}`);
     await dbConnection.connect();
@@ -29,13 +32,15 @@ async function bootstrapServer() {
   }
 
   console.info("[Bootstrap] Instantiating job queues.");
-  const jobQueue = new Bull("general-job-queue");
 
   jobQueue.process("batch-send-invitations", async () => {
     batchSendInvitations();
   });
+  jobQueue.add("batch-send-invitations", {
+    repeat: { cron: "* * * * *" },
+  });
 
-  jobQueue.process(
+  contestQueue.process(
     "sprinting-teams-update",
     async (
       job: Bull.Job<{
@@ -48,11 +53,11 @@ async function bootstrapServer() {
     },
   );
 
-  jobQueue.process("hourly-job", async () => {
+  contestQueue.process("hourly-contest-update", async () => {
     const contestsStartingInOneHour = await getContestsStartingInOneHour();
 
     contestsStartingInOneHour.forEach((contest) => {
-      jobQueue.add("sprinting-teams-update", contest, {
+      contestQueue.add("sprinting-teams-update", contest, {
         repeat: {
           cron: "* * * * *",
           startDate: contest.startsAt,
@@ -62,21 +67,12 @@ async function bootstrapServer() {
     });
   });
 
-  jobQueue.add("batch-send-invitations", {
-    repeat: {
-      cron: "* * * * *",
-    },
+  contestQueue.add("hourly-contest-update", {
+    repeat: { cron: "0 0 * * *" },
   });
 
-  jobQueue.add("hourly-job", {
-    repeat: {
-      cron: "0 0 * * *",
-    },
-  });
-
-  cache.subscribe(contestChannel("submission"), (data) => {
-    const submission = JSON.parse(data);
-
+  contestQueue.process(contestChannel("submission"), (job: Bull.Job<any>) => {
+    const submission = job.data;
     leaderboard.quickestFirstsProcessor(submission);
     leaderboard.sumOfScoresProcessor(submission);
     leaderboard.sprintingTeamsProcessor(submission);
@@ -86,7 +82,6 @@ async function bootstrapServer() {
 }
 
 export async function register() {
-  console.log(process.env.NEXT_RUNTIME);
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await bootstrapServer();
   }

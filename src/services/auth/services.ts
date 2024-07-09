@@ -79,7 +79,8 @@ export async function loadUsersOnboardedIntoCache() {
     .from(TB_users)
     .where(sql`metadata->>'onboarded' = 'true'`);
   const usersOnboarded = users.map((u) => u.id);
-  await cache.sAdd("cache:users:onboarded", usersOnboarded);
+
+  await cache.sAdd("cache:users:onboarded", "");
 }
 
 export async function setUserOnboarded() {

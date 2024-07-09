@@ -11,6 +11,7 @@ import { TB_teamMembers, getTeamIdByUserId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
 import { cache } from "../cache";
+import { contestQueue } from "../queue";
 
 export const contestChannel = (subChannel: "submission") => {
   return `channel:contest:${subChannel}`;
@@ -174,19 +175,16 @@ export async function checkAndCreateSubmission(data: {
       createdAt: TB_contestSubmissions.createdAt,
     });
 
-  cache.publish(
-    contestChannel("submission"),
-    JSON.stringify({
-      submissionId: newSubmission.id,
-      contestId,
-      challengeId,
-      challengeOrder: challenge.order,
-      teamId,
-      score,
-      timeTaken,
-      createdAt: newSubmission.createdAt,
-    }),
-  );
+  contestQueue.add(contestChannel("submission"), {
+    submissionId: newSubmission.id,
+    contestId,
+    challengeId,
+    challengeOrder: challenge.order,
+    teamId,
+    score,
+    timeTaken,
+    createdAt: newSubmission.createdAt,
+  });
 
   return true;
 }

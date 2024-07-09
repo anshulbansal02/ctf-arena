@@ -1,4 +1,4 @@
-import { cache } from "@/services/cache";
+import { cache, subCache } from "@/services/cache";
 import * as leaderboard from "@/services/contest/leaderboard";
 
 export const runtime = "nodejs";
@@ -28,7 +28,7 @@ export async function GET(
     send(updatedLeaderboard);
   };
 
-  cache.subscribe(
+  subCache.subscribe(
     leaderboard.leaderboardUpdateChannel(type, contestId),
     leaderboardListener,
   );

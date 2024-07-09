@@ -311,7 +311,9 @@ export async function batchSendInvitations() {
       and(
         eq(TB_TR.type, "invite"),
         eq(TB_TR.status, "queued"),
-        notInArray(TB_TR.id, invitationsAlreadyUnderProcessing),
+        invitationsAlreadyUnderProcessing.length
+          ? notInArray(TB_TR.id, invitationsAlreadyUnderProcessing)
+          : sql`true`,
       ),
     );
 
