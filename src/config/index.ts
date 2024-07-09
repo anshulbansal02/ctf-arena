@@ -10,6 +10,14 @@ export const config = {
     port: +process.env.REDIS_PORT!,
     password: process.env.REDIS_PASS!,
   },
+  auth: {
+    azure: {
+      tenantId: process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID,
+      accountId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
+      secret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+    },
+  },
+
   routes: {
     default: {
       NO_AUTH: "/",

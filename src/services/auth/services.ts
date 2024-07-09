@@ -11,6 +11,7 @@ import {
 } from "../user";
 import { eq, sql } from "drizzle-orm";
 import { cache } from "../cache";
+import { config } from "@/config";
 
 declare module "next-auth" {
   interface Session {
@@ -25,8 +26,8 @@ declare module "next-auth" {
 const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     EntraID({
-      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
-      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+      clientId: config.auth.azure.accountId,
+      clientSecret: config.auth.azure.secret,
     }),
   ],
   adapter: DrizzleAdapter(db, {
