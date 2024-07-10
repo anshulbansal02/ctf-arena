@@ -1,5 +1,4 @@
 import NextAuth from "next-auth";
-import EntraID from "next-auth/providers/microsoft-entra-id";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 
 import { db } from "../db";
@@ -11,7 +10,7 @@ import {
 } from "../user";
 import { eq, sql } from "drizzle-orm";
 import { cache } from "../cache";
-import { config } from "@/config";
+import { authConfig } from "./config";
 
 declare module "next-auth" {
   interface Session {
@@ -24,26 +23,13 @@ declare module "next-auth" {
 }
 
 const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [
-    EntraID({
-      clientId: config.auth.azure.accountId,
-      clientSecret: config.auth.azure.secret,
-    }),
-  ],
   adapter: DrizzleAdapter(db, {
     usersTable: TB_users,
     accountsTable: TB_userAccounts,
     sessionsTable: TB_userSessions,
     verificationTokensTable: TB_userVerificationTokens,
   }),
-  session: { strategy: "jwt" },
-  callbacks: {
-    session({ session, user }) {
-      session.user.id = user.id;
-
-      return session;
-    },
-  },
+  ...authConfig,
 });
 
 export async function getSession() {

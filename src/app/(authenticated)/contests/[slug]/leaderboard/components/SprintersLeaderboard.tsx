@@ -22,7 +22,7 @@ export function SprintersLeaderboard(props: Props) {
 
   useEffect(() => {
     const leaderboardEvents = new EventSource(
-      `/hook/leaderboard/${props.contestId}/update?type=sprinting_teams`,
+      `/api/hook/leaderboard/${props.contestId}/update?type=sprinting_teams`,
     );
 
     leaderboardEvents.onmessage = (event) => {

@@ -63,7 +63,7 @@ export function MainLeaderboard(props: Props) {
 
   useEffect(() => {
     const leaderboardEvents = new EventSource(
-      `/hook/leaderboard/${props.contestId}/update?type=sum_of_scores`,
+      `/api/hook/leaderboard/${props.contestId}/update?type=sum_of_scores`,
     );
 
     leaderboardEvents.onmessage = (event) => {

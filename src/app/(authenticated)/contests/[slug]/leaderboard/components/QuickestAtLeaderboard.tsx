@@ -24,7 +24,7 @@ export function QuickestAtLeaderboard(props: Props) {
 
   useEffect(() => {
     const leaderboardEvents = new EventSource(
-      `/hook/leaderboard/${props.contestId}/update?type=quickest_firsts`,
+      `/api/hook/leaderboard/${props.contestId}/update?type=quickest_firsts`,
     );
 
     leaderboardEvents.onmessage = (event) => {

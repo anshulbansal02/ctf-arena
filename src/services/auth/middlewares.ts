@@ -1,6 +1,10 @@
 import { config } from "@/config";
+import NextAuth from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getIsUserOnboarded, getSession } from "./services";
+import { authConfig } from "./config";
+import { getIsUserOnboarded } from "./services";
+
+export const { auth: getSession } = NextAuth(authConfig);
 
 export async function attachSession() {
   try {
