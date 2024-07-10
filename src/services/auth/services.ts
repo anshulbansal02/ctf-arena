@@ -12,16 +12,6 @@ import { eq, sql } from "drizzle-orm";
 import { cache } from "../cache";
 import { authConfig } from "./config";
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      name: string;
-      email: string;
-    };
-  }
-}
-
 const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db, {
     usersTable: TB_users,
