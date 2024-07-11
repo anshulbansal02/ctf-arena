@@ -14,11 +14,15 @@
   ul {
     display: flex;
     align-items: center;
-    gap: 0px;
+    gap: 4px;
   }
 
   li {
     line-height: 1;
+
+    &.active a {
+      background-color: rgb(37, 44, 45);
+    }
   }
 
   a {

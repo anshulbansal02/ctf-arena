@@ -1,3 +1,4 @@
+"use client";
 import { useTeamsById } from "@/services/team/client";
 import { useEffect, useMemo, useState } from "react";
 

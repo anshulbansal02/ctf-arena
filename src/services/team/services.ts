@@ -14,7 +14,7 @@ import { config } from "@/config";
 export type TeamDetails = {
   id: number;
   name: string;
-  members: Array<{ id: string; name: string }>;
+  members: Array<{ id: string; name: string; isLeader: boolean }>;
 };
 
 export async function generateTeamName(): Promise<string> {
@@ -75,8 +75,12 @@ export async function getTeams(): Promise<Array<TeamDetails>> {
       id: t.id,
       name: t.name,
       members: sql<
-        Array<{ id: string; name: string }>
-      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.name))`,
+        Array<{ id: string; name: string; isLeader: boolean }>
+      >`json_agg(json_build_object(
+      'id', current_team_members.user_id, 
+      'name', u.name, 
+      'isLeader', current_team_members.user_id = t.leader
+    ))`,
     })
     .from(t)
     .leftJoin(ctm, eq(ctm.teamId, t.id))
@@ -93,14 +97,20 @@ export async function getTeamsDetailsByIds(
     t = TB_teams,
     u = TB_users;
 
+  if (!teamIds.length) return {};
+
   const teams = await db
     .with(ctm)
     .select({
       id: t.id,
       name: t.name,
       members: sql<
-        Array<{ id: string; name: string }>
-      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.name))`,
+        Array<{ id: string; name: string; isLeader: boolean }>
+      >`json_agg(json_build_object(
+      'id', current_team_members.user_id, 
+      'name', u.name, 
+      'isLeader', current_team_members.user_id = t.leader
+    ))`,
     })
     .from(t)
     .leftJoin(ctm, eq(ctm.teamId, t.id))
@@ -126,9 +136,14 @@ export async function getTeamDetails(
     .select({
       id: t.id,
       name: t.name,
+      leaderId: t.leader,
       members: sql<
-        Array<{ id: string; name: string }>
-      >`json_agg(json_build_object('id', current_team_members.user_id, 'name', u.name))`,
+        Array<{ id: string; name: string; isLeader: boolean }>
+      >`json_agg(json_build_object(
+      'id', current_team_members.user_id, 
+      'name', u.name, 
+      'isLeader', current_team_members.user_id = t.leader
+    ))`,
     })
     .from(t)
     .leftJoin(ctm, eq(ctm.teamId, t.id))

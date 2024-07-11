@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useMemo } from "react";
 import { getTeamsDetailsByIds, TeamDetails } from "../services";
 import { atom, useAtom } from "jotai";

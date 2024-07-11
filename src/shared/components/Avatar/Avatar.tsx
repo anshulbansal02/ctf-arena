@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 import clsx from "clsx";
 import styles from "./avatar.module.scss";
+import Image from "next/image";
 
 interface Props {
   size?: number;
@@ -13,7 +13,7 @@ interface Props {
 export function Avatar({ size = 48, ...props }: Props) {
   return (
     <div className={clsx(styles.avatar, props.className)}>
-      <img
+      <Image
         title={props.title}
         width={size}
         height={size}

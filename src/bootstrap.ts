@@ -29,6 +29,7 @@ export async function bootstrap() {
   console.info("[Bootstrap] Instantiating job queues");
 
   jobQueue.process("batch-send-invitations", async () => {
+    console.info("[Job] Batch sending invitations");
     batchSendInvitations();
   });
   jobQueue.add("batch-send-invitations", {

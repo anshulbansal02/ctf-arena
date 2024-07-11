@@ -1,10 +1,14 @@
-import { getTeamDetailsByUserId, getTeamDetails } from "@/services/team";
+import {
+  getTeamDetailsByUserId,
+  getTeamDetails,
+  TeamDetails,
+} from "@/services/team";
 import { Avatar, Button } from "@/shared/components";
 
 type TeamCardProps = { teamId: number } | { userId: string };
 
 export async function TeamCard(props: TeamCardProps) {
-  let team: any;
+  let team: TeamDetails | undefined;
   if ("teamId" in props) team = await getTeamDetails(props.teamId);
   else team = await getTeamDetailsByUserId(props.userId);
 
@@ -38,7 +42,7 @@ export async function TeamCard(props: TeamCardProps) {
   ) : (
     <div className="empty-state">
       <p className="mt-4 text-slate-400">You are not in a team yet</p>
-      <div className="mt-8 flex items-center gap-2">
+      <div className="mt-8 flex items-center justify-center gap-2">
         <Button variant="outlined">Join A Team</Button>
         <p>Or</p>
         <Button variant="outlined">Create Your Team</Button>
