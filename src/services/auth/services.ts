@@ -2,12 +2,7 @@ import NextAuth from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 
 import { db } from "../db";
-import {
-  TB_userAccounts,
-  TB_users,
-  TB_userSessions,
-  TB_userVerificationTokens,
-} from "../user";
+import { TB_userAccounts, TB_users } from "../user";
 import { eq, sql } from "drizzle-orm";
 import { cache } from "../cache";
 import { authConfig } from "./config";
@@ -16,8 +11,6 @@ const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db, {
     usersTable: TB_users,
     accountsTable: TB_userAccounts,
-    sessionsTable: TB_userSessions,
-    verificationTokensTable: TB_userVerificationTokens,
   }),
   ...authConfig,
 });
@@ -27,7 +20,7 @@ export async function getSession() {
 }
 
 export async function getAuthUser() {
-  const session = await auth();
+  const session = await getSession();
   return session?.user!;
 }
 

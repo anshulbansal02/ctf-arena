@@ -23,6 +23,7 @@ function isRouteType(patterns: Array<RegExp>, route: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const session = await attachSession();
+
   if (isRouteType(routesType.protected, request.nextUrl.pathname)) {
     if (!(session && session.user))
       return NextResponse.redirect(

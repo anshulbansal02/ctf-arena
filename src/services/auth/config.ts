@@ -42,14 +42,16 @@ export const authConfig = {
     }),
   ],
   session: { strategy: "jwt" },
-  callbacks: {
-    jwt({ token, user }) {
-      token.onboarded = Boolean(user.metadata.onboarded);
-      return token;
-    },
-    session({ session, token }) {
-      session.user.onboarded = token.onboarded;
-      return session;
-    },
-  },
+  // callbacks: {
+  //   jwt({ token, user }) {
+  //     console.log("JWT: ", token, user);
+  //     // token.onboarded = Boolean(user.metadata.onboarded);
+  //     return token;
+  //   },
+  //   session({ session, token }) {
+  //     console.log("Session: ", session, token);
+  //     // session.user.onboarded = token.onboarded;
+  //     return session;
+  //   },
+  // },
 } satisfies NextAuthConfig;

@@ -9,6 +9,7 @@ import {
   index,
   jsonb,
   pgView,
+  text,
 } from "drizzle-orm/pg-core";
 import { TB_users } from "../user";
 import { eq, isNull } from "drizzle-orm";
@@ -30,7 +31,7 @@ export const Enum_teamRequestType = pgEnum("team_request_type", [
 export const TB_teams = pgTable("teams", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
-  leader: uuid("leader")
+  leader: text("leader")
     .notNull()
     .unique()
     .references(() => TB_users.id, { onDelete: "restrict" }),
@@ -40,7 +41,7 @@ export const TB_teams = pgTable("teams", {
 export const TB_teamMembers = pgTable(
   "team_members",
   {
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => TB_users.id, { onDelete: "cascade" }),
     teamId: integer("team_id")

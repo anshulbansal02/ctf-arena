@@ -43,7 +43,7 @@ export const TB_contestSubmissions = pgTable("contest_submissions", {
   submittedByTeam: integer("submitted_by_team")
     .notNull()
     .references(() => TB_teams.id, { onDelete: "no action" }),
-  submittedByUser: uuid("submitted_by_user")
+  submittedByUser: text("submitted_by_user")
     .notNull()
     .references(() => TB_users.id, { onDelete: "no action" }),
   timeTaken: integer("time_taken").notNull(),

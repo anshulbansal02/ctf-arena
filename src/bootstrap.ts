@@ -10,7 +10,7 @@ export async function bootstrap() {
   );
 
   try {
-    console.info(`[Bootstrap] Connecting to database ${dbConnection.host}`);
+    console.info(`[Bootstrap] Connecting to database`);
     await dbConnection.connect();
     console.info(`[Bootstrap] Successfully connected to database`);
   } catch (e) {
