@@ -4,12 +4,24 @@ import { getAuthUser } from "@/services/auth";
 import { db } from "../db";
 import { TB_teamMembers, TB_teamRequest, TB_teams } from "./entities";
 import { TB_users } from "../user";
-import { and, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
+import {
+  and,
+  count,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import { randomItem } from "@/lib/utils";
 import teamNames from "./team_names.json";
 import { cache } from "../cache";
 import { emailService, renderTemplate } from "../email";
 import { config } from "@/config";
+import { TB_contestEvents } from "../contest";
+import { CONTEST_EVENTS } from "../contest/helpers";
 
 export type TeamDetails = {
   id: number;
@@ -17,11 +29,25 @@ export type TeamDetails = {
   members: Array<{ id: string; name: string; isLeader: boolean }>;
 };
 
+const teamCacheKey = (teamId: number) => `team:${teamId}:details`;
+
+async function preconditionIsTeamInContest(teamId: number) {
+  const [r] = await db
+    .select({})
+    .from(TB_contestEvents)
+    .where(
+      and(
+        eq(TB_contestEvents.teamId, teamId),
+        eq(TB_contestEvents.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
+      ),
+    );
+
+  return !!r;
+}
+
 export async function generateTeamName(): Promise<string> {
   return randomItem(teamNames);
 }
-
-const teamCacheKey = (teamId: number) => `team:${teamId}:details`;
 
 const CTE_currentTeamMembers = (teamId?: number) =>
   db.$with("current_team_members").as(
@@ -62,6 +88,47 @@ export async function createTeamAndSendInvites(props: {
       })),
     );
   });
+}
+
+export async function sendTeamInvites(emails: Array<string>) {
+  const user = await getAuthUser();
+
+  const teamId = await getTeamIdByUserId(user.id);
+  if (!teamId) throw new Error("You are not in a team.");
+
+  const [team] = await db
+    .select({ leaderId: TB_teams.leader })
+    .from(TB_teams)
+    .where(eq(TB_teams.id, teamId));
+
+  if (team.leaderId !== user.id) throw new Error("You are not a team leader.");
+
+  // check sent team invites count
+  const dayStart = new Date();
+  dayStart.setUTCHours(0, 0, 0, 0);
+  const [invites] = await db
+    .select({ count: count() })
+    .from(TB_teamRequest)
+    .where(
+      and(
+        eq(TB_teamRequest.type, "invite"),
+        eq(TB_teamRequest.teamId, teamId),
+        gt(TB_teamRequest, dayStart),
+      ),
+    );
+  if (invites.count >= config.app.team.INVITE_USER_LIMIT)
+    throw new Error(
+      `A team can only send invitations to maximum ${config.app.team.INVITE_USER_LIMIT} users`,
+    );
+
+  await db.insert(TB_teamRequest).values(
+    emails.map((email) => ({
+      type: "invite" as any,
+      teamId,
+      userEmail: email,
+      createdBy: user.id,
+    })),
+  );
 }
 
 export async function getTeams(): Promise<Array<TeamDetails>> {
@@ -179,33 +246,87 @@ export async function getTeamIdByUserId(
 export async function sendTeamRequests(teamIds: Array<number>) {
   const user = await getAuthUser();
 
+  const teamId = await getTeamIdByUserId(user.id);
+  if (teamId) throw new Error("User is already in a team");
+
+  const [userRequests] = await db
+    .select({ count: count() })
+    .from(TB_teamRequest)
+    .where(
+      and(
+        eq(TB_teamRequest.createdBy, user.id),
+        eq(TB_teamRequest.type, "request"),
+        inArray(TB_teamRequest.status, ["delivered"]),
+      ),
+    );
+
+  const limit = config.app.team.REQUEST_TEAM_LIMIT;
+  if (userRequests.count >= limit)
+    throw new Error(`Cannot send request to more than ${limit} teams`);
+
   await db.insert(TB_teamRequest).values(
     teamIds.map((teamId) => ({
       type: "request" as any,
+      status: "delivered" as any,
       teamId,
-      createdBy: user.id,
-    })),
-  );
-}
-
-export async function sendTeamInvites(teamId: number, emails: string[]) {
-  const user = await getAuthUser();
-
-  await db.insert(TB_teamRequest).values(
-    emails.map((email) => ({
-      type: "invite" as any,
-      teamId,
-      userEmail: email,
       createdBy: user.id,
     })),
   );
 }
 
 export async function cancelTeamRequest(requestId: number) {
+  const user = await getAuthUser();
+
   await db
     .update(TB_teamRequest)
     .set({ status: "cancelled" })
-    .where(eq(TB_teamRequest.id, requestId));
+    .where(
+      and(
+        eq(TB_teamRequest.id, requestId),
+        eq(TB_teamRequest.createdBy, user.id),
+      ),
+    );
+}
+
+export async function getSentTeamRequests() {
+  const user = await getAuthUser();
+
+  const tr = TB_teamRequest;
+
+  const requests = await db
+    .select()
+    .from(tr)
+    .where(
+      and(
+        eq(tr.createdBy, user.id),
+        eq(tr.status, "delivered"),
+        eq(tr.type, "request"),
+      ),
+    );
+
+  return requests;
+}
+
+export async function getSentTeamInvites() {
+  const user = await getAuthUser();
+
+  const teamId = await getTeamIdByUserId(user.id);
+
+  if (!teamId) return [];
+
+  const tr = TB_teamRequest;
+  const invites = await db
+    .select()
+    .from(tr)
+    .where(
+      and(
+        eq(tr.teamId, teamId),
+        inArray(tr.status, ["queued", "sent", "delivered"]),
+        eq(tr.type, "invite"),
+      ),
+    );
+
+  return invites;
 }
 
 export async function respondToTeamRequest(
@@ -238,11 +359,20 @@ export async function respondToTeamRequest(
 
     if (response === "accept") {
       const [user] = await tx
-        .select({ id: TB_users.id })
+        .select({ id: TB_users.id, email: TB_users.email })
         .from(TB_users)
         .where(eq(predicate.by, predicate.value));
 
       if (!user) throw new Error("User does not exist");
+
+      if (request.type === "invite") {
+        const [team] = await db
+          .select({ leaderId: TB_teams.leader })
+          .from(TB_teams)
+          .where(eq(TB_teams.id, request.teamId));
+        if (team.leaderId !== user.id)
+          throw new Error("You are not a team leader.");
+      }
 
       // Check if user already in team
       if (await getTeamIdByUserId(user.id)) {
@@ -253,6 +383,20 @@ export async function respondToTeamRequest(
         throw new Error("User is already in a team");
       }
 
+      // Check if team accepting the request is not in contest
+      // Check if user accepting the invite from team is not in contest
+      if (await preconditionIsTeamInContest(request.teamId))
+        throw new Error("Team is currently in a contest.");
+
+      // Check if team is full
+      const cte = CTE_currentTeamMembers(request.teamId);
+      const [teamMembers] = await db
+        .with(cte)
+        .select({ count: count() })
+        .from(cte);
+      if (teamMembers.count >= config.app.team.MEMBERS_LIMIT)
+        throw new Error("Team is full.");
+
       // Update team members
       await tx.insert(TB_teamMembers).values({
         teamId: request.teamId,
@@ -260,6 +404,13 @@ export async function respondToTeamRequest(
       });
 
       cacheTeamDetails({ teamId: request.teamId });
+
+      // Update all requests created by the user.
+      // Update all invites sent to the user.
+      await tx
+        .update(tr)
+        .set({ status: "cancelled" })
+        .where(or(eq(tr.userEmail, user.email), eq(tr.createdBy, user.id)));
     }
 
     // Update invite status
@@ -272,7 +423,10 @@ export async function leaveTeam() {
   const user = await getAuthUser();
   const teamId = await getTeamIdByUserId(user.id);
 
-  if (!teamId) throw new Error("User is not in a team.");
+  if (!teamId) throw new Error("You are not in a team.");
+
+  if (await preconditionIsTeamInContest(teamId))
+    throw new Error("Your team is currently in a contest.");
 
   await db
     .update(TB_teamMembers)
@@ -334,8 +488,8 @@ export async function batchSendInvitations() {
 
   // Lock invites
   const invitationsToProcess = invites.map((i) => i.id.toString());
-  // if (invitationsToProcess)
-  //   await cache.sAdd("lock:invitation:processing", invitationsToProcess);
+  if (invitationsToProcess.length)
+    await cache.sAdd("lock:invitation:processing", invitationsToProcess);
 
   // Store which invites were sent successfully
   const invitesSent: Array<number> = [];
