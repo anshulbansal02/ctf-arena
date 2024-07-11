@@ -1,3 +1,4 @@
+"use server";
 import { and, asc, count, desc, eq, gt, isNull, lt } from "drizzle-orm";
 import { db } from "../db";
 import {
@@ -23,17 +24,14 @@ export const contestChannel = (subChannel: "submission") => {
 export async function joinContest(contestId: number) {
   const user = await getAuthUser();
 
-  const [team] = await db
-    .select({ id: TB_teamMembers.teamId })
-    .from(TB_teamMembers)
-    .where(
-      and(eq(TB_teamMembers.userId, user.id), isNull(TB_teamMembers.leftAt)),
-    );
+  const teamId = await getTeamIdByUserId(user.id);
+
+  if (!teamId) throw new Error("You are not in a team");
 
   await db.insert(TB_contestEvents).values({
     name: CONTEST_EVENTS.TEAM_ENTERED_CONTEST,
     contestId,
-    teamId: team.id,
+    teamId: teamId,
   });
 }
 

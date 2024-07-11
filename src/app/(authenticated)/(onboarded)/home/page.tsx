@@ -10,8 +10,8 @@ export default async function HomePage() {
     <div>
       <Header className="fixed top-0 z-10" />
       <main className="mt-[80px] flex min-h-screen min-w-[420px] flex-col items-center px-4 text-center">
-        <section className="mt-8 w-[420px]">
-          <h2 className="text-2xl">Your Team</h2>
+        <section className="mt-8 flex w-[420px] flex-col items-center">
+          <h2 className="text-2xl">My Team</h2>
           <TeamCard userId={user.id} />
         </section>
 

@@ -41,11 +41,17 @@ export async function TeamCard(props: TeamCardProps) {
     </div>
   ) : (
     <div className="empty-state">
-      <p className="mt-4 text-slate-400">You are not in a team yet</p>
+      <p className="mt-4 text-center text-slate-400">
+        You are not in a team yet
+      </p>
       <div className="mt-8 flex items-center justify-center gap-2">
-        <Button variant="outlined">Join A Team</Button>
+        <Button variant="outlined" as="link" href="/team/search">
+          Join A Team
+        </Button>
         <p>Or</p>
-        <Button variant="outlined">Create Your Team</Button>
+        <Button variant="outlined" as="link" href="/team/new">
+          Create Your Team
+        </Button>
       </div>
     </div>
   );
