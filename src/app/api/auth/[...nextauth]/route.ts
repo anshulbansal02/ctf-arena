@@ -1,2 +1,2 @@
-import { handlers } from "@/services/auth";
-export const { GET, POST } = handlers;
+import { getHandlers } from "@/services/auth";
+export const { GET, POST } = await getHandlers();

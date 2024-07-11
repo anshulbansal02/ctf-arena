@@ -1,6 +1,5 @@
 export async function bootstrap() {
   const { connection: dbConnection } = await import("@/services/db");
-  const { loadUsersOnboardedIntoCache } = await import("@/services/auth");
   const { contestQueue, jobQueue } = await import("@/services/queue");
   const leaderboard = await import("@/services/contest/leaderboard");
   const { cache } = await import("@/services/cache");
@@ -66,6 +65,4 @@ export async function bootstrap() {
     leaderboard.sumOfScoresProcessor(submission);
     leaderboard.sprintingTeamsProcessor(submission);
   });
-
-  await loadUsersOnboardedIntoCache();
 }

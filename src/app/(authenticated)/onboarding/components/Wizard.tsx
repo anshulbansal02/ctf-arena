@@ -1,7 +1,6 @@
 "use client";
 
 import { setUserOnboarded } from "@/services/auth";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,12 +16,9 @@ export function OnboardingWizard(props: Props) {
   type Step = "choice" | "join" | "create";
   const [step, setStep] = useState<Step>("choice");
 
-  const router = useRouter();
-
   async function handleChoice(choice: "join" | "create" | "finish") {
     if (choice === "finish") {
       await setUserOnboarded();
-      location.reload();
     } else {
       setStep(choice);
     }

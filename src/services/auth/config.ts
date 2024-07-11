@@ -30,6 +30,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     onboarded: boolean;
+    userId: string;
   }
 }
 
@@ -42,16 +43,18 @@ export const authConfig = {
     }),
   ],
   session: { strategy: "jwt" },
-  // callbacks: {
-  //   jwt({ token, user }) {
-  //     console.log("JWT: ", token, user);
-  //     // token.onboarded = Boolean(user.metadata.onboarded);
-  //     return token;
-  //   },
-  //   session({ session, token }) {
-  //     console.log("Session: ", session, token);
-  //     // session.user.onboarded = token.onboarded;
-  //     return session;
-  //   },
-  // },
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.onboarded = Boolean(user.metadata.onboarded);
+        token.userId = user.id!;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      session.user.onboarded = token.onboarded;
+      session.user.id = token.userId;
+      return session;
+    },
+  },
 } satisfies NextAuthConfig;
