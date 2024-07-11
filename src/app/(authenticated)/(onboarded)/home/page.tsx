@@ -1,4 +1,4 @@
-import { Header } from "../components/Header";
+import { Header } from "../../components/Header";
 import { getAuthUser } from "@/services/auth";
 import { TeamCard } from "./components/TeamCard";
 import { Contests } from "./components/Contests";

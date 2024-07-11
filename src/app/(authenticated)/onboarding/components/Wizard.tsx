@@ -4,9 +4,9 @@ import { setUserOnboarded } from "@/services/auth";
 import { useMemo, useState } from "react";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { CreateTeamStep } from "./CreateTeam";
+import { CreateTeamStep } from "../../components/CreateTeam";
 import { FirstChoiceStep } from "./FirstChoice";
-import { JoinTeamStep } from "./JoinTeam";
+import { JoinTeamStep } from "../../components/JoinTeam";
 
 interface Props {
   username: string;
