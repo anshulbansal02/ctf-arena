@@ -44,10 +44,12 @@ export const authConfig = {
   ],
   session: { strategy: "jwt" },
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user, session }) {
       if (user) {
         token.onboarded = Boolean(user.metadata.onboarded);
         token.userId = user.id!;
+      } else if (session?.user.onboarded) {
+        token.onboarded = true;
       }
       return token;
     },

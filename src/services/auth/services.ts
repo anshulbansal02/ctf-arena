@@ -4,6 +4,7 @@ import { db } from "../db";
 import { TB_users } from "../user";
 import { eq, sql } from "drizzle-orm";
 import { getSession, updateSession } from "./auth";
+import { redirect } from "next/navigation";
 
 export async function getAuthUser() {
   const session = await getSession();
@@ -27,4 +28,5 @@ export async function setUserOnboarded() {
     })
     .where(eq(TB_users.id, authUser.id));
   await updateSession({ user: { onboarded: true } });
+  redirect("/");
 }

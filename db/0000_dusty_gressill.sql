@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS "contest_events" (
 CREATE TABLE IF NOT EXISTS "contest_submissions" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"submitted_by_team" integer NOT NULL,
-	"submitted_by_user" uuid NOT NULL,
+	"submitted_by_user" text NOT NULL,
 	"time_taken" integer NOT NULL,
 	"submission" text,
 	"score" integer NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS "contests" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "team_members" (
-	"user_id" uuid NOT NULL,
+	"user_id" text NOT NULL,
 	"team_id" integer NOT NULL,
 	"joined_at" timestamp DEFAULT now() NOT NULL,
 	"left_at" timestamp
@@ -83,76 +83,46 @@ CREATE TABLE IF NOT EXISTS "team_requests" (
 CREATE TABLE IF NOT EXISTS "teams" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
-	"leader" uuid NOT NULL,
+	"leader" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "teams_name_unique" UNIQUE("name"),
 	CONSTRAINT "teams_leader_unique" UNIQUE("leader")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "account" (
-	"userId" uuid NOT NULL,
+CREATE TABLE IF NOT EXISTS "accounts" (
+	"userId" text NOT NULL,
 	"type" text NOT NULL,
 	"provider" text NOT NULL,
 	"providerAccountId" text NOT NULL,
 	"refresh_token" text,
 	"access_token" text,
 	"expires_at" integer,
-	"metadata" jsonb NOT NULL,
 	"token_type" text,
 	"scope" text,
 	"id_token" text,
 	"session_state" text,
+	"metadata" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "account_provider_providerAccountId_pk" PRIMARY KEY("provider","providerAccountId")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "authenticator" (
-	"credentialID" text NOT NULL,
-	"userId" uuid NOT NULL,
-	"providerAccountId" text NOT NULL,
-	"credentialPublicKey" text NOT NULL,
-	"counter" integer NOT NULL,
-	"credentialDeviceType" text NOT NULL,
-	"credentialBackedUp" boolean NOT NULL,
-	"transports" text,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "authenticator_userId_credentialID_pk" PRIMARY KEY("userId","credentialID"),
-	CONSTRAINT "authenticator_credentialID_unique" UNIQUE("credentialID")
+	CONSTRAINT "accounts_provider_providerAccountId_pk" PRIMARY KEY("provider","providerAccountId")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_notifications" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"status" "user_notification_status" DEFAULT 'queued' NOT NULL,
-	"for_user_id" uuid NOT NULL,
+	"for_user_id" text NOT NULL,
 	"content" jsonb DEFAULT '{}'::jsonb,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "session" (
-	"sessionToken" text PRIMARY KEY NOT NULL,
-	"userId" uuid NOT NULL,
-	"expires" timestamp NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "verification_token" (
-	"identifier" text NOT NULL,
-	"token" text NOT NULL,
-	"expires" timestamp NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "verification_token_identifier_token_pk" PRIMARY KEY("identifier","token")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "user" (
-	"id" uuid PRIMARY KEY NOT NULL,
+CREATE TABLE IF NOT EXISTS "users" (
+	"id" text PRIMARY KEY NOT NULL,
 	"name" text,
 	"email" text NOT NULL,
 	"emailVerified" timestamp,
-	"metadata" jsonb NOT NULL,
 	"image" text,
+	"metadata" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -188,7 +158,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "contest_submissions" ADD CONSTRAINT "contest_submissions_submitted_by_user_user_id_fk" FOREIGN KEY ("submitted_by_user") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "contest_submissions" ADD CONSTRAINT "contest_submissions_submitted_by_user_users_id_fk" FOREIGN KEY ("submitted_by_user") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -206,7 +176,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "team_members" ADD CONSTRAINT "team_members_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "team_members" ADD CONSTRAINT "team_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -224,31 +194,19 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "teams" ADD CONSTRAINT "teams_leader_user_id_fk" FOREIGN KEY ("leader") REFERENCES "public"."user"("id") ON DELETE restrict ON UPDATE no action;
+ ALTER TABLE "teams" ADD CONSTRAINT "teams_leader_users_id_fk" FOREIGN KEY ("leader") REFERENCES "public"."users"("id") ON DELETE restrict ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "account" ADD CONSTRAINT "account_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "accounts" ADD CONSTRAINT "accounts_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "authenticator" ADD CONSTRAINT "authenticator_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "user_notifications" ADD CONSTRAINT "user_notifications_for_user_id_user_id_fk" FOREIGN KEY ("for_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "session" ADD CONSTRAINT "session_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "user_notifications" ADD CONSTRAINT "user_notifications_for_user_id_users_id_fk" FOREIGN KEY ("for_user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
