@@ -22,6 +22,7 @@ import { emailService, renderTemplate } from "../email";
 import { config } from "@/config";
 import { TB_contestEvents } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
+import { nanoid } from "nanoid";
 
 export type TeamDetails = {
   id: number;
@@ -85,6 +86,9 @@ export async function createTeamAndSendInvites(props: {
         teamId,
         userEmail: i,
         createdBy: user.id,
+        metadata: {
+          secret: nanoid(24),
+        },
       })),
     );
   });
@@ -127,6 +131,9 @@ export async function sendTeamInvites(emails: Array<string>) {
       teamId,
       userEmail: email,
       createdBy: user.id,
+      metadata: {
+        secret: nanoid(24),
+      },
     })),
   );
 }
@@ -500,7 +507,7 @@ export async function batchSendInvitations() {
       const emailBody = renderTemplate("team-invite", {
         inviteeEmail: invite.inviteeEmail!,
         inviterEmail: invite.inviter?.email!,
-        inviteLink: "",
+        inviteLink: `https://${config.host}/team/invite/${(invite.metadata as any).secret}`,
         inviterName: invite.inviter?.name!,
         teamName: invite.teamName!,
       });
@@ -529,4 +536,13 @@ export async function batchSendInvitations() {
   // Release lock
   if (invitationsToProcess.length)
     await cache.sRem("lock:invitation:processing", invitationsToProcess);
+}
+
+export async function getInviteFromSecret(secret: string) {
+  const [invite] = await db
+    .select()
+    .from(TB_teamRequest)
+    .where(sql`metadata->'secret' = ${secret}`);
+
+  return invite;
 }

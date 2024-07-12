@@ -17,7 +17,7 @@ export const config = {
       secret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
     },
   },
-
+  host: process.env.APP_HOST,
   routes: {
     default: {
       NO_AUTH: "/",
