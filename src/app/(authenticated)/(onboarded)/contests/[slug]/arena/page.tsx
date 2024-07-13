@@ -1,19 +1,39 @@
 "use client";
 
-// import { checkAndCreateSubmission } from "@/services/contest/services";
+import {
+  checkAndCreateSubmission,
+  getNextContestChallenge,
+  getTeamContestStats,
+} from "@/services/contest";
 import { Button, Confetti, Input } from "@/shared/components";
-import { useAction, useScheduledTasks, useToaster } from "@/shared/hooks";
+import { useAction } from "@/shared/hooks";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
+import { ScheduledHints } from "./components/ScheduledHints";
 
 interface SubmissionForm {
   flag: string;
 }
 
-export default function SubmissionPage() {
-  const { execute: checkAndSubmitFlag, loading } = useAction(
-    async () => await new Promise((r) => setTimeout(() => r(true), 2500)),
-  );
+export default function SubmissionPage({
+  params,
+}: {
+  params: { slug: number };
+}) {
+  const { execute: checkAndSubmitFlag, loading: checkingSubmission } =
+    useAction(checkAndCreateSubmission);
+
+  const {
+    execute: getNextChallenge,
+    loading: loadingNextChallenge,
+    data: nextChallenge,
+  } = useAction(getNextContestChallenge);
+
+  const {
+    execute: getTeamStats,
+    loading: loadingTeamStats,
+    data: teamStats,
+  } = useAction(getTeamContestStats);
 
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -27,42 +47,31 @@ export default function SubmissionPage() {
 
   function handleFlagSubmission(next: Function) {
     return async (formData: SubmissionForm) => {
+      const parsedAnswer =
+        formData.flag.match(/^flag\{(\w+)\}$/i)?.[1] ?? formData.flag;
+
       const isCorrect = await checkAndSubmitFlag({
         challengeId: 0,
         contestId: 0,
-        submission: formData.flag,
+        submission: parsedAnswer,
       });
-      if (isCorrect) next();
+      if (isCorrect) {
+        next();
+        getNextChallenge(params.slug);
+        getTeamStats(params.slug);
+      }
     };
   }
 
-  // Fetch user's next challenge
-
-  const toaster = useToaster();
-
-  const hints = [
-    {
-      text: "Obscured hint Alias nemo magnam laudantium impedit dolore necessitatibus cupiditate eligendi.",
-      after: 2,
-    },
-    {
-      text: "Obscured hint Alias nemo magnam laudantium impedit dolore necessitatibus cupiditate eligendi.",
-      after: 5,
-    },
-  ];
-
-  // Schedule Hints
-  useScheduledTasks(
-    hints.map((hint) => ({
-      action: () => {
-        toaster.toast({ content: hint.text, scoped: true, persistent: true,  });
-      },
-      timeout: hint.after * 1000,
-    })),
-  );
-
   return (
     <div className="mx-auto flex min-h-screen max-w-[600px] flex-col items-center">
+      {nextChallenge ? (
+        <ScheduledHints
+          challengeId={nextChallenge.id}
+          contestId={nextChallenge.contestId}
+        />
+      ) : null}
+
       <div className="">
         <h2 className="mb-4 mt-8 text-2xl font-medium">Your Team Stats</h2>
       </div>
@@ -96,7 +105,7 @@ export default function SubmissionPage() {
             </p>
             <Button
               className="mt-4 w-full"
-              loading={loading}
+              loading={checkingSubmission}
               ref={submitButtonRef}
             >
               Submit

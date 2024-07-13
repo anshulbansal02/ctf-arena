@@ -5,7 +5,7 @@ type ScheduledTask = {
   timeout: number;
 };
 
-export function useScheduledTasks(tasks: Array<ScheduledTask>) {
+export function useScheduledTasks(tasks: Array<ScheduledTask>, deps: unknown) {
   const timeoutRef = useRef<Array<number>>([]);
 
   useEffect(() => {
@@ -16,5 +16,5 @@ export function useScheduledTasks(tasks: Array<ScheduledTask>) {
     return () => {
       timeoutRef.current.forEach((timeout) => clearTimeout(timeout));
     };
-  }, []);
+  }, [deps]);
 }

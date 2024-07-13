@@ -215,16 +215,56 @@ export async function getNextContestChallenge(contestId: number) {
       ),
     );
 
-  const { answer, ...redactedChallenge } = nextChallenge;
+  const { answer, hints, ...redactedChallenge } = nextChallenge;
+
+  return redactedChallenge;
+}
+
+export async function getChallengeHints(challengeId: number) {
+  const cc = TB_contestChallenges;
+  const [challenge] = await db
+    .select({ hints: cc.hints })
+    .from(cc)
+    .where(eq(cc.id, challengeId));
+
+  if (!challenge) throw new Error("Challenge not found");
 
   const redactedHints = (
-    redactedChallenge.hints as Array<{ text: string; cost: number }>
+    challenge.hints as Array<{
+      text: string;
+      cost: number;
+      afterSeconds: number;
+    }>
   ).map((hint) => ({ ...hint, text: scrambleText(hint.text) }));
 
-  return {
-    ...redactedChallenge,
-    hints: redactedHints,
-  };
+  return redactedHints;
+}
+
+export async function getTeamLastSubmissionAt(
+  contestId: number,
+  teamId?: number,
+) {
+  const cs = TB_contestSubmissions,
+    ce = TB_contestEvents;
+
+  const tId = teamId ?? (await getTeamIdByUserId((await getAuthUser()).id));
+  if (!tId) throw new Error("Cannot get team last submission");
+
+  const [submission] = await db
+    .select({ createdAt: cs.createdAt })
+    .from(cs)
+    .where(and(eq(cs.contestId, contestId), eq(cs.submittedByTeam, tId)));
+
+  if (submission) return submission.createdAt;
+
+  const [event] = await db
+    .select({ createdAt: ce.createdAt })
+    .from(ce)
+    .where(
+      and(eq(ce.teamId, tId), eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST)),
+    );
+
+  return event?.createdAt;
 }
 
 export async function revealHint(challengeId: number, hintIndex: number) {
@@ -263,4 +303,8 @@ export async function getContestsStartingInOneHour() {
     );
 
   return contestsStartingInOneHour;
+}
+
+export async function getTeamContestStats(contestId: number) {
+  // team rank, score, successful submissions, last submission at,
 }
