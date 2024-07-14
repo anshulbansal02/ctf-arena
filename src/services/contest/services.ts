@@ -8,7 +8,7 @@ import {
   TB_contests,
 } from "./entities";
 import { getAuthUser } from "../auth";
-import { TB_teamMembers, getTeamIdByUserId } from "../team";
+import { getTeamIdByUserId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
 import { contestQueue } from "../queue";
@@ -221,7 +221,8 @@ export async function getNextContestChallenge(contestId: number) {
 }
 
 export async function getChallengeHints(challengeId: number) {
-  const cc = TB_contestChallenges;
+  const cc = TB_contestChallenges,
+    ce = TB_contestEvents;
   const [challenge] = await db
     .select({ hints: cc.hints })
     .from(cc)
@@ -229,13 +230,40 @@ export async function getChallengeHints(challengeId: number) {
 
   if (!challenge) throw new Error("Challenge not found");
 
+  const teamId = (await getTeamIdByUserId((await getAuthUser()).id))!;
+
+  // get hints already claimed
+  const hintsClaimedEvents = await db
+    .select({ hint: ce.data })
+    .from(ce)
+    .where(
+      and(
+        eq(ce.name, CONTEST_EVENTS.HINT_TAKEN),
+        eq(ce.challengeId, challengeId),
+        eq(ce.teamId, teamId),
+      ),
+    );
+
+  const revealedHintIds = hintsClaimedEvents.map(
+    ({ hint }) => (hint as { id: number }).id,
+  );
+
   const redactedHints = (
     challenge.hints as Array<{
+      id: number;
       text: string;
       cost: number;
       afterSeconds: number;
     }>
-  ).map((hint) => ({ ...hint, text: scrambleText(hint.text) }));
+  ).map((hint) => {
+    return {
+      id: hint.id,
+      hiddenText: scrambleText(hint.text),
+      cost: hint.cost,
+      afterSeconds: hint.afterSeconds,
+      text: revealedHintIds.includes(hint.id) ? hint.text : null,
+    };
+  });
 
   return redactedHints;
 }
@@ -276,7 +304,14 @@ export async function revealHint(challengeId: number, hintIndex: number) {
 
   if (!res) throw new Error("Hint not found");
 
-  const hintTaken = (res.hints as any[])[hintIndex];
+  const hintTaken = (
+    res.hints as Array<{
+      text: string;
+      cost: number;
+      afterSeconds: number;
+      id: number;
+    }>
+  )[hintIndex];
 
   const teamId = await getTeamIdByUserId((await getAuthUser()).id);
 
@@ -307,4 +342,49 @@ export async function getContestsStartingInOneHour() {
 
 export async function getTeamContestStats(contestId: number) {
   // team rank, score, successful submissions, last submission at,
+}
+
+export async function createContest(data: {
+  name: string;
+  description: string;
+  time: { start: Date; end: Date };
+  challenges: Array<{
+    name?: string;
+    description?: string;
+    points: { max: number; min: number };
+    pointsDecayFactor: number;
+    answer: string;
+    hints: Array<{
+      text: string;
+      cost: number;
+      afterSeconds: number;
+      id: number;
+    }>;
+  }>;
+}) {
+  await db.transaction(async (tx) => {
+    const [contest] = await tx
+      .insert(TB_contests)
+      .values({
+        name: data.name,
+        description: data.description,
+        startsAt: data.time.start,
+        endsAt: data.time.end,
+      })
+      .returning({ id: TB_contests.id });
+
+    await tx.insert(TB_contestChallenges).values(
+      data.challenges.map((c, i) => ({
+        contestId: contest.id,
+        name: c.name,
+        answer: c.answer,
+        maxPoints: c.points.max,
+        minPoints: c.points.min,
+        order: i,
+        description: c.description,
+        hints: c.hints,
+        pointsDecayFactor: c.pointsDecayFactor,
+      })),
+    );
+  });
 }

@@ -3,7 +3,8 @@ import {
   getTeamLastSubmissionAt,
   revealHint,
 } from "@/services/contest";
-import { useScheduledTasks, useToaster } from "@/shared/hooks";
+import { Shim } from "@/shared/components";
+import { useAction, useScheduledTasks, useToaster } from "@/shared/hooks";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -14,16 +15,36 @@ interface Props {
 function RevealableHint(props: {
   number: number;
   hiddenText: string;
-  originalText?: string;
+  text: string | null;
   cost: number;
   reveal: (n: number) => void;
 }) {
+  const [show, setShow] = useState(false);
+
+  const contentToShow = show ? (
+    props.text ? (
+      <p>{props.text}</p>
+    ) : (
+      <Shim classNames="w-full h-6" />
+    )
+  ) : (
+    <p>{props.hiddenText}</p>
+  );
+  const isAlreadyRevealed = Boolean(props.text);
+
+  function toggle() {
+    if (!isAlreadyRevealed) {
+      props.reveal(props.number);
+    }
+    setShow(!show);
+  }
+
   return (
     <div>
       <h5>Hint #{props.number}</h5>
-      <p>{props.originalText ?? props.hiddenText}</p>
-      <p>Reveal hint for {props.cost} points.</p>
-      <button onClick={() => props.reveal(props.number)}>Reveal</button>
+      {contentToShow}
+      {!isAlreadyRevealed ? <p>Reveal hint for {props.cost} points.</p> : null}
+      <button onClick={toggle}>{show ? "Hide" : "Reveal"}</button>
     </div>
   );
 }
@@ -31,18 +52,27 @@ function RevealableHint(props: {
 export function ScheduledHints(props: Props) {
   const [hints, setHints] = useState<{
     list: Array<{
-      text: string;
+      text: string | null;
+      hiddenText: string;
       cost: number;
       afterSeconds: number;
+      id: number;
     }>;
     lastSubmissionAt: Date | null;
   }>({ list: [], lastSubmissionAt: null });
 
   const toaster = useToaster();
 
-  async function getRevealedHint(n: number) {
-    revealHint;
-  }
+  const { execute: getRevealedHint } = useAction(async (n: number) => {
+    const hint = await revealHint(props.challengeId, n);
+    setHints({
+      ...hints,
+      list: hints.list.map((h) => {
+        if (h.id === hint.id) h.text = hint.text;
+        return h;
+      }),
+    });
+  });
 
   useEffect(() => {
     (async () => {
@@ -62,7 +92,8 @@ export function ScheduledHints(props: Props) {
           content: (
             <RevealableHint
               cost={hint.cost}
-              hiddenText={hint.text}
+              hiddenText={hint.hiddenText}
+              text={hint.text}
               number={i + 1}
               reveal={getRevealedHint}
             />
