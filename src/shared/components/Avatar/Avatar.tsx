@@ -14,6 +14,7 @@ export function Avatar({ size = 48, ...props }: Props) {
   return (
     <div className={clsx(styles.avatar, props.className)}>
       <Image
+        priority
         title={props.title}
         width={size}
         height={size}

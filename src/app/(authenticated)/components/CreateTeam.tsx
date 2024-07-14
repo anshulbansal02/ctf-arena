@@ -1,14 +1,14 @@
 "use client";
 
+import clsx from "clsx";
+import validator from "validator";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { SvgChevronLeft, SvgPenSparkle } from "@/assets/icons";
 import { config } from "@/config";
 import { createTeamAndSendInvites, generateTeamName } from "@/services/team";
 import { Button, Input, TagsInput } from "@/shared/components";
 import { useAction, useToaster } from "@/shared/hooks";
-import clsx from "clsx";
-import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import validator from "validator";
 
 interface TeamDetails {
   name: string;
@@ -81,7 +81,7 @@ export function CreateTeamStep(props: Props) {
   }, [teamInfoToastTimer]);
 
   return (
-    <div className="mt-36 min-w-[420px] text-center">
+    <div className="mt-20 min-w-[420px] text-center">
       <div className="flex items-center justify-center gap-4">
         <Button onClick={props.onBack} variant="outlined">
           <SvgChevronLeft fill="#fff" />
@@ -99,7 +99,7 @@ export function CreateTeamStep(props: Props) {
             autoFocus
             disabled={settingName}
             className={clsx({ "animate-pulse": settingName }, "mt-2 w-full")}
-            placeholder="How about Rangers?"
+            placeholder={"What would you call your team?"}
             {...register("name", {
               required: {
                 message: "Please enter a name before proceeding",

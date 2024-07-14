@@ -13,7 +13,7 @@ import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
 import { contestQueue } from "../queue";
 
-export const contestChannel = (subChannel: "submission") => {
+export const contestChannel = async (subChannel: "submission") => {
   return `channel:contest:${subChannel}`;
 };
 
@@ -172,7 +172,7 @@ export async function checkAndCreateSubmission(data: {
       createdAt: TB_contestSubmissions.createdAt,
     });
 
-  contestQueue.add(contestChannel("submission"), {
+  contestQueue.add(await contestChannel("submission"), {
     submissionId: newSubmission.id,
     contestId,
     challengeId,

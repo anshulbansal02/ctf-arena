@@ -12,6 +12,7 @@ import { useState } from "react";
 import AstronautImage from "@/assets/media/astronaut.png";
 import Image from "next/image";
 import { sendTeamRequests } from "@/services/team";
+import { useForm } from "react-hook-form";
 
 interface Props {
   onNext: (choice: "finish") => void;
@@ -29,9 +30,14 @@ const TeamsListSkeleton = () => {
 
 export function JoinTeamStep(props: Props) {
   const toaster = useToaster();
-  const { teams, loading } = useTeams();
+  const [search, setSearch] = useState<string>("");
+  const { teams, loading } = useTeams({ search });
   const [joinRequestsDraft, setJoinRequestsDraft] = useState<Array<number>>([]);
   const [readyToFinish, setReadyToFinish] = useState(false);
+
+  const { register, handleSubmit } = useForm<{ search: string }>({
+    mode: "onSubmit",
+  });
 
   function toggleRequest(teamId: number) {
     if (
@@ -65,7 +71,7 @@ export function JoinTeamStep(props: Props) {
   });
 
   return (
-    <div className="mt-24 text-center">
+    <div className="mt-20 text-center">
       <div className="flex items-center justify-center gap-4">
         <Button onClick={props.onBack} variant="outlined">
           <SvgChevronLeft fill="#fff" />
@@ -77,11 +83,16 @@ export function JoinTeamStep(props: Props) {
         at a time. First team to accept your request becomes your team.
       </p>
       <div className="mx-auto mt-8 flex flex-col items-center gap-4">
-        <Input
-          type="text"
-          placeholder="Search with team name"
+        <form
+          onSubmit={handleSubmit(({ search }) => setSearch(search))}
           className="w-full"
-        />
+        >
+          <Input
+            {...register("search")}
+            type="search"
+            placeholder="Search with team name"
+          />
+        </form>
 
         <ul className="mt-8 flex w-full list-none flex-col gap-6">
           {loading ? (
@@ -102,7 +113,9 @@ export function JoinTeamStep(props: Props) {
                   <Button
                     onClick={() => toggleRequest(team.id)}
                     variant={
-                      joinRequestsDraft.includes(team.id) ? "ghost" : "primary"
+                      joinRequestsDraft.includes(team.id)
+                        ? "outlined"
+                        : "primary"
                     }
                   >
                     {joinRequestsDraft.includes(team.id)

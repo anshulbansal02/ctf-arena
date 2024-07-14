@@ -9,6 +9,10 @@ const cacheClient = createClient({
   },
 });
 
+cacheClient.on("error", (e) => {
+  console.log("cache error: ", e);
+});
+
 const subCacheClient = cacheClient.duplicate({ readonly: true });
 
 export { cacheClient as cache, subCacheClient as subCache };

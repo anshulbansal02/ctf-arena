@@ -1,13 +1,14 @@
-export async function bootstrap() {
-  const { connection: dbConnection } = await import("@/services/db");
-  const { contestQueue, jobQueue } = await import("@/services/queue");
-  const leaderboard = await import("@/services/contest/leaderboard");
-  const { cache } = await import("@/services/cache");
-  const { batchSendInvitations } = await import("@/services/team");
-  const { contestChannel, getContestsStartingInOneHour } = await import(
-    "@/services/contest"
-  );
+import { connection as dbConnection } from "@/services/db";
+import { contestQueue, jobQueue } from "@/services/queue";
+import * as leaderboard from "@/services/contest/leaderboard";
+import { cache } from "@/services/cache";
+import { batchSendInvitations } from "@/services/team";
+import {
+  contestChannel,
+  getContestsStartingInOneHour,
+} from "@/services/contest";
 
+export async function bootstrap() {
   try {
     console.info(`[Bootstrap] Connecting to database`);
     await dbConnection.connect();
@@ -60,7 +61,7 @@ export async function bootstrap() {
     repeat: { cron: "0 0 * * *" },
   });
 
-  contestQueue.process(contestChannel("submission"), (job: any) => {
+  contestQueue.process(await contestChannel("submission"), (job: any) => {
     const submission = job.data;
     leaderboard.quickestFirstsProcessor(submission);
     leaderboard.sumOfScoresProcessor(submission);

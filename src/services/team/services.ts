@@ -9,6 +9,7 @@ import {
   count,
   eq,
   gt,
+  ilike,
   inArray,
   isNull,
   notInArray,
@@ -80,17 +81,18 @@ export async function createTeamAndSendInvites(props: {
 
     await tx.insert(TB_teamMembers).values({ teamId, userId: user.id });
 
-    await tx.insert(TB_teamRequest).values(
-      props.invitees.map((i) => ({
-        type: "invite" as any,
-        teamId,
-        userEmail: i,
-        createdBy: user.id,
-        metadata: {
-          secret: nanoid(24),
-        },
-      })),
-    );
+    if (props.invitees?.length)
+      await tx.insert(TB_teamRequest).values(
+        props.invitees.map((i) => ({
+          type: "invite" as any,
+          teamId,
+          userEmail: i,
+          createdBy: user.id,
+          metadata: {
+            secret: nanoid(24),
+          },
+        })),
+      );
   });
 }
 
@@ -138,7 +140,7 @@ export async function sendTeamInvites(emails: Array<string>) {
   );
 }
 
-export async function getTeams(): Promise<Array<TeamDetails>> {
+export async function getTeams(search?: string): Promise<Array<TeamDetails>> {
   const ctm = CTE_currentTeamMembers(),
     t = TB_teams,
     u = TB_users;
@@ -152,13 +154,14 @@ export async function getTeams(): Promise<Array<TeamDetails>> {
         Array<{ id: string; name: string; isLeader: boolean }>
       >`json_agg(json_build_object(
       'id', current_team_members.user_id, 
-      'name', u.name, 
-      'isLeader', current_team_members.user_id = t.leader
+      'name', users.name, 
+      'isLeader', current_team_members.user_id = teams.leader
     ))`,
     })
     .from(t)
     .leftJoin(ctm, eq(ctm.teamId, t.id))
     .leftJoin(u, eq(ctm.userId, u.id))
+    .where(search ? ilike(t.name, `%${search}%`) : sql`true`)
     .groupBy(t.id);
 
   return teams;
@@ -182,8 +185,8 @@ export async function getTeamsDetailsByIds(
         Array<{ id: string; name: string; isLeader: boolean }>
       >`json_agg(json_build_object(
       'id', current_team_members.user_id, 
-      'name', u.name, 
-      'isLeader', current_team_members.user_id = t.leader
+      'name', users.name, 
+      'isLeader', current_team_members.user_id = teams.leader
     ))`,
     })
     .from(t)
@@ -215,8 +218,8 @@ export async function getTeamDetails(
         Array<{ id: string; name: string; isLeader: boolean }>
       >`json_agg(json_build_object(
       'id', current_team_members.user_id, 
-      'name', u.name, 
-      'isLeader', current_team_members.user_id = t.leader
+      'name', users.name, 
+      'isLeader', current_team_members.user_id = teams.leader
     ))`,
     })
     .from(t)

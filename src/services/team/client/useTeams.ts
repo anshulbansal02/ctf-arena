@@ -1,6 +1,6 @@
 import { useAction } from "@/shared/hooks";
 import { useEffect } from "react";
-import { getTeams } from "../services";
+import { getTeams } from "@/services/team";
 
 interface Options {
   search?: string;
@@ -10,8 +10,8 @@ export function useTeams(opts?: Options) {
   const { error, data, execute, loading } = useAction(getTeams);
 
   useEffect(() => {
-    execute(null);
-  }, [execute]);
+    execute(opts?.search);
+  }, [opts?.search]);
 
   return {
     teams: data ?? [],

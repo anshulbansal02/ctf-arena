@@ -17,7 +17,7 @@ export async function TeamCard(props: TeamCardProps) {
       <div className="flex flex-col">
         <div className="text-left">
           <h4 className="font-medium leading-tight text-slate-400">Name</h4>
-          <h3 className="text-lg">Moroccan Dirham</h3>
+          <h3 className="text-lg">{team.name}</h3>
         </div>
         <div className="mt-3 text-left">
           <h4 className="font-medium leading-tight text-slate-400">Members</h4>
