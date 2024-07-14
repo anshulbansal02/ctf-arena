@@ -23,7 +23,7 @@ export async function TeamCard(props: TeamCardProps) {
           <h4 className="font-medium leading-tight text-slate-400">Members</h4>
           <ul className="mt-2 flex flex-wrap gap-4 gap-y-2">
             {team.members.map((member) => (
-              <li className="flex items-center gap-2">
+              <li key={member.id} className="flex items-center gap-2">
                 <Avatar username={member.id} size={20} />
                 <p>
                   {member.name}{" "}

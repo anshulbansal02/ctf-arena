@@ -21,7 +21,7 @@ export function Toast({
   return (
     <div className={clsx(styles.container, styles[className ?? ""])}>
       {icon && <div className={styles.icon}>{icon}</div>}
-      <div className={styles.body} style={{ paddingLeft: icon ? 0 : "1rem" }}>
+      <div className={styles.body} style={{ paddingLeft: icon ? 0 : "1rem", paddingRight: !dismissible ? "1rem" : 0 }}>
         {title && <h4 className={styles.title}>{title}</h4>}
         {content &&
           (typeof content === "string" ? (

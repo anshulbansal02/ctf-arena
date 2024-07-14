@@ -3,7 +3,7 @@ import {
   getTeamLastSubmissionAt,
   revealHint,
 } from "@/services/contest";
-import { Shim } from "@/shared/components";
+import { Button, Shim } from "@/shared/components";
 import { useAction, useScheduledTasks, useToaster } from "@/shared/hooks";
 import { useEffect, useState } from "react";
 
@@ -17,34 +17,41 @@ function RevealableHint(props: {
   hiddenText: string;
   text: string | null;
   cost: number;
+  id: number;
   reveal: (n: number) => void;
 }) {
   const [show, setShow] = useState(false);
 
   const contentToShow = show ? (
     props.text ? (
-      <p>{props.text}</p>
+      <p className="my-2">{props.text}</p>
     ) : (
       <Shim classNames="w-full h-6" />
     )
   ) : (
-    <p>{props.hiddenText}</p>
+    <p className="my-2 blur-sm">{props.hiddenText}</p>
   );
   const isAlreadyRevealed = Boolean(props.text);
 
   function toggle() {
     if (!isAlreadyRevealed) {
-      props.reveal(props.number);
+      props.reveal(props.id);
     }
     setShow(!show);
   }
 
   return (
     <div>
-      <h5>Hint #{props.number}</h5>
+      <h5 className="text-xs font-semibold">Hint #{props.number}</h5>
       {contentToShow}
-      {!isAlreadyRevealed ? <p>Reveal hint for {props.cost} points.</p> : null}
-      <button onClick={toggle}>{show ? "Hide" : "Reveal"}</button>
+      {!isAlreadyRevealed ? (
+        <p className="mb-2 text-sm italic text-amber-300">
+          Reveal hint for {props.cost} points.
+        </p>
+      ) : null}
+      <Button variant="outlined" className="p-2" onClick={toggle}>
+        {show ? "Hide" : "Reveal"}
+      </Button>
     </div>
   );
 }
@@ -63,8 +70,12 @@ export function ScheduledHints(props: Props) {
 
   const toaster = useToaster();
 
-  const { execute: getRevealedHint } = useAction(async (n: number) => {
-    const hint = await revealHint(props.challengeId, n);
+  const { execute: getRevealedHint } = useAction(async (id: number) => {
+    console.log("GETTING HINT");
+    const hint = await revealHint(props.challengeId, id);
+    console.log("GOT: ", hint);
+    if (!hint) return;
+
     setHints({
       ...hints,
       list: hints.list.map((h) => {
@@ -76,12 +87,17 @@ export function ScheduledHints(props: Props) {
 
   useEffect(() => {
     (async () => {
-      const [hints, lastSubmissionAt] = await Promise.all([
+      const [fetchedHints, lastSubmissionAt] = await Promise.all([
         getChallengeHints(props.challengeId),
         getTeamLastSubmissionAt(props.contestId),
       ]);
 
-      setHints({ list: hints, lastSubmissionAt });
+      console.log("HINTS: ", fetchedHints);
+
+      setHints({
+        list: fetchedHints,
+        lastSubmissionAt: new Date(lastSubmissionAt),
+      });
     })();
   }, [props.challengeId]);
 
@@ -94,12 +110,14 @@ export function ScheduledHints(props: Props) {
               cost={hint.cost}
               hiddenText={hint.hiddenText}
               text={hint.text}
+              id={hint.id}
               number={i + 1}
               reveal={getRevealedHint}
             />
           ),
           scoped: true,
           persistent: true,
+          dismissible: false,
         });
       },
       timeout: hint.afterSeconds * 1000,

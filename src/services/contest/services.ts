@@ -78,7 +78,8 @@ export async function getContest(contestId: number) {
     })
     .from(TB_C)
     .leftJoin(TB_CC, eq(TB_CC.contestId, contestId))
-    .where(eq(TB_C.id, contestId));
+    .where(eq(TB_C.id, contestId))
+    .groupBy(TB_C.id);
 
   return contest;
 }
@@ -107,6 +108,8 @@ export async function checkAndCreateSubmission(data: {
     })
     .from(TB_contests)
     .where(eq(TB_contests.id, contestId));
+
+  console.log(contestId, contest);
 
   if (!contest) throw new Error("Contest not found.");
   if (contest.startsAt > now) throw new Error("Contest is yet to begin.");
@@ -203,7 +206,7 @@ export async function getNextContestChallenge(contestId: number) {
     .orderBy(desc(TB_contestSubmissions.createdAt))
     .limit(1);
 
-  const nextInOrder = (lastSubmission.order ?? 0) + 1;
+  const nextInOrder = (lastSubmission?.order ?? 0) + 1;
 
   const [nextChallenge] = await db
     .select()
@@ -271,7 +274,7 @@ export async function getChallengeHints(challengeId: number) {
 export async function getTeamLastSubmissionAt(
   contestId: number,
   teamId?: number,
-) {
+): Promise<string> {
   const cs = TB_contestSubmissions,
     ce = TB_contestEvents;
 
@@ -283,7 +286,7 @@ export async function getTeamLastSubmissionAt(
     .from(cs)
     .where(and(eq(cs.contestId, contestId), eq(cs.submittedByTeam, tId)));
 
-  if (submission) return submission.createdAt;
+  if (submission) return submission.createdAt.toString();
 
   const [event] = await db
     .select({ createdAt: ce.createdAt })
@@ -292,10 +295,10 @@ export async function getTeamLastSubmissionAt(
       and(eq(ce.teamId, tId), eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST)),
     );
 
-  return event?.createdAt;
+  return event.createdAt.toString();
 }
 
-export async function revealHint(challengeId: number, hintIndex: number) {
+export async function revealHint(challengeId: number, hintId: number) {
   const cc = TB_contestChallenges;
   const [res] = await db
     .select({ hints: cc.hints, contestId: cc.contestId })
@@ -311,7 +314,7 @@ export async function revealHint(challengeId: number, hintIndex: number) {
       afterSeconds: number;
       id: number;
     }>
-  )[hintIndex];
+  ).find((h) => h.id === hintId);
 
   const teamId = await getTeamIdByUserId((await getAuthUser()).id);
 
@@ -387,4 +390,22 @@ export async function createContest(data: {
       })),
     );
   });
+}
+
+export async function hasTeamAlreadyJoinedContest(contestId: number) {
+  const teamId = await getTeamIdByUserId((await getAuthUser()).id);
+  const ce = TB_contestEvents;
+
+  const [contestJoinedEvent] = await db
+    .select({ createdAt: ce.createdAt })
+    .from(ce)
+    .where(
+      and(
+        eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
+        eq(ce.teamId, teamId!),
+        eq(ce.contestId, contestId),
+      ),
+    );
+
+  return Boolean(contestJoinedEvent);
 }

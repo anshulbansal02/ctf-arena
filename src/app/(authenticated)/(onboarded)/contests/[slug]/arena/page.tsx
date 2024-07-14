@@ -5,9 +5,9 @@ import {
   getNextContestChallenge,
   getTeamContestStats,
 } from "@/services/contest";
-import { Button, Confetti, Input } from "@/shared/components";
+import { Button, Confetti, Input, Shim } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { ScheduledHints } from "./components/ScheduledHints";
 
@@ -45,18 +45,24 @@ export default function SubmissionPage({
     mode: "onSubmit",
   });
 
+  useEffect(() => {
+    getNextChallenge(params.slug);
+  }, []);
+
   function handleFlagSubmission(next: Function) {
     return async (formData: SubmissionForm) => {
       const parsedAnswer =
         formData.flag.match(/^flag\{(\w+)\}$/i)?.[1] ?? formData.flag;
 
       const isCorrect = await checkAndSubmitFlag({
-        challengeId: 0,
-        contestId: 0,
+        challengeId: nextChallenge!.id,
+        contestId: params.slug,
         submission: parsedAnswer,
       });
       if (isCorrect) {
         next();
+        // Await for confetti to settle
+        await new Promise((r) => setTimeout(r, 2000));
         getNextChallenge(params.slug);
         getTeamStats(params.slug);
       }
@@ -75,44 +81,58 @@ export default function SubmissionPage({
       <div className="">
         <h2 className="mb-4 mt-8 text-2xl font-medium">Your Team Stats</h2>
       </div>
-
-      <h2 className="mb-4 mt-36 text-2xl font-medium">Submit A Flag</h2>
-      <Confetti
-        render={(launch) => (
-          <form
-            className="w-[360px] max-w-[360px]"
-            onSubmit={handleSubmit(
-              handleFlagSubmission(launch.bind(null, submitButtonRef.current!)),
+      {loadingNextChallenge ? (
+        <>
+          <h2 className="mb-4 text-2xl font-medium">Loading Next Challenge</h2>
+          <Shim classNames="w-full h-[200px]" />
+        </>
+      ) : (
+        <>
+          {" "}
+          <h2 className="mb-4 mt-36 text-2xl font-medium">
+            Submit Challenge Flag
+          </h2>
+          <Confetti
+            render={(launch) => (
+              <form
+                className="w-[360px] max-w-[360px]"
+                onSubmit={handleSubmit(
+                  handleFlagSubmission(
+                    launch.bind(null, submitButtonRef.current!),
+                  ),
+                )}
+              >
+                <Input
+                  {...register("flag", {
+                    required: {
+                      message: "Please type in the flag before submitting.",
+                      value: true,
+                    },
+                  })}
+                  className="w-full"
+                  placeholder="Flag{                                                              }"
+                />
+                <p className="mt-2 text-center text-sm text-red-300">
+                  {formErrors.flag?.message}
+                </p>
+                <p className="mt-2 cursor-default text-center text-xs leading-5 text-slate-400">
+                  Enter the flag you found without <kbd>Flag&#123; &#125;</kbd>.
+                  <br />
+                  For e.g. Flag&#123;Arena&#125; will be entered as Arena or
+                  arena.
+                </p>
+                <Button
+                  className="mt-4 w-full"
+                  loading={checkingSubmission}
+                  ref={submitButtonRef}
+                >
+                  Submit
+                </Button>
+              </form>
             )}
-          >
-            <Input
-              {...register("flag", {
-                required: {
-                  message: "Please type in the flag before submitting.",
-                  value: true,
-                },
-              })}
-              className="w-full"
-              placeholder="Flag{                                                              }"
-            />
-            <p className="mt-2 text-center text-sm text-red-300">
-              {formErrors.flag?.message}
-            </p>
-            <p className="mt-2 cursor-default text-center text-xs leading-5 text-slate-400">
-              Enter the flag you found without <kbd>Flag&#123; &#125;</kbd>.
-              <br />
-              For e.g. Flag&#123;Arena&#125; will be entered as Arena or arena.
-            </p>
-            <Button
-              className="mt-4 w-full"
-              loading={checkingSubmission}
-              ref={submitButtonRef}
-            >
-              Submit
-            </Button>
-          </form>
-        )}
-      />
+          />
+        </>
+      )}
     </div>
   );
 }
