@@ -71,9 +71,7 @@ export function ScheduledHints(props: Props) {
   const toaster = useToaster();
 
   const { execute: getRevealedHint } = useAction(async (id: number) => {
-    console.log("GETTING HINT");
     const hint = await revealHint(props.challengeId, id);
-    console.log("GOT: ", hint);
     if (!hint) return;
 
     setHints({
@@ -91,8 +89,6 @@ export function ScheduledHints(props: Props) {
         getChallengeHints(props.challengeId),
         getTeamLastSubmissionAt(props.contestId),
       ]);
-
-      console.log("HINTS: ", fetchedHints);
 
       setHints({
         list: fetchedHints,

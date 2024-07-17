@@ -12,6 +12,7 @@ import { getTeamIdByUserId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
 import { contestQueue } from "../queue";
+import { getTeamScore } from "./leaderboard";
 
 export const contestChannel = async (subChannel: "submission") => {
   return `channel:contest:${subChannel}`;
@@ -108,8 +109,6 @@ export async function checkAndCreateSubmission(data: {
     })
     .from(TB_contests)
     .where(eq(TB_contests.id, contestId));
-
-  console.log(contestId, contest);
 
   if (!contest) throw new Error("Contest not found.");
   if (contest.startsAt > now) throw new Error("Contest is yet to begin.");
@@ -343,10 +342,6 @@ export async function getContestsStartingInOneHour() {
   return contestsStartingInOneHour;
 }
 
-export async function getTeamContestStats(contestId: number) {
-  // team rank, score, successful submissions, last submission at,
-}
-
 export async function createContest(data: {
   name: string;
   description: string;
@@ -408,4 +403,40 @@ export async function hasTeamAlreadyJoinedContest(contestId: number) {
     );
 
   return Boolean(contestJoinedEvent);
+}
+
+export async function getTeamContestStats(contestId: number) {
+  const teamId = await getTeamIdByUserId((await getAuthUser()).id);
+
+  if (!teamId) throw new Error("Team not found");
+
+  const p1 = getTeamLastSubmissionAt(contestId, teamId);
+
+  const p2 = db
+    .select({ count: count() })
+    .from(TB_contestSubmissions)
+    .where(
+      and(
+        eq(TB_contestSubmissions.submittedByTeam, teamId),
+        eq(TB_contestSubmissions.contestId, contestId),
+      ),
+    );
+
+  const p3 = getTeamScore(contestId, teamId);
+
+  const [lastSubmissionAt, [submissions], score] = await Promise.all([
+    p1,
+    p2,
+    p3,
+  ]);
+
+  return {
+    teamId,
+    contestId,
+    submissionsCount: submissions.count,
+    lastSubmissionAt,
+    score,
+  };
+
+  /** lastSubmissionAt, solved out of n, score, rank, */
 }

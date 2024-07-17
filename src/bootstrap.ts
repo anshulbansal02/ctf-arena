@@ -29,12 +29,16 @@ export async function bootstrap() {
 
   console.info("[Bootstrap] Instantiating job queues");
 
-  jobQueue.process("batch-send-invitations", async () => {
+  jobQueue.process("batch-send-invitations", () => {
     console.info("[Job] Batch sending invitations");
     batchSendInvitations();
   });
   jobQueue.add("batch-send-invitations", {
     repeat: { cron: "* * * * *" },
+  });
+
+  jobQueue.process("notifications", async () => {
+    // create new notification
   });
 
   contestQueue.process("sprinting-teams-update", async (job: any) => {
@@ -45,6 +49,8 @@ export async function bootstrap() {
 
   contestQueue.process("hourly-contest-update", async () => {
     const contestsStartingInOneHour = await getContestsStartingInOneHour();
+
+    jobQueue.add("notifications", []);
 
     contestsStartingInOneHour.forEach((contest) => {
       contestQueue.add("sprinting-teams-update", contest, {

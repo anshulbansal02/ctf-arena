@@ -16,6 +16,15 @@ type ActionState<R> = {
   success: boolean | undefined;
 };
 
+type Options<T> =
+  | {
+      immediate: true;
+      args: T;
+    }
+  | {
+      immediate: false;
+    };
+
 function reducer<R>(
   state: ActionState<R>,
   event: EventWithPayload,
@@ -46,10 +55,11 @@ function reducer<R>(
 
 export function useAction<ParamsType, ReturnType>(
   action: AsyncFunction<ParamsType, ReturnType>,
+  opts?: Options<ParamsType>,
 ) {
   const [actionState, dispatch] = useReducer(reducer<ReturnType>, {
     success: undefined,
-    loading: false,
+    loading: Boolean(opts?.immediate),
     error: null,
     data: null,
   });
@@ -68,6 +78,12 @@ export function useAction<ParamsType, ReturnType>(
     },
     [action],
   );
+
+  useEffect(() => {
+    if (opts?.immediate) {
+      execute(opts.args);
+    }
+  }, []);
 
   const reset = useCallback(() => {
     dispatch({ type: "reset" });

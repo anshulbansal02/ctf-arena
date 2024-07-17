@@ -27,7 +27,10 @@ export default function SubmissionPage({
     execute: getNextChallenge,
     loading: loadingNextChallenge,
     data: nextChallenge,
-  } = useAction(getNextContestChallenge);
+  } = useAction(getNextContestChallenge, {
+    immediate: true,
+    args: +params.slug,
+  });
 
   const {
     execute: getTeamStats,
@@ -80,6 +83,11 @@ export default function SubmissionPage({
 
       <div className="">
         <h2 className="mb-4 mt-8 text-2xl font-medium">Your Team Stats</h2>
+        <div>
+          <div>{teamStats?.score}</div>
+          <div>{teamStats?.lastSubmissionAt}</div>
+          <div>{teamStats?.submissionsCount}</div>
+        </div>
       </div>
       {loadingNextChallenge ? (
         <>

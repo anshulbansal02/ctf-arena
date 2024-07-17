@@ -192,3 +192,11 @@ export async function getByName(name: Leaderboard, contestId: number) {
       return getSprintingTeams(contestId);
   }
 }
+
+export async function getTeamScore(contestId: number, teamId: number) {
+  const score = await cache.zScore(
+    leaderboardKey("sum_of_scores", contestId, "raw"),
+    teamId.toString(),
+  );
+  return score;
+}

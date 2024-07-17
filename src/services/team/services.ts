@@ -24,6 +24,7 @@ import { config } from "@/config";
 import { TB_contestEvents } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
 import { nanoid } from "nanoid";
+import { jobQueue } from "../queue";
 
 export type TeamDetails = {
   id: number;
@@ -127,17 +128,21 @@ export async function sendTeamInvites(emails: Array<string>) {
       `A team can only send invitations to maximum ${config.app.team.INVITE_USER_LIMIT} users`,
     );
 
-  await db.insert(TB_teamRequest).values(
-    emails.map((email) => ({
-      type: "invite" as any,
-      teamId,
-      userEmail: email,
-      createdBy: user.id,
-      metadata: {
-        secret: nanoid(24),
-      },
-    })),
-  );
+  await db.transaction(async (tx) => {
+    await tx.insert(TB_teamRequest).values(
+      emails.map((email) => ({
+        type: "invite" as any,
+        teamId,
+        userEmail: email,
+        createdBy: user.id,
+        metadata: {
+          secret: nanoid(24),
+        },
+      })),
+    );
+
+    jobQueue.addBulk("notifications", []);
+  });
 }
 
 export async function getTeams(search?: string): Promise<Array<TeamDetails>> {
@@ -274,14 +279,21 @@ export async function sendTeamRequests(teamIds: Array<number>) {
   if (userRequests.count >= limit)
     throw new Error(`Cannot send request to more than ${limit} teams`);
 
-  await db.insert(TB_teamRequest).values(
-    teamIds.map((teamId) => ({
-      type: "request" as any,
-      status: "delivered" as any,
-      teamId,
-      createdBy: user.id,
-    })),
-  );
+  await db.transaction(async (tx) => {
+    const requests = await tx
+      .insert(TB_teamRequest)
+      .values(
+        teamIds.map((teamId) => ({
+          type: "request" as any,
+          status: "delivered" as any,
+          teamId,
+          createdBy: user.id,
+        })),
+      )
+      .returning();
+
+    jobQueue.addBulk([]);
+  });
 }
 
 export async function cancelTeamRequest(requestId: number) {

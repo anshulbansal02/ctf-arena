@@ -1,5 +1,4 @@
 import Bull from "bull";
-import { cache } from "../cache";
 
 const jobQueue = new Bull("general-job-queue");
 

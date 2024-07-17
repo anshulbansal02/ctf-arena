@@ -1,3 +1,3 @@
-export default function ContestsPage() {
-  return <div>Contests</div>
+export default async function ContestsPage() {
+  return <div>Contests</div>;
 }
