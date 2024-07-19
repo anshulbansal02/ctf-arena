@@ -13,6 +13,8 @@ import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
 import { contestQueue } from "../queue";
 import { getTeamScore } from "./leaderboard";
+import { TB_users } from "../user";
+import { emailService, renderTemplate } from "../email";
 
 export const contestChannel = async (subChannel: "submission") => {
   return `channel:contest:${subChannel}`;
@@ -41,7 +43,7 @@ export async function joinContest(contestId: number) {
  * @param type
  * @returns
  */
-export async function getContests(type: "active" | "upcoming") {
+export async function getContests(type: "active" | "upcoming" | "ended") {
   const contests = db
     .select()
     .from(TB_contests)
@@ -54,8 +56,10 @@ export async function getContests(type: "active" | "upcoming") {
         gt(TB_contests.endsAt, new Date()),
       ),
     );
-  } else {
+  } else if (type === "upcoming") {
     return await contests.where(gt(TB_contests.startsAt, new Date()));
+  } else {
+    return await contests.where(lt(TB_contests.endsAt, new Date()));
   }
 }
 
@@ -439,4 +443,29 @@ export async function getTeamContestStats(contestId: number) {
   };
 
   /** lastSubmissionAt, solved out of n, score, rank, */
+}
+
+export async function batchSendContestIntimation(contestId: number) {
+  const [contest] = await db
+    .select()
+    .from(TB_contests)
+    .where(eq(TB_contests.id, contestId));
+
+  const users = await db
+    .select({ name: TB_users.name, email: TB_users.email })
+    .from(TB_users);
+
+  users.forEach((user) => {
+    emailService.send({
+      address: { to: user.email },
+      body: renderTemplate("contest-intimation", {
+        contestName: contest.name,
+        contestURL: "",
+        startsAt: contest.startsAt,
+        userEmail: user.email,
+        userName: user.name!,
+      }),
+      subject: "CTF Contest is starting in 1 hour.",
+    });
+  });
 }

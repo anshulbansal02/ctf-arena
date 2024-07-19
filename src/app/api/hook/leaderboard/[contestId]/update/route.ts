@@ -16,7 +16,7 @@ export async function GET(
     "type",
   ) as leaderboard.Leaderboard;
 
-  const send = (data: any) => {
+  const send = (data: unknown) => {
     writer.write(encoder.encode(`data: ${data}\n\n`));
   };
 

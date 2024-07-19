@@ -4,9 +4,11 @@ import * as leaderboard from "@/services/contest/leaderboard";
 import { cache } from "@/services/cache";
 import { batchSendInvitations } from "@/services/team";
 import {
+  batchSendContestIntimation,
   contestChannel,
   getContestsStartingInOneHour,
 } from "@/services/contest";
+import Bull from "bull";
 
 export async function bootstrap() {
   try {
@@ -41,16 +43,23 @@ export async function bootstrap() {
     // create new notification
   });
 
-  contestQueue.process("sprinting-teams-update", async (job: any) => {
-    const contest = job.data;
+  contestQueue.process(
+    "sprinting-teams-update",
+    async (job: Bull.Job<{ id: number }>) => {
+      const contest = job.data;
 
-    leaderboard.purgeBuildAndNotify("sprinting_teams", contest.id);
-  });
+      leaderboard.purgeBuildAndNotify("sprinting_teams", contest.id);
+    },
+  );
 
   contestQueue.process("hourly-contest-update", async () => {
     const contestsStartingInOneHour = await getContestsStartingInOneHour();
 
     jobQueue.add("notifications", []);
+
+    contestsStartingInOneHour.forEach((contest) => {
+      batchSendContestIntimation(contest.id);
+    });
 
     contestsStartingInOneHour.forEach((contest) => {
       contestQueue.add("sprinting-teams-update", contest, {
@@ -67,10 +76,13 @@ export async function bootstrap() {
     repeat: { cron: "0 0 * * *" },
   });
 
-  contestQueue.process(await contestChannel("submission"), (job: any) => {
-    const submission = job.data;
-    leaderboard.quickestFirstsProcessor(submission);
-    leaderboard.sumOfScoresProcessor(submission);
-    leaderboard.sprintingTeamsProcessor(submission);
-  });
+  contestQueue.process(
+    await contestChannel("submission"),
+    (job: Bull.Job<leaderboard.ContestSubmission>) => {
+      const submission = job.data;
+      leaderboard.quickestFirstsProcessor(submission);
+      leaderboard.sumOfScoresProcessor(submission);
+      leaderboard.sprintingTeamsProcessor(submission);
+    },
+  );
 }

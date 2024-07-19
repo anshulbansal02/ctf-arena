@@ -1,6 +1,6 @@
 export interface SendConfig {
   address: {
-    from: string;
+    from?: string;
     to: string | Array<string>;
   };
   subject: string;

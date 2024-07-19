@@ -8,7 +8,7 @@ import type { AdapterUser as BaseAdapterUser } from "next-auth/adapters";
 
 declare module "@auth/core/adapters" {
   interface AdapterUser extends BaseAdapterUser {
-    metadata: any;
+    metadata: { onboarded: boolean };
   }
 }
 
@@ -23,7 +23,7 @@ declare module "next-auth" {
   }
 
   interface User {
-    metadata: any;
+    metadata: { onboarded: boolean };
   }
 }
 

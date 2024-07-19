@@ -1,8 +1,9 @@
-import { TeamInviteEmail } from "@/templates/emails";
+import { ContestIntimationEmail, TeamInviteEmail } from "@/templates/emails";
 import { render } from "@react-email/render";
 
 const templates = {
   "team-invite": TeamInviteEmail,
+  "contest-intimation": ContestIntimationEmail,
 } as const;
 
 export function renderTemplate<T extends keyof typeof templates>(
@@ -11,5 +12,5 @@ export function renderTemplate<T extends keyof typeof templates>(
 ) {
   const template = templates[name];
 
-  return render(template(props));
+  return render(template(props as any));
 }

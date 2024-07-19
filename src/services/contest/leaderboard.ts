@@ -1,6 +1,6 @@
 import { cache } from "@/services/cache";
 
-type ContestSubmission = {
+export type ContestSubmission = {
   submissionId: number;
   contestId: number;
   challengeId: number;

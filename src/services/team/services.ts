@@ -522,7 +522,7 @@ export async function batchSendInvitations() {
       const emailBody = renderTemplate("team-invite", {
         inviteeEmail: invite.inviteeEmail!,
         inviterEmail: invite.inviter?.email!,
-        inviteLink: `https://${config.host}/team/invite/${(invite.metadata as any).secret}`,
+        inviteLink: `https://${config.host}/team/invite/${(invite.metadata as { secret: string }).secret}`,
         inviterName: invite.inviter?.name!,
         teamName: invite.teamName!,
       });

@@ -2,10 +2,11 @@
 
 import {
   checkAndCreateSubmission,
+  getContest,
   getNextContestChallenge,
   getTeamContestStats,
 } from "@/services/contest";
-import { Button, Confetti, Input, Shim } from "@/shared/components";
+import { Button, Confetti, Input, Shim, Spinner } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -20,8 +21,15 @@ export default function SubmissionPage({
 }: {
   params: { slug: number };
 }) {
+  // if contest is ended, redirect to leaderboard
+
   const { execute: checkAndSubmitFlag, loading: checkingSubmission } =
     useAction(checkAndCreateSubmission);
+
+  const { loading: loadingContest, data: contest } = useAction(getContest, {
+    immediate: true,
+    args: params.slug,
+  });
 
   const {
     execute: getNextChallenge,
@@ -29,7 +37,7 @@ export default function SubmissionPage({
     data: nextChallenge,
   } = useAction(getNextContestChallenge, {
     immediate: true,
-    args: +params.slug,
+    args: params.slug,
   });
 
   const {
@@ -64,82 +72,100 @@ export default function SubmissionPage({
       });
       if (isCorrect) {
         next();
+        getTeamStats(params.slug);
         // Await for confetti to settle
         await new Promise((r) => setTimeout(r, 2000));
-        getNextChallenge(params.slug);
-        getTeamStats(params.slug);
+
+        // Get the next challenge only if there is one to solve.
+        // TeamStats show number of challenges solved by the team and is lagging by 1 because it is not updated yet
+        if (contest!.noOfChallenges > (teamStats?.submissionsCount ?? 0) + 1)
+          getNextChallenge(params.slug);
       }
     };
   }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-[600px] flex-col items-center">
-      {nextChallenge ? (
-        <ScheduledHints
-          challengeId={nextChallenge.id}
-          contestId={nextChallenge.contestId}
-        />
-      ) : null}
-
-      <div className="">
-        <h2 className="mb-4 mt-8 text-2xl font-medium">Your Team Stats</h2>
+      {contest && (
         <div>
-          <div>{teamStats?.score}</div>
-          <div>{teamStats?.lastSubmissionAt}</div>
-          <div>{teamStats?.submissionsCount}</div>
-        </div>
-      </div>
-      {loadingNextChallenge ? (
-        <>
-          <h2 className="mb-4 text-2xl font-medium">Loading Next Challenge</h2>
-          <Shim classNames="w-full h-[200px]" />
-        </>
-      ) : (
-        <>
-          {" "}
-          <h2 className="mb-4 mt-36 text-2xl font-medium">
-            Submit Challenge Flag
-          </h2>
-          <Confetti
-            render={(launch) => (
-              <form
-                className="w-[360px] max-w-[360px]"
-                onSubmit={handleSubmit(
-                  handleFlagSubmission(
-                    launch.bind(null, submitButtonRef.current!),
-                  ),
-                )}
-              >
-                <Input
-                  {...register("flag", {
-                    required: {
-                      message: "Please type in the flag before submitting.",
-                      value: true,
-                    },
-                  })}
-                  className="w-full"
-                  placeholder="Flag{                                                              }"
-                />
-                <p className="mt-2 text-center text-sm text-red-300">
-                  {formErrors.flag?.message}
-                </p>
-                <p className="mt-2 cursor-default text-center text-xs leading-5 text-slate-400">
-                  Enter the flag you found without <kbd>Flag&#123; &#125;</kbd>.
-                  <br />
-                  For e.g. Flag&#123;Arena&#125; will be entered as Arena or
-                  arena.
-                </p>
-                <Button
-                  className="mt-4 w-full"
-                  loading={checkingSubmission}
-                  ref={submitButtonRef}
-                >
-                  Submit
-                </Button>
-              </form>
+          {nextChallenge ? (
+            <ScheduledHints
+              challengeId={nextChallenge.id}
+              contestId={nextChallenge.contestId}
+            />
+          ) : null}
+
+          <div className="">
+            <h2 className="mb-4 mt-8 text-2xl font-medium">Your Team Stats</h2>
+            {!teamStats ? (
+              <div>No stats to show</div>
+            ) : (
+              <div>
+                {loadingTeamStats && <Spinner />}
+                <div>{teamStats.score}</div>
+                <div>{teamStats.lastSubmissionAt}</div>
+                <div>
+                  {teamStats.submissionsCount} / {contest.noOfChallenges}
+                </div>
+              </div>
             )}
-          />
-        </>
+          </div>
+          {loadingNextChallenge ? (
+            <>
+              <h2 className="mb-4 text-2xl font-medium">
+                Loading Next Challenge
+              </h2>
+              <Shim classNames="w-full h-[200px]" />
+            </>
+          ) : (
+            <>
+              {" "}
+              <h2 className="mb-4 mt-36 text-2xl font-medium">
+                Submit Challenge Flag
+              </h2>
+              <Confetti
+                render={(launch) => (
+                  <form
+                    className="w-[360px] max-w-[360px]"
+                    onSubmit={handleSubmit(
+                      handleFlagSubmission(
+                        launch.bind(null, submitButtonRef.current!),
+                      ),
+                    )}
+                  >
+                    <Input
+                      {...register("flag", {
+                        required: {
+                          message: "Please type in the flag before submitting.",
+                          value: true,
+                        },
+                      })}
+                      className="w-full"
+                      placeholder="Flag{                                                              }"
+                    />
+                    <p className="mt-2 text-center text-sm text-red-300">
+                      {formErrors.flag?.message}
+                    </p>
+                    <p className="mt-2 cursor-default text-center text-xs leading-5 text-slate-400">
+                      Enter the flag you found without{" "}
+                      <kbd>Flag&#123; &#125;</kbd>.
+                      <br />
+                      For e.g. Flag&#123;Arena&#125; will be entered as Arena or
+                      arena.
+                    </p>
+                    <Button
+                      className="mt-4 w-full"
+                      loading={checkingSubmission}
+                      ref={submitButtonRef}
+                    >
+                      Submit
+                    </Button>
+                  </form>
+                )}
+              />
+            </>
+          )}
+        </div>
       )}
     </div>
   );
