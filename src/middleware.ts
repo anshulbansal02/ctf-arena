@@ -7,12 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const routesType = {
   // Can only be viewed by authenticated user
-  protected: [
-    /^\/onboarding/,
-    /^\/home/,
-    /^\/team/,
-    /^\/contest\/[a-zA-Z0-9]+\/arena/,
-  ],
+  protected: [/^\/onboarding/, /^\/home/, /^\/team/, /^\/contests/],
   // Cannot be viewed by authenticated user
   public: [/^\/$/],
 };

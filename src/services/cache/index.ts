@@ -9,6 +9,8 @@ const cacheClient = createClient({
   },
 });
 
+if (!cacheClient.isOpen) cacheClient.connect();
+
 cacheClient.on("error", (e) => {
   console.log("cache error: ", e);
 });

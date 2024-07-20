@@ -6,6 +6,7 @@ import { TB_teamMembers, TB_teamRequest, TB_teams } from "./entities";
 import { TB_users } from "../user";
 import {
   and,
+  asc,
   count,
   eq,
   gt,
@@ -443,21 +444,42 @@ export async function respondToTeamRequest(
 
 export async function leaveTeam() {
   const user = await getAuthUser();
-  const teamId = await getTeamIdByUserId(user.id);
+  const team = await getTeamDetailsByUserId(user.id);
 
-  if (!teamId) throw new Error("You are not in a team.");
+  if (!team?.id) throw new Error("You are not in a team.");
 
-  if (await preconditionIsTeamInContest(teamId))
+  if (await preconditionIsTeamInContest(team.id))
     throw new Error("Your team is currently in a contest.");
 
-  await db
-    .update(TB_teamMembers)
-    .set({ leftAt: new Date() })
-    .where(
-      and(isNull(TB_teamMembers.leftAt), eq(TB_teamMembers.userId, user.id)),
-    );
+  await db.transaction(async (tx) => {
+    const leader = team.members.find((u) => u.isLeader);
 
-  cacheTeamDetails({ teamId: teamId });
+    if (user.id === leader?.id) {
+      const ctm = CTE_currentTeamMembers(team.id);
+      const [newLeader] = await db
+        .with(ctm)
+        .select()
+        .from(ctm)
+        .orderBy(asc(ctm.joinedAt))
+        .offset(1)
+        .limit(1);
+
+      if (newLeader)
+        await tx
+          .update(TB_teams)
+          .set({ leader: newLeader.userId })
+          .where(eq(TB_teams.id, team.id));
+    }
+
+    await tx
+      .update(TB_teamMembers)
+      .set({ leftAt: new Date() })
+      .where(
+        and(isNull(TB_teamMembers.leftAt), eq(TB_teamMembers.userId, user.id)),
+      );
+
+    cacheTeamDetails({ teamId: team.id });
+  });
 }
 
 async function cacheTeamDetails(

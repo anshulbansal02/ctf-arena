@@ -22,7 +22,7 @@ export async function bootstrap() {
 
   try {
     console.info(`[Bootstrap] Connecting to cache`);
-    await cache.connect();
+    if (!cache.isOpen) await cache.connect();
     console.info(`[Bootstrap] Successfully connected to cache`);
   } catch (e) {
     console.error(`[Bootstrap] Failed to connect to cache: `, e);
