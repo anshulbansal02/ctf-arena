@@ -56,7 +56,7 @@ export function SprintersLeaderboard(props: Props) {
       <div className="no-scrollbar flex max-h-[360px] w-full flex-col gap-2 overflow-auto rounded-xl">
         {leaderboard.map((entry) => (
           <div
-            key={teamsById[entry.teamId]?.name}
+            key={entry.teamId}
             role="row"
             className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-950 p-3"
           >

@@ -142,7 +142,7 @@ export async function sendTeamInvites(emails: Array<string>) {
       })),
     );
 
-    jobQueue.addBulk("notifications", []);
+    // jobQueue.addBulk("notifications", []);
   });
 }
 

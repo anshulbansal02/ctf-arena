@@ -42,6 +42,7 @@ export default async function ViewInvitePage({
       <div className="flex items-center">
         {team.members.map((member) => (
           <Avatar
+            key={member.id}
             rounded
             username={member.id}
             title={member.name}

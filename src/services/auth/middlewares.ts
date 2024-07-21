@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { config } from "@/config";
 import { authConfig } from "./config";
 
-export const { auth: getSession } = NextAuth(authConfig);
+export const { auth: getSession } = NextAuth({
+  ...authConfig,
+  trustHost: true,
+});
 
 export async function attachSession() {
   try {

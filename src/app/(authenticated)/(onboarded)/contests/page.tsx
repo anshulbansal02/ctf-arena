@@ -21,7 +21,7 @@ export default async function ContestsPage() {
         <div>
           {activeContests.length ? (
             activeContests.map((contest) => (
-              <Link href={`contests/${contest.id}`}>
+              <Link href={`contests/${contest.id}`} key={contest.id}>
                 <div className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]">
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>
@@ -65,7 +65,7 @@ export default async function ContestsPage() {
         <div>
           {upcomingContests.length ? (
             upcomingContests.map((contest) => (
-              <Link href={`contests/${contest.id}`}>
+              <Link href={`contests/${contest.id}`} key={contest.id}>
                 <div className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]">
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>
@@ -109,7 +109,7 @@ export default async function ContestsPage() {
         <div>
           {pastContests.length ? (
             pastContests.map((contest) => (
-              <Link href={`contests/${contest.id}`}>
+              <Link href={`contests/${contest.id}`} key={contest.id}>
                 <div className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]">
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>

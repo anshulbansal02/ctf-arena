@@ -11,6 +11,7 @@ const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
     usersTable: TB_users,
     accountsTable: TB_userAccounts,
   }),
+  trustHost: true,
   ...authConfig,
 });
 

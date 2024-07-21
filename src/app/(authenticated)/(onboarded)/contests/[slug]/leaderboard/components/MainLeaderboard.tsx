@@ -90,6 +90,7 @@ export function MainLeaderboard(props: Props) {
       <div className="no-scrollbar flex max-h-[560px] w-full flex-col gap-2 overflow-auto rounded-xl">
         {leaderboard.map((entry, i) => (
           <div
+            key={entry.teamId}
             role="row"
             className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-950 p-3"
           >
@@ -100,6 +101,7 @@ export function MainLeaderboard(props: Props) {
               <div className="flex items-center">
                 {teamsById[entry.teamId]?.members?.map((member) => (
                   <Avatar
+                    key={member.id}
                     rounded
                     username={member.id}
                     title={member.name}
