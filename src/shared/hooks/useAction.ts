@@ -7,6 +7,7 @@ type Event = "loading" | "success" | "error" | "reset";
 type EventWithPayload = {
   type: Event;
   payload?: unknown;
+  preserveData?: boolean;
 };
 
 type ActionState<R> = {
@@ -16,14 +17,15 @@ type ActionState<R> = {
   success: boolean | undefined;
 };
 
-type Options<T> =
+type Options<T> = (
   | {
       immediate: true;
       args: T;
     }
   | {
       immediate: false;
-    };
+    }
+) & { preserveData?: boolean };
 
 function reducer<R>(
   state: ActionState<R>,
@@ -31,7 +33,12 @@ function reducer<R>(
 ): ActionState<R> {
   switch (event.type) {
     case "loading":
-      return { success: undefined, data: null, error: false, loading: true };
+      return {
+        data: event.preserveData ? state.data : null,
+        success: undefined,
+        error: false,
+        loading: true,
+      };
     case "success":
       return {
         success: true,
@@ -42,7 +49,7 @@ function reducer<R>(
     case "error":
       return {
         success: false,
-        data: null,
+        data: event.preserveData ? state.data : null,
         error: event.payload,
         loading: false,
       };
@@ -66,14 +73,18 @@ export function useAction<ParamsType, ReturnType>(
 
   const execute = useCallback(
     async (params: ParamsType): Promise<ReturnType | undefined> => {
-      dispatch({ type: "loading" });
+      dispatch({ type: "loading", preserveData: opts?.preserveData });
       try {
         const result = await action(params);
         dispatch({ type: "success", payload: result });
 
         return result;
       } catch (error) {
-        dispatch({ type: "error", payload: error });
+        dispatch({
+          type: "error",
+          payload: error,
+          preserveData: opts?.preserveData,
+        });
       }
     },
     [action],

@@ -8,3 +8,4 @@ export * from "./Toaster";
 export * from "./Shim/Shim";
 export * from "./Timer/Timer";
 export * from "./Confetti/Confetti";
+export * from "./ProgressBar/ProgressBar";

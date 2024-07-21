@@ -311,6 +311,7 @@ export async function cancelTeamRequest(requestId: number) {
     );
 }
 
+// As a user, to which teams I have sent requests to
 export async function getSentTeamRequests() {
   const user = await getAuthUser();
 
@@ -330,13 +331,43 @@ export async function getSentTeamRequests() {
   return requests;
 }
 
-export async function getSentTeamInvites() {
+// As a team, which users have sent request to join
+export async function getReceivedJoinRequests(teamId: number) {
+  const tr = TB_teamRequest;
+  const requests = await db
+    .select()
+    .from(tr)
+    .where(
+      and(
+        eq(tr.teamId, teamId),
+        inArray(tr.status, ["delivered"]),
+        eq(tr.type, "request"),
+      ),
+    );
+
+  return requests;
+}
+
+// As a user, which teams have sent me invites
+export async function getReceivedTeamInvites() {
   const user = await getAuthUser();
+  const tr = TB_teamRequest;
+  const invites = await db
+    .select()
+    .from(tr)
+    .where(
+      and(
+        eq(tr.userEmail, user.email),
+        inArray(tr.status, ["queued", "sent", "delivered"]),
+        eq(tr.type, "invite"),
+      ),
+    );
 
-  const teamId = await getTeamIdByUserId(user.id);
+  return invites;
+}
 
-  if (!teamId) return [];
-
+// As a team, which users were invited to team
+export async function getSentTeamInvites(teamId: number) {
   const tr = TB_teamRequest;
   const invites = await db
     .select()

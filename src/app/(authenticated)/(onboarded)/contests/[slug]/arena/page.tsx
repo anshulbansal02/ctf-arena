@@ -6,25 +6,65 @@ import {
   getNextContestChallenge,
   getTeamContestStats,
 } from "@/services/contest";
-import { Button, Confetti, Input, Shim, Spinner } from "@/shared/components";
+import {
+  Button,
+  Confetti,
+  Input,
+  ProgressBar,
+  Shim,
+  Spinner,
+} from "@/shared/components";
 import { useAction } from "@/shared/hooks";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { ScheduledHints } from "./components/ScheduledHints";
+import { useRouter } from "next/navigation";
+import { randomItem } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
 
 interface SubmissionForm {
   flag: string;
 }
+
+const errorMessages = [
+  "Incorrect flag. Please review and submit again.",
+  "Sorry, that's not the correct flag.",
+  "Not quite. Please check your flag and try again.",
+  "That's not correct. Double-check your flag and try again.",
+  "Incorrect. Don't worry, you can try again!",
+  "That flag is incorrect. Give it another try!",
+  "Wrong flag. Take a moment and try again!",
+  "Incorrect flag, try again.",
+  "That's not correct, please try again.",
+  "Nope, that's not right. Try again!",
+  "Incorrect, have another shot.",
+  "Sorry, wrong flag. Try once more.",
+  "Not correct, please try again.",
+  "That's incorrect, try again.",
+  "Incorrect, give it another try.",
+  "No, that's not the flag. Try again.",
+  "Wrong, but keep trying!",
+  "Not quite, try again.",
+  "Incorrect, have another go.",
+  "Sorry, that's not it. Try again.",
+  "Not the right flag, try again.",
+  "Try again.",
+  "Wrong answer.",
+  "Incorrect flag.",
+  "No. Not correct.",
+  "Sorry, wrong answer.",
+  "Incorrect. Try once more.",
+];
 
 export default function SubmissionPage({
   params,
 }: {
   params: { slug: number };
 }) {
-  // if contest is ended, redirect to leaderboard
-
   const { execute: checkAndSubmitFlag, loading: checkingSubmission } =
     useAction(checkAndCreateSubmission);
+
+  const router = useRouter();
 
   const { loading: loadingContest, data: contest } = useAction(getContest, {
     immediate: true,
@@ -44,21 +84,36 @@ export default function SubmissionPage({
     execute: getTeamStats,
     loading: loadingTeamStats,
     data: teamStats,
-  } = useAction(getTeamContestStats);
-
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
+  } = useAction(
+    async (n: number) => {
+      await new Promise((r) => setTimeout(r, 1000));
+      return await getTeamContestStats(n);
+    },
+    { immediate: true, args: params.slug },
+  );
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors: formErrors },
   } = useForm<SubmissionForm>({
     mode: "onSubmit",
   });
 
   useEffect(() => {
-    getNextChallenge(params.slug);
+    if (loadingContest) return;
+    if (contest == null) return router.replace("/");
+    if (contest.endsAt < new Date())
+      return router.push(`/contests/${params.slug}/leaderboard`);
+  }, [contest]);
+
+  useEffect(() => {
+    const interval = setInterval(() => getTeamStats(params.slug), 10000);
+    return () => clearInterval(interval);
   }, []);
+
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   function handleFlagSubmission(next: Function) {
     return async (formData: SubmissionForm) => {
@@ -80,6 +135,8 @@ export default function SubmissionPage({
         // TeamStats show number of challenges solved by the team and is lagging by 1 because it is not updated yet
         if (contest!.noOfChallenges > (teamStats?.submissionsCount ?? 0) + 1)
           getNextChallenge(params.slug);
+      } else {
+        setError("flag", { message: randomItem(errorMessages) });
       }
     };
   }
@@ -97,15 +154,52 @@ export default function SubmissionPage({
 
           <div className="">
             <h2 className="mb-4 mt-8 text-2xl font-medium">Your Team Stats</h2>
-            {!teamStats ? (
+            {!loadingTeamStats && !teamStats ? (
               <div>No stats to show</div>
             ) : (
-              <div>
-                {loadingTeamStats && <Spinner />}
-                <div>{teamStats.score}</div>
-                <div>{teamStats.lastSubmissionAt}</div>
+              <div className="relative rounded-xl bg-[#202123] p-4">
+                {loadingTeamStats && (
+                  <Spinner
+                    color="white"
+                    size={12}
+                    className="absolute right-4 top-4"
+                  />
+                )}
+
+                <div className="flex gap-2">
+                  <p className="rounded-md bg-[#31373c] p-1 leading-none">
+                    Rank <span className="text-slate-500">|</span>{" "}
+                    {teamStats?.rank ?? "-"}
+                  </p>
+                  <p className="rounded-md bg-[#31373c] p-1 leading-none">
+                    Score <span className="text-slate-500">|</span>{" "}
+                    {teamStats?.score ?? "-"}
+                  </p>
+                </div>
+
                 <div>
-                  {teamStats.submissionsCount} / {contest.noOfChallenges}
+                  <div className="mt-4 flex justify-between">
+                    <p>Solved</p>
+                    <p>
+                      {teamStats?.submissionsCount} / {contest.noOfChallenges}
+                    </p>
+                  </div>
+                  <ProgressBar
+                    total={contest.noOfChallenges}
+                    value={teamStats?.submissionsCount ?? 0}
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <p className="text-right text-sm text-slate-400">
+                    Last Submitted{" "}
+                    {formatDistanceToNow(
+                      teamStats?.lastSubmissionAt ?? new Date(),
+                      {
+                        addSuffix: true,
+                      },
+                    )}
+                  </p>
                 </div>
               </div>
             )}
@@ -119,8 +213,7 @@ export default function SubmissionPage({
             </>
           ) : (
             <>
-              {" "}
-              <h2 className="mb-4 mt-36 text-2xl font-medium">
+              <h2 className="mb-4 mt-16 text-center text-2xl font-medium">
                 Submit Challenge Flag
               </h2>
               <Confetti

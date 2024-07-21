@@ -193,10 +193,15 @@ export async function getByName(name: Leaderboard, contestId: number) {
   }
 }
 
-export async function getTeamScore(contestId: number, teamId: number) {
-  const score = await cache.zScore(
+export async function getTeamRankAndScore(contestId: number, teamId: number) {
+  const args = [
     leaderboardKey("sum_of_scores", contestId, "raw"),
     teamId.toString(),
-  );
-  return score;
+  ];
+  // const score = await cache.zScore(args[0], args[1]);
+  const [rank, score] = await Promise.all([
+    cache.zRank(args[0], args[1]),
+    cache.zScore(args[0], args[1]),
+  ]);
+  return { rank, score };
 }

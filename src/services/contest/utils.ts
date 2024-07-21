@@ -1,6 +1,7 @@
 import { randomItem } from "@/lib/utils";
 
 export function submissionComparator(keyA: string, keyB: string) {
+  console.log({ keyA, keyB });
   return keyA.toLowerCase() === keyB.toLowerCase();
 }
 
@@ -14,7 +15,7 @@ export function scrambleText(str: string) {
       if (/[a-z]/.test(c)) return randomItem(lowerAlpha);
       if (/[A-Z]/.test(c)) return randomItem(upperAlpha);
       if (/\d/.test(c)) return randomItem(numbers);
-      return c
+      return c;
     })
     .join("");
 }

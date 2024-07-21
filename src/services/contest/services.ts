@@ -12,7 +12,7 @@ import { getTeamIdByUserId } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
 import { contestQueue } from "../queue";
-import { getTeamScore } from "./leaderboard";
+import { getTeamRankAndScore } from "./leaderboard";
 import { TB_users } from "../user";
 import { emailService, renderTemplate } from "../email";
 
@@ -156,11 +156,12 @@ export async function checkAndCreateSubmission(data: {
   // Score calculation
   const hintsDeduction = hintsTaken.reduce((a, hint) => a + hint.data.cost, 0);
   const pointsDecayFactor = challenge.pointsDecayFactor ?? 0;
-  const score =
+  const score = Math.round(
     Math.max(
       challenge.maxPoints - (timeTaken / 1000) * pointsDecayFactor,
       challenge.minPoints ?? 0,
-    ) - hintsDeduction;
+    ) - hintsDeduction,
+  );
 
   const [newSubmission] = await db
     .insert(TB_contestSubmissions)
@@ -220,6 +221,8 @@ export async function getNextContestChallenge(contestId: number) {
         eq(TB_contestChallenges.order, nextInOrder),
       ),
     );
+
+  if (!nextChallenge) return;
 
   const { answer, hints, ...redactedChallenge } = nextChallenge;
 
@@ -426,9 +429,9 @@ export async function getTeamContestStats(contestId: number) {
       ),
     );
 
-  const p3 = getTeamScore(contestId, teamId);
+  const p3 = getTeamRankAndScore(contestId, teamId);
 
-  const [lastSubmissionAt, [submissions], score] = await Promise.all([
+  const [lastSubmissionAt, [submissions], leaderboard] = await Promise.all([
     p1,
     p2,
     p3,
@@ -439,10 +442,9 @@ export async function getTeamContestStats(contestId: number) {
     contestId,
     submissionsCount: submissions.count,
     lastSubmissionAt,
-    score,
+    rank: leaderboard.rank,
+    score: leaderboard.score,
   };
-
-  /** lastSubmissionAt, solved out of n, score, rank, */
 }
 
 export async function batchSendContestIntimation(contestId: number) {

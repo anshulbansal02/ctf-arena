@@ -1,5 +1,5 @@
 "use client";
-import { Avatar } from "@/shared/components";
+import { Avatar, ProgressBar } from "@/shared/components";
 import Image, { StaticImageData } from "next/image";
 
 import GoldMedal from "@/assets/media/gold-medal.png";
@@ -30,17 +30,6 @@ function Rank({ index }: { index: number }) {
       width={100}
       height={100}
     />
-  );
-}
-
-function ProgressBar(props: { total: number; value: number }) {
-  return (
-    <div className="h-2 w-28 rounded-full bg-slate-800">
-      <div
-        className="h-full rounded-full bg-[#20b0b5]"
-        style={{ width: (props.value / props.total) * 100 + "%" }}
-      ></div>
-    </div>
   );
 }
 
@@ -115,7 +104,7 @@ export function MainLeaderboard(props: Props) {
                     username={member.id}
                     title={member.name}
                     size={20}
-                    className="-ml-2 rounded-full border border-zinc-950 first:ml-0"
+                    className="-ml-2 rounded-full border border-zinc-950 bg-slate-400 first:ml-0"
                   />
                 ))}
               </div>

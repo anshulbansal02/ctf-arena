@@ -2,7 +2,7 @@ import { getContests } from "@/services/contest";
 import Link from "next/link";
 
 export async function Contests() {
-  const [_activeContests, upcomingContests] = await Promise.all([
+  const [activeContests, upcomingContests] = await Promise.all([
     getContests("active"),
     getContests("upcoming"),
   ]);
@@ -14,7 +14,7 @@ export async function Contests() {
         <h4 className="mt-4 text-left font-medium text-slate-400">Ongoing</h4>
         {upcomingContests.length ? (
           upcomingContests.map((contest) => (
-            <div className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4">
+            <div className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]">
               <div className="text-left">
                 <h3 className="text-xl font-medium">{contest.name}</h3>
                 <p className="mt-1 text-sm font-light leading-snug text-slate-300">
