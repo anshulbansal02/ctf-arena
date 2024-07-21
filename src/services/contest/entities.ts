@@ -15,6 +15,7 @@ import { TB_teams } from "../team";
 export const TB_contests = pgTable("contests", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  shortDescription: text("short_description").default(""),
   description: text("description"),
   startsAt: timestamp("starts_at").notNull(),
   endsAt: timestamp("ends_at").notNull(),

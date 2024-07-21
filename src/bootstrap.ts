@@ -35,17 +35,21 @@ export async function bootstrap() {
     console.info("[Job] Batch sending invitations");
     batchSendInvitations();
   });
-  jobQueue.add("batch-send-invitations", {
+  jobQueue.add("batch-send-invitations", null, {
     repeat: { cron: "* * * * *" },
   });
 
   jobQueue.process("notifications", async () => {
+    console.info(`[Job] Creating notifications`);
     // create new notification
   });
 
   contestQueue.process(
     "sprinting-teams-update",
     async (job: Bull.Job<{ id: number }>) => {
+      console.info(
+        `[Job] Updating sprinting teams leaderboard for contest id ${job.data.id}`,
+      );
       const contest = job.data;
 
       leaderboard.purgeBuildAndNotify("sprinting_teams", contest.id);
@@ -53,6 +57,7 @@ export async function bootstrap() {
   );
 
   contestQueue.process("hourly-contest-update", async () => {
+    console.info(`[Job] Hourly contest updates`);
     const contestsStartingInOneHour = await getContestsStartingInOneHour();
 
     jobQueue.add("notifications", []);
@@ -72,13 +77,14 @@ export async function bootstrap() {
     });
   });
 
-  contestQueue.add("hourly-contest-update", {
+  contestQueue.add("hourly-contest-update", null, {
     repeat: { cron: "0 0 * * *" },
   });
 
   contestQueue.process(
     await contestChannel("submission"),
     (job: Bull.Job<leaderboard.ContestSubmission>) => {
+      console.info(`[Job] Processing submission id ${job.data.submissionId}`);
       const submission = job.data;
       leaderboard.quickestFirstsProcessor(submission);
       leaderboard.sumOfScoresProcessor(submission);
