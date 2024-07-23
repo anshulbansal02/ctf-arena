@@ -1,5 +1,15 @@
 "use server";
-import { and, asc, count, desc, eq, gt, isNull, lt } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  countDistinct,
+  desc,
+  eq,
+  gt,
+  isNull,
+  lt,
+} from "drizzle-orm";
 import { db } from "../db";
 import {
   TB_contestChallenges,
@@ -470,4 +480,34 @@ export async function batchSendContestIntimation(contestId: number) {
       subject: "CTF Contest is starting in 1 hour.",
     });
   });
+}
+
+export async function getContestStats(contestId: number) {
+  const ce = TB_contestEvents,
+    cs = TB_contestSubmissions;
+  const p1 = db
+    .select({
+      count: countDistinct(ce.teamId),
+    })
+    .from(ce)
+    .where(
+      and(
+        eq(ce.contestId, contestId),
+        eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
+      ),
+    );
+
+  const p2 = db
+    .select({
+      count: count(),
+    })
+    .from(cs)
+    .where(and(eq(cs.contestId, contestId)));
+
+  const [[teams], [submissions]] = await Promise.all([p1, p2]);
+
+  return {
+    teamsCount: teams.count,
+    submissionsCount: submissions.count,
+  };
 }

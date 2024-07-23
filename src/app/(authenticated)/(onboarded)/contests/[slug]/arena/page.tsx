@@ -89,7 +89,7 @@ export default function SubmissionPage({
       await new Promise((r) => setTimeout(r, 1000));
       return await getTeamContestStats(n);
     },
-    { immediate: true, args: params.slug },
+    { immediate: true, args: params.slug, preserveData: true },
   );
 
   const {
@@ -153,7 +153,9 @@ export default function SubmissionPage({
           ) : null}
 
           <div className="">
-            <h2 className="mb-4 mt-8 text-2xl font-medium">Your Team Stats</h2>
+            <h2 className="mb-4 mt-8 text-center text-2xl font-medium">
+              Your Team Stats
+            </h2>
             {!loadingTeamStats && !teamStats ? (
               <div>No stats to show</div>
             ) : (
@@ -192,13 +194,9 @@ export default function SubmissionPage({
 
                 <div className="mt-4">
                   <p className="text-right text-sm text-slate-400">
-                    Last Submitted{" "}
-                    {formatDistanceToNow(
-                      teamStats?.lastSubmissionAt ?? new Date(),
-                      {
-                        addSuffix: true,
-                      },
-                    )}
+                    {teamStats?.lastSubmissionAt
+                      ? `Last Submitted ${formatDistanceToNow(teamStats.lastSubmissionAt, { addSuffix: true })}`
+                      : "Getting Team Stats"}
                   </p>
                 </div>
               </div>
