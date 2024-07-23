@@ -14,21 +14,23 @@ export async function Contests() {
         <h4 className="mt-4 text-left font-medium text-slate-400">Ongoing</h4>
         {upcomingContests.length ? (
           upcomingContests.map((contest) => (
-            <div
-              key={contest.id}
-              className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]"
-            >
-              <div className="text-left">
-                <h3 className="text-xl font-medium">{contest.name}</h3>
-                <p className="mt-1 text-sm font-light leading-snug text-slate-300">
-                  {contest.description}
-                </p>
+            <Link href={`contests/${contest.id}`} key={contest.id}>
+              <div
+                key={contest.id}
+                className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]"
+              >
+                <div className="text-left">
+                  <h3 className="text-xl font-medium">{contest.name}</h3>
+                  <p className="mt-1 text-sm font-light leading-snug text-slate-300">
+                    {contest.shortDescription}
+                  </p>
+                </div>
+                <div className="whitespace-nowrap">
+                  <p className="font-medium">Starts In</p>
+                  <p>03:24 Hr</p>
+                </div>
               </div>
-              <div className="whitespace-nowrap">
-                <p className="font-medium">Starts In</p>
-                <p>03:24 Hr</p>
-              </div>
-            </div>
+            </Link>
           ))
         ) : (
           <p className="mt-4 text-slate-400">
@@ -46,7 +48,7 @@ export async function Contests() {
               <div className="text-left">
                 <h3 className="text-xl font-medium">{contest.name}</h3>
                 <p className="mt-1 text-sm font-light leading-snug text-slate-300">
-                  {contest.description}
+                  {contest.shortDescription}
                 </p>
               </div>
               <div className="whitespace-nowrap">

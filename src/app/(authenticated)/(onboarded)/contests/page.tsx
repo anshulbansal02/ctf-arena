@@ -11,8 +11,6 @@ export default async function ContestsPage() {
     getContests("ended"),
   ]);
 
-  const now = new Date();
-
   return (
     <div className="mx-auto mb-32 mt-32 w-[560px]">
       <h2 className="mb-4 text-center text-2xl">Contests</h2>
@@ -41,7 +39,7 @@ export default async function ContestsPage() {
                       <p>17 teams participating</p>
                     </div>
                     <p className="mt-4 text-sm font-light leading-snug text-slate-300">
-                      {contest.description}
+                      {contest.shortDescription}
                     </p>
                   </div>
                   <div className="whitespace-nowrap text-center">
@@ -85,7 +83,7 @@ export default async function ContestsPage() {
                       <p>17 teams to participate</p>
                     </div>
                     <p className="mt-4 text-sm font-light leading-snug text-slate-300">
-                      {contest.description}
+                      {contest.shortDescription}
                     </p>
                   </div>
                   <div className="whitespace-nowrap text-center">
@@ -129,7 +127,7 @@ export default async function ContestsPage() {
                       <p>17 teams participated</p>
                     </div>
                     <p className="mt-4 text-sm font-light leading-snug text-slate-300">
-                      {contest.description}
+                      {contest.shortDescription}
                     </p>
                   </div>
                   <div className="whitespace-nowrap text-center">
