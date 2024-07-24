@@ -79,6 +79,11 @@ export default function SubmissionPage({
       else if (contest.endsAt < new Date())
         redirectPath = `/contests/${contest.id}/leaderboard`;
 
+      if (redirectPath) {
+        router.replace(redirectPath);
+        return null;
+      }
+
       return {
         shouldRedirectToPath: redirectPath,
         contest,
@@ -123,11 +128,6 @@ export default function SubmissionPage({
   });
 
   useEffect(() => {
-    if (pageData?.shouldRedirectToPath)
-      router.replace(pageData.shouldRedirectToPath);
-  }, [pageData]);
-
-  useEffect(() => {
     const interval = setInterval(() => getTeamStats(params.slug), 10000);
     return () => clearInterval(interval);
   }, []);
@@ -165,6 +165,12 @@ export default function SubmissionPage({
 
   return (
     <div className="mx-auto flex min-h-screen max-w-[600px] flex-col items-center">
+      {loadingPageData && (
+        <div className="flex h-[calc(100vh-200px)] flex-col items-center justify-center">
+          <Spinner color="white" className="" />
+          <p className="mt-4 text-center">Retrieving Contest Details</p>
+        </div>
+      )}
       {pageData && (
         <div>
           {nextChallenge ? (
