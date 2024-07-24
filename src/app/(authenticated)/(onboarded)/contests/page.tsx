@@ -23,21 +23,7 @@ export default async function ContestsPage() {
                 <div className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]">
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex items-center">
-                        {Array(5)
-                          .fill(0)
-                          .map((_) => (
-                            <Avatar
-                              className="-ml-2 rounded-full border border-[#282D31] bg-slate-400 first:ml-0"
-                              size={20}
-                              rounded
-                              username={nanoid()}
-                            />
-                          ))}
-                      </div>
-                      <p>17 teams participating</p>
-                    </div>
+
                     <p className="mt-4 text-sm font-light leading-snug text-slate-300">
                       {contest.shortDescription}
                     </p>
@@ -54,7 +40,9 @@ export default async function ContestsPage() {
               </Link>
             ))
           ) : (
-            <p className="mt-4 text-slate-400">No active contests</p>
+            <p className="mt-4 text-center text-slate-400">
+              No ongoing contests
+            </p>
           )}
         </div>
       </section>
@@ -67,21 +55,7 @@ export default async function ContestsPage() {
                 <div className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]">
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex items-center">
-                        {Array(5)
-                          .fill(0)
-                          .map((_) => (
-                            <Avatar
-                              className="-ml-2 rounded-full border border-[#282D31] bg-slate-400 first:ml-0"
-                              size={20}
-                              rounded
-                              username={nanoid()}
-                            />
-                          ))}
-                      </div>
-                      <p>17 teams to participate</p>
-                    </div>
+
                     <p className="mt-4 text-sm font-light leading-snug text-slate-300">
                       {contest.shortDescription}
                     </p>
@@ -98,7 +72,9 @@ export default async function ContestsPage() {
               </Link>
             ))
           ) : (
-            <p className="mt-4 text-slate-400">No past contests</p>
+            <p className="mt-4 text-center text-slate-400">
+              No upcoming contests
+            </p>
           )}
         </div>
       </section>
@@ -111,21 +87,7 @@ export default async function ContestsPage() {
                 <div className="contest-card mt-4 flex items-center justify-between gap-8 rounded-lg bg-[#282D31] px-6 py-4 transition-colors hover:bg-[#424a51]">
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex items-center">
-                        {Array(5)
-                          .fill(0)
-                          .map((_) => (
-                            <Avatar
-                              className="-ml-2 rounded-full border border-[#282D31] bg-slate-400 first:ml-0"
-                              size={20}
-                              rounded
-                              username={nanoid()}
-                            />
-                          ))}
-                      </div>
-                      <p>17 teams participated</p>
-                    </div>
+
                     <p className="mt-4 text-sm font-light leading-snug text-slate-300">
                       {contest.shortDescription}
                     </p>
@@ -140,7 +102,7 @@ export default async function ContestsPage() {
               </Link>
             ))
           ) : (
-            <p className="mt-4 text-slate-400">No past contests</p>
+            <p className="mt-4 text-center text-slate-400">No past contests</p>
           )}
         </div>
       </section>

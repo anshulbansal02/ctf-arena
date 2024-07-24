@@ -5,6 +5,7 @@ import {
   getContest,
   getNextContestChallenge,
   getTeamContestStats,
+  hasTeamAlreadyJoinedContest,
 } from "@/services/contest";
 import {
   Button,
@@ -64,12 +65,30 @@ export default function SubmissionPage({
   const { execute: checkAndSubmitFlag, loading: checkingSubmission } =
     useAction(checkAndCreateSubmission);
 
-  const router = useRouter();
+  const { loading: loadingPageData, data: pageData } = useAction(
+    async () => {
+      const [contest, hasJoinedContest] = await Promise.all([
+        getContest(params.slug),
+        hasTeamAlreadyJoinedContest(params.slug),
+      ]);
 
-  const { loading: loadingContest, data: contest } = useAction(getContest, {
-    immediate: true,
-    args: params.slug,
-  });
+      let redirectPath;
+      if (!contest) redirectPath = "/";
+      else if (contest.startsAt > new Date() || !hasJoinedContest)
+        redirectPath = `/contests/${contest.id}`;
+      else if (contest.endsAt < new Date())
+        redirectPath = `/contests/${contest.id}/leaderboard`;
+
+      return {
+        shouldRedirectToPath: redirectPath,
+        contest,
+      };
+    },
+    {
+      immediate: true,
+      args: null,
+    },
+  );
 
   const {
     execute: getNextChallenge,
@@ -92,6 +111,8 @@ export default function SubmissionPage({
     { immediate: true, args: params.slug, preserveData: true },
   );
 
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -102,11 +123,9 @@ export default function SubmissionPage({
   });
 
   useEffect(() => {
-    if (loadingContest) return;
-    if (contest == null) return router.replace("/");
-    if (contest.endsAt < new Date())
-      return router.push(`/contests/${params.slug}/leaderboard`);
-  }, [contest]);
+    if (pageData?.shouldRedirectToPath)
+      router.replace(pageData.shouldRedirectToPath);
+  }, [pageData]);
 
   useEffect(() => {
     const interval = setInterval(() => getTeamStats(params.slug), 10000);
@@ -133,7 +152,10 @@ export default function SubmissionPage({
 
         // Get the next challenge only if there is one to solve.
         // TeamStats show number of challenges solved by the team and is lagging by 1 because it is not updated yet
-        if (contest!.noOfChallenges > (teamStats?.submissionsCount ?? 0) + 1)
+        if (
+          pageData!.contest.noOfChallenges >
+          (teamStats?.submissionsCount ?? 0) + 1
+        )
           getNextChallenge(params.slug);
       } else {
         setError("flag", { message: randomItem(errorMessages) });
@@ -143,7 +165,7 @@ export default function SubmissionPage({
 
   return (
     <div className="mx-auto flex min-h-screen max-w-[600px] flex-col items-center">
-      {contest && (
+      {pageData && (
         <div>
           {nextChallenge ? (
             <ScheduledHints
@@ -183,11 +205,12 @@ export default function SubmissionPage({
                   <div className="mt-4 flex justify-between">
                     <p>Solved</p>
                     <p>
-                      {teamStats?.submissionsCount} / {contest.noOfChallenges}
+                      {teamStats?.submissionsCount} /{" "}
+                      {pageData.contest.noOfChallenges}
                     </p>
                   </div>
                   <ProgressBar
-                    total={contest.noOfChallenges}
+                    total={pageData.contest.noOfChallenges}
                     value={teamStats?.submissionsCount ?? 0}
                   />
                 </div>
