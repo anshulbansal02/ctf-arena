@@ -17,6 +17,19 @@ export const config = {
       secret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
     },
   },
+  email: {
+    provider: {
+      resend: {
+        key: process.env.RESEND_API_KEY,
+      },
+      ses: {
+        key: process.env.SES_API_KEY,
+      },
+      sendgrid: {
+        key: process.env.SENDGRID_API_KEY,
+      },
+    },
+  },
   host: process.env.APP_HOST,
   routes: {
     default: {

@@ -1,4 +1,4 @@
-import { Shim, Spinner } from "@/shared/components";
+import { Spinner } from "@/shared/components";
 
 export default function LoadingPage() {
   return (

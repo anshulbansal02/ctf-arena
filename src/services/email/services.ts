@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import { ResendProvider } from "./adapters/resend";
 import { EmailProvider, SendConfig } from "./types";
 
@@ -21,6 +22,6 @@ class EmailService {
 export const emailService = new EmailService(
   new ResendProvider({
     API_URL: "https://api.resend.com/emails",
-    AUTH_KEY: process.env.RESEND_API_KEY!,
+    AUTH_KEY: config.email.provider.resend.key!,
   }),
 );

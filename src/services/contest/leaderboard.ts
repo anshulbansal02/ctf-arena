@@ -205,3 +205,5 @@ export async function getTeamRankAndScore(contestId: number, teamId: number) {
   ]);
   return { rank, score };
 }
+
+export async function commitLeaderboards(contestId: number) {}
