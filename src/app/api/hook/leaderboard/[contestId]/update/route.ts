@@ -24,7 +24,7 @@ export async function GET(
   if (isNaN(contestId)) throw new Error("Invalid contest id");
 
   const leaderboardListener = async () => {
-    const updatedLeaderboard = await leaderboard.getByName(type, contestId);
+    const updatedLeaderboard = await leaderboard.getLeaderboardByName(type, contestId);
     send(updatedLeaderboard);
   };
 

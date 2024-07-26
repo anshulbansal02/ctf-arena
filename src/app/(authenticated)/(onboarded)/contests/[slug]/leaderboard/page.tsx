@@ -1,12 +1,21 @@
+import { getContest } from "@/services/contest";
 import { MainLeaderboard } from "./components/MainLeaderboard";
 import { QuickestAtLeaderboard } from "./components/QuickestAtLeaderboard";
 import { SprintersLeaderboard } from "./components/SprintersLeaderboard";
+import { redirect } from "next/navigation";
 
-export default function LeaderboardPage({
+export default async function LeaderboardPage({
   params,
 }: {
-  params: { slug: string };
+  params: { slug: number };
 }) {
+  // Check if contest is ended or not started
+  const contest = await getContest(params.slug);
+
+  if (contest.startsAt > new Date()) {
+    redirect(`/contests/${contest.id}`);
+  }
+
   return (
     <div className="px-4 md:px-16">
       <div className="mt-32 flex flex-col gap-12 lg:flex-row">

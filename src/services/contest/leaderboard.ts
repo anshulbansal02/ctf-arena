@@ -1,4 +1,10 @@
 import { cache } from "@/services/cache";
+import { db } from "../db";
+import { TB_contestChallenges, TB_contestSubmissions } from "./entities";
+import { desc, eq, gt, min, sum } from "drizzle-orm";
+import { subMinutes } from "date-fns";
+
+/** === TYPES === */
 
 export type ContestSubmission = {
   submissionId: number;
@@ -16,6 +22,8 @@ export type Leaderboard =
   | "quickest_firsts"
   | "sum_of_scores";
 
+/** === HELPERS === */
+
 export const leaderboardKey = (
   type: Leaderboard,
   contestId: number,
@@ -32,13 +40,16 @@ export async function purgeBuildAndNotify(
   contestId: number,
 ) {
   await cache.del(leaderboardKey(type, contestId, "prepared"));
-  await getByName(type, contestId);
+  await getLeaderboardByName(type, contestId);
   cache.publish(
     leaderboardUpdateChannel(type, contestId),
     JSON.stringify(Date.now()),
   );
 }
 
+/** === LEADERBOARDS === */
+
+/** Sum Of Scores */
 export async function sumOfScoresProcessor(submission: ContestSubmission) {
   const { contestId, score, teamId } = submission;
 
@@ -49,105 +60,6 @@ export async function sumOfScoresProcessor(submission: ContestSubmission) {
   );
 
   purgeBuildAndNotify("sum_of_scores", contestId);
-}
-
-export async function quickestFirstsProcessor(submission: ContestSubmission) {
-  const { contestId, timeTaken, teamId, challengeId, challengeOrder } =
-    submission;
-
-  const key = leaderboardKey("quickest_firsts", contestId, "raw");
-
-  const challengeRecord = await cache.hGet(key, challengeId.toString());
-
-  let newRecord;
-
-  if (challengeRecord) {
-    const { timing } = JSON.parse(challengeRecord);
-    if (timeTaken < timing)
-      newRecord = {
-        order: challengeOrder,
-        teamId,
-        timing: timeTaken,
-      };
-  } else {
-    newRecord = {
-      order: challengeOrder,
-      teamId,
-      timing: timeTaken,
-    };
-  }
-
-  if (newRecord) {
-    await cache.hSet(key, challengeId.toString(), JSON.stringify(newRecord));
-    purgeBuildAndNotify("quickest_firsts", contestId);
-  }
-}
-
-export async function sprintingTeamsProcessor(submission: ContestSubmission) {
-  const { contestId, teamId, createdAt } = submission;
-
-  const score = +`${+createdAt}.${teamId}`;
-
-  await cache.zAdd(leaderboardKey("sprinting_teams", contestId, "raw"), [
-    { score, value: teamId.toString() },
-  ]);
-
-  purgeBuildAndNotify("sprinting_teams", contestId);
-}
-
-export async function getQuickestFirsts(contestId: number) {
-  const cacheKey = leaderboardKey("quickest_firsts", contestId, "prepared");
-  const cached = await cache.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
-  const records = await cache.hGetAll(
-    leaderboardKey("quickest_firsts", contestId, "raw"),
-  );
-
-  const leaderboard = Object.entries(records)
-    .map<{
-      challengeId: number;
-      order: number;
-      teamId: number | null;
-      timing: number | null;
-    }>(([challengeId, record]) => ({
-      challengeId,
-      ...JSON.parse(record),
-    }))
-    .toSorted((a, b) => a.order - b.order);
-
-  cache.set(cacheKey, JSON.stringify(leaderboard));
-
-  return leaderboard;
-}
-
-export async function getSprintingTeams(contestId: number) {
-  const cacheKey = leaderboardKey("sprinting_teams", contestId, "prepared");
-  const cached = await cache.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
-  const timeBoundary = 30 * 60 * 1000;
-
-  const submissionsTimeline = await cache.zRangeWithScores(
-    leaderboardKey("sprinting_teams", contestId, "raw"),
-    Date.now(),
-    timeBoundary,
-  );
-
-  const submissionsByTeam: Record<string, number> = {};
-  submissionsTimeline.forEach(({ value: teamId }) => {
-    if (!submissionsByTeam[teamId]) submissionsByTeam[teamId] = 0;
-    submissionsByTeam[teamId]++;
-  });
-
-  const leaderboard = Object.entries(submissionsByTeam).map((o) => ({
-    teamId: +o[0],
-    submissions: o[1],
-  }));
-
-  cache.set(cacheKey, JSON.stringify(leaderboard));
-
-  return leaderboard;
 }
 
 export async function getSumOfScores(contestId: number) {
@@ -182,7 +94,194 @@ export async function getSumOfScores(contestId: number) {
   return leaderboard;
 }
 
-export async function getByName(name: Leaderboard, contestId: number) {
+export async function rebuildSumOfScores(contestId: number) {
+  const cs = TB_contestSubmissions;
+  const sumOfScores = await db
+    .select({
+      totalScore: sum(cs.score),
+      teamId: cs.submittedByTeam,
+    })
+    .from(cs)
+    .where(eq(cs.contestId, contestId))
+    .groupBy(cs.submittedByTeam)
+    .orderBy(desc(sum(cs.score)));
+
+  const records = sumOfScores.map((record) => ({
+    score: +record.totalScore!,
+    value: record.teamId.toString(),
+  }));
+
+  const key = leaderboardKey("sum_of_scores", contestId, "raw");
+
+  await cache.del(key);
+  await cache.zAdd(key, records);
+
+  purgeBuildAndNotify("sum_of_scores", contestId);
+}
+
+/** Sprinting Teams */
+export async function sprintingTeamsProcessor(submission: ContestSubmission) {
+  const { contestId, teamId, createdAt } = submission;
+
+  const score = +`${+createdAt}.${teamId}`;
+
+  await cache.zAdd(leaderboardKey("sprinting_teams", contestId, "raw"), [
+    { score, value: teamId.toString() },
+  ]);
+
+  purgeBuildAndNotify("sprinting_teams", contestId);
+}
+
+export async function getSprintingTeams(contestId: number) {
+  const cacheKey = leaderboardKey("sprinting_teams", contestId, "prepared");
+  const cached = await cache.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const timeBoundary = 30 * 60 * 1000;
+
+  const submissionsTimeline = await cache.zRangeWithScores(
+    leaderboardKey("sprinting_teams", contestId, "raw"),
+    Date.now(),
+    timeBoundary,
+  );
+
+  const submissionsByTeam: Record<string, number> = {};
+  submissionsTimeline.forEach(({ value: teamId }) => {
+    if (!submissionsByTeam[teamId]) submissionsByTeam[teamId] = 0;
+    submissionsByTeam[teamId]++;
+  });
+
+  const leaderboard = Object.entries(submissionsByTeam).map((o) => ({
+    teamId: +o[0],
+    submissions: o[1],
+  }));
+
+  cache.set(cacheKey, JSON.stringify(leaderboard));
+
+  return leaderboard;
+}
+
+export async function rebuildSprintingTeams(contestId: number) {
+  const cs = TB_contestSubmissions;
+  const last30MinutesSubmissions = await db
+    .select({
+      createdAt: cs.createdAt,
+      teamId: cs.submittedByTeam,
+    })
+    .from(cs)
+    .orderBy(desc(cs.createdAt))
+    .where(gt(cs.createdAt, subMinutes(new Date(), 30)));
+
+  const records = last30MinutesSubmissions.map((record) => ({
+    score: +record.createdAt,
+    value: record.teamId.toString(),
+  }));
+
+  const key = leaderboardKey("sprinting_teams", contestId, "raw");
+
+  await cache.del(key);
+  await cache.zAdd(key, records);
+
+  purgeBuildAndNotify("sprinting_teams", contestId);
+}
+
+/** Quickest Firsts */
+export async function quickestFirstsProcessor(submission: ContestSubmission) {
+  const { contestId, timeTaken, teamId, challengeId, challengeOrder } =
+    submission;
+
+  const key = leaderboardKey("quickest_firsts", contestId, "raw");
+
+  const challengeRecord = await cache.hGet(key, challengeId.toString());
+
+  let newRecord;
+
+  if (challengeRecord) {
+    const { timing } = JSON.parse(challengeRecord);
+    if (timeTaken < timing)
+      newRecord = {
+        order: challengeOrder,
+        teamId,
+        timing: timeTaken,
+      };
+  } else {
+    newRecord = {
+      order: challengeOrder,
+      teamId,
+      timing: timeTaken,
+    };
+  }
+
+  if (newRecord) {
+    await cache.hSet(key, challengeId.toString(), JSON.stringify(newRecord));
+    purgeBuildAndNotify("quickest_firsts", contestId);
+  }
+}
+
+export async function getQuickestFirsts(contestId: number) {
+  const cacheKey = leaderboardKey("quickest_firsts", contestId, "prepared");
+  const cached = await cache.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const records = await cache.hGetAll(
+    leaderboardKey("quickest_firsts", contestId, "raw"),
+  );
+
+  const leaderboard = Object.entries(records)
+    .map<{
+      challengeId: number;
+      order: number;
+      teamId: number | null;
+      timing: number | null;
+    }>(([challengeId, record]) => ({
+      challengeId,
+      ...JSON.parse(record),
+    }))
+    .toSorted((a, b) => a.order - b.order);
+
+  cache.set(cacheKey, JSON.stringify(leaderboard));
+
+  return leaderboard;
+}
+
+export async function rebuildQuickestFirsts(contestId: number) {
+  const cs = TB_contestSubmissions,
+    cc = TB_contestChallenges;
+  const quickestFirsts = await db
+    .select({
+      challengeId: cs.challengeId,
+      order: cc.order,
+      timeTaken: min(cs.timeTaken),
+      teamId: cs.submittedByTeam,
+    })
+    .from(cs)
+    .leftJoin(cc, eq(cc.id, cs.challengeId))
+    .where(eq(cs.contestId, contestId))
+    .groupBy(cs.challengeId);
+
+  const records = quickestFirsts.flatMap((record) => [
+    record.challengeId.toString(),
+    JSON.stringify({
+      order: record.order,
+      teamId: record.teamId,
+      timing: record.timeTaken,
+    }),
+  ]);
+
+  const key = leaderboardKey("quickest_firsts", contestId, "raw");
+
+  await cache.del(key);
+  await cache.hSet(key, records);
+
+  purgeBuildAndNotify("quickest_firsts", contestId);
+}
+
+/* === SERVICES === */
+
+export async function getLeaderboardByName(
+  name: Leaderboard,
+  contestId: number,
+) {
   switch (name) {
     case "sum_of_scores":
       return getSumOfScores(contestId);
