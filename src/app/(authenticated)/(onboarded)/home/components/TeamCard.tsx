@@ -1,9 +1,12 @@
+import { SvgMoveOut, SvgVerticalDots } from "@/assets/icons";
 import {
   getTeamDetailsByUserId,
   getTeamDetails,
   TeamDetails,
+  leaveTeam,
 } from "@/services/team";
 import { Avatar, Button } from "@/shared/components";
+import * as Popover from "@radix-ui/react-popover";
 
 type TeamCardProps = { teamId: number } | { userId: string };
 
@@ -13,11 +16,32 @@ export async function TeamCard(props: TeamCardProps) {
   else team = await getTeamDetailsByUserId(props.userId);
 
   return team ? (
-    <div className="team-card mt-4 rounded-lg bg-black px-6 py-4">
+    <div className="team-card mt-4 min-w-[420px] rounded-lg bg-black px-6 py-4">
       <div className="flex flex-col">
-        <div className="text-left">
-          <h4 className="font-medium leading-tight text-slate-400">Name</h4>
-          <h3 className="text-lg">{team.name}</h3>
+        <div className="flex items-start justify-between">
+          <div className="text-left">
+            <h4 className="font-medium leading-tight text-slate-400">Name</h4>
+            <h3 className="text-lg">{team.name}</h3>
+          </div>
+
+          <div>
+            <Popover.Root>
+              <Popover.Trigger>
+                <SvgVerticalDots width={18} height={18} />
+              </Popover.Trigger>
+              <Popover.Portal>
+                <Popover.Content className="mt-2 flex w-40 flex-col gap-2 rounded-lg bg-zinc-800 p-2 shadow-lg">
+                  <Button
+                    variant="outlined"
+                    className="w-full"
+                    onClick={leaveTeam}
+                  >
+                    Leave Team <SvgMoveOut />
+                  </Button>
+                </Popover.Content>
+              </Popover.Portal>
+            </Popover.Root>
+          </div>
         </div>
         <div className="mt-3 text-left">
           <h4 className="font-medium leading-tight text-slate-400">Members</h4>

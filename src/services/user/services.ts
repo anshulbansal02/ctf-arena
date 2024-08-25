@@ -1,3 +1,5 @@
+"use server";
+
 import { eq, inArray } from "drizzle-orm";
 import { db } from "../db";
 import { TB_userNotifications } from "./entities";
@@ -12,14 +14,13 @@ export async function createNotification(data: {
     .values({ forUser: data.userId, content: data.content });
 }
 
-export async function markNotification(
-  notificationId: number,
-  status: "seen" | "unseen",
-) {
+export async function markAllNotificationsAsRead() {
+  const user = await getAuthUser();
+
   await db
     .update(TB_userNotifications)
-    .set({ status: status === "unseen" ? "delivered" : "seen" })
-    .where(eq(TB_userNotifications.id, notificationId));
+    .set({ status: "seen" })
+    .where(eq(TB_userNotifications.forUser, user.id));
 }
 
 export async function getNotifications() {

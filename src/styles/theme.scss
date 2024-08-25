@@ -8,3 +8,17 @@ kbd {
   font-family: "JetBrains Mono";
   margin: 2px;
 }
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background-color: rgb(215, 244, 239);
+}

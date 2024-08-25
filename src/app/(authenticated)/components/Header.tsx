@@ -1,7 +1,9 @@
 import { getAuthUser, signOut } from "@/services/auth";
 import { Avatar, Button, Logo } from "@/shared/components";
 import clsx from "clsx";
-import { SvgSignOut } from "@/assets/icons";
+import { SvgLogOut } from "@/assets/icons";
+import React from "react";
+import { Notifications } from "./Notifications";
 
 interface Props {
   className?: string;
@@ -20,7 +22,9 @@ export async function Header({ className }: Props) {
       <div className="w-40"></div>
       <Logo className="flex-shrink-[0.5] flex-grow" />
 
-      <div className="flex w-40 justify-end gap-4">
+      <div className="flex w-60 justify-end gap-4">
+        <Notifications />
+
         <Avatar size={40} username={user.id} />
 
         <form
@@ -32,7 +36,7 @@ export async function Header({ className }: Props) {
           <Button variant="outlined">
             <span className="hidden sm:block">Sign Out</span>
             <span className="sm:hidden">
-              <SvgSignOut />
+              <SvgLogOut />
             </span>
           </Button>
         </form>

@@ -1,0 +1,3 @@
+import type { SVGProps } from "react";
+const SvgBellActive = (props: SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="#e8eaed" viewBox="0 -960 960 960" role="img" {...props}><path d="M80-560q0-100 44.5-183.5T244-882l47 64q-60 44-95.5 111T160-560zm720 0q0-80-35.5-147T669-818l47-64q75 55 119.5 138.5T880-560zM160-200v-80h80v-280q0-83 50-147.5T420-792v-28q0-25 17.5-42.5T480-880t42.5 17.5T540-820v28q80 20 130 84.5T720-560v280h80v80zM480-80q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80M320-280h320v-280q0-66-47-113t-113-47-113 47-47 113z" /></svg>;
+export default SvgBellActive;

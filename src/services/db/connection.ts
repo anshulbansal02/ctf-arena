@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
 export const connection = new Pool({
-  database: "arena",
+  database: config.db.name,
   host: config.db.host,
   port: config.db.port,
   user: config.db.user,

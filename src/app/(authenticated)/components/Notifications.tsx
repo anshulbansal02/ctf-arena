@@ -1,0 +1,89 @@
+"use client";
+
+import { Button } from "@/shared/components";
+import clsx from "clsx";
+import { SvgBell, SvgBellActive, SvgEmptyBox } from "@/assets/icons";
+import {
+  getNotifications,
+  markAllNotificationsAsRead,
+} from "@/services/user/services";
+import * as Popover from "@radix-ui/react-popover";
+import React from "react";
+import { formatDistanceToNowStrict } from "date-fns";
+import { useAction } from "@/shared/hooks";
+
+export function Notifications() {
+  const { data: notifications, execute: refetchNotifications } = useAction(
+    getNotifications,
+    {
+      immediate: true,
+      args: null,
+    },
+  );
+
+  const { execute: markRead } = useAction(markAllNotificationsAsRead);
+
+  const unseenNotificationsCount =
+    notifications?.filter((n) => n.status !== "seen").length ?? 0;
+
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <Button
+          variant="outlined"
+          className="relative mr-2 rounded-full"
+          onClick={async () => {
+            await markRead(null);
+            await refetchNotifications(null);
+          }}
+        >
+          {unseenNotificationsCount > 0 ? <SvgBellActive /> : <SvgBell />}
+          {unseenNotificationsCount > 0 && (
+            <div className="absolute right-[1px] top-[1px] h-3 w-3 rounded-full bg-red-500"></div>
+          )}
+        </Button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content className="z-20 mt-4 max-h-80 w-80 overflow-y-auto rounded-lg bg-zinc-800 px-4 py-3 shadow-lg">
+          <ul className="flex flex-col gap-3">
+            {!notifications?.length && (
+              <li className="flex flex-col items-center gap-2">
+                <SvgEmptyBox width={24} height={24} />
+                <p className="text-center text-sm leading-tight text-gray-400">
+                  You don't have any notifications.
+                  <br />
+                  Check back later.
+                </p>
+              </li>
+            )}
+
+            {notifications?.map((notification, i) => (
+              <React.Fragment key={notification.id}>
+                <li className="flex gap-2">
+                  {notification.status !== "seen" && (
+                    <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-[#4ec8c8]"></div>
+                  )}
+                  <p
+                    className={clsx({
+                      "text-gray-400": notification.status === "seen",
+                    })}
+                  >
+                    {notification.content as React.ReactNode}
+                  </p>
+                  <span className="ml-auto self-center whitespace-nowrap text-sm text-gray-500">
+                    {formatDistanceToNowStrict(notification.createdAt, {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </li>
+                {i < notifications.length - 1 && (
+                  <hr className="border-gray-600" />
+                )}
+              </React.Fragment>
+            ))}
+          </ul>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}

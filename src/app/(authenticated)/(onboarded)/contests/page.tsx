@@ -15,7 +15,7 @@ export default async function ContestsPage() {
     <div className="mx-auto mb-32 mt-32 w-[560px]">
       <h2 className="mb-4 text-center text-2xl">Contests</h2>
       <section className="mb-16">
-        <h2 className="text-slate-400">Ongoing Contests</h2>
+        <h2 className="">Ongoing Contests</h2>
         <div>
           {activeContests.length ? (
             activeContests.map((contest) => (

@@ -8,7 +8,7 @@ export default defineConfig({
   out: "./db",
   dbCredentials: {
     ssl: false,
-    database: "arena",
+    database: config.db.name,
     host: config.db.host,
     port: config.db.port,
     user: config.db.user,
