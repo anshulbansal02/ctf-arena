@@ -1,9 +1,15 @@
 "use client";
 import { useTeamsById } from "@/services/team/client";
+import { intervalToDuration } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 
 interface Props {
   contestId: number;
+}
+
+function msToDuration(ms: number) {
+  const duration = intervalToDuration({ start: 0, end: ms });
+  return `${(duration.minutes ?? 0).toString().padStart(2, "0")}:${(duration.seconds ?? 0).toString().padStart(2, "0")}`;
 }
 
 export function QuickestAtLeaderboard(props: Props) {
@@ -15,6 +21,8 @@ export function QuickestAtLeaderboard(props: Props) {
       timing?: number;
     }>
   >([]);
+
+  const [contestEnded, setContestEnded] = useState(false);
 
   const teamsOnLeaderboard = useMemo(
     () => leaderboard.map((l) => l.teamId),
@@ -28,13 +36,17 @@ export function QuickestAtLeaderboard(props: Props) {
       `/api/hook/leaderboard/${props.contestId}/update?type=quickest_firsts`,
     );
 
-    leaderboardEvents.onmessage = (event) => {
-      const data = event.data;
+    leaderboardEvents.addEventListener("leaderboard_update", (e) => {
+      const data = e.data;
       try {
         const updatedLeaderboard = JSON.parse(data);
         setLeaderboard(updatedLeaderboard);
       } catch {}
-    };
+    });
+
+    leaderboardEvents.addEventListener("contest_ended", () => {
+      setContestEnded(true);
+    });
 
     return () => {
       leaderboardEvents.close();
@@ -53,7 +65,7 @@ export function QuickestAtLeaderboard(props: Props) {
         <div role="cell" className="flex-[4]">
           Team
         </div>
-        <div role="cell" className="flex-1">
+        <div role="cell" className="flex-[2]">
           Timing
         </div>
       </div>
@@ -71,8 +83,8 @@ export function QuickestAtLeaderboard(props: Props) {
             <div role="cell" className="flex-[4]">
               {teamsById[entry.teamId]?.name ?? "-"}
             </div>
-            <div role="cell" className="flex-1">
-              {entry.timing ? entry.timing + "s" : "-"}
+            <div role="cell" className="flex-[2]">
+              {entry.timing ? msToDuration(entry.timing) + " min" : "-"}
             </div>
           </div>
         ))}

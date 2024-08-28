@@ -45,7 +45,7 @@ export async function bootstrap() {
   });
 
   contestQueue.process(
-    "sprinting-teams-update",
+    "minutely-contest-update",
     async (job: Bull.Job<{ id: number }>) => {
       console.info(
         `[Job] Updating sprinting teams leaderboard for contest id ${job.data.id}`,
@@ -67,7 +67,7 @@ export async function bootstrap() {
     });
 
     contestsStartingInOneHour.forEach((contest) => {
-      contestQueue.add("sprinting-teams-update", contest, {
+      contestQueue.add("minutely-contest-update", contest, {
         repeat: {
           cron: "* * * * *",
           startDate: contest.startsAt,

@@ -351,9 +351,15 @@ export async function getReceivedJoinRequests(teamId: number) {
 // As a user, which teams have sent me invites
 export async function getReceivedTeamInvites() {
   const user = await getAuthUser();
-  const tr = TB_teamRequest;
+  const tr = TB_teamRequest,
+    t = TB_teams;
   const invites = await db
-    .select()
+    .select({
+      id: tr.id,
+      createdAt: tr.createdAt,
+      teamName: t.name,
+      createdBy: tr.createdBy,
+    })
     .from(tr)
     .where(
       and(
@@ -361,7 +367,8 @@ export async function getReceivedTeamInvites() {
         inArray(tr.status, ["queued", "sent", "delivered"]),
         eq(tr.type, "invite"),
       ),
-    );
+    )
+    .leftJoin(t, eq(tr.teamId, t.id));
 
   return invites;
 }
@@ -610,7 +617,14 @@ export async function getInviteFromSecret(secret: string) {
   const [invite] = await db
     .select()
     .from(TB_teamRequest)
-    .where(sql`metadata->'secret' = ${secret}`);
+    .where(sql`metadata->>'secret' = '${secret}'`);
 
   return invite;
+}
+
+export async function isUserTeamLeader(): Promise<boolean> {
+  const user = await getAuthUser();
+  const team = await getTeamDetailsByUserId(user.id);
+
+  return !!team?.members.find((m) => m.id === user.id && m.isLeader);
 }

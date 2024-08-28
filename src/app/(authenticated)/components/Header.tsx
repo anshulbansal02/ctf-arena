@@ -19,7 +19,7 @@ export async function Header({ className }: Props) {
         className,
       )}
     >
-      <div className="w-40"></div>
+      <div className="w-60"></div>
       <Logo className="flex-shrink-[0.5] flex-grow" />
 
       <div className="flex w-60 justify-end gap-4">

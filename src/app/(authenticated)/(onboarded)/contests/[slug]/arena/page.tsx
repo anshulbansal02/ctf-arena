@@ -14,6 +14,7 @@ import {
   ProgressBar,
   Shim,
   Spinner,
+  Timer,
 } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
 import { useEffect, useRef } from "react";
@@ -173,6 +174,12 @@ export default function SubmissionPage({
       )}
       {pageData && (
         <div>
+          <div className="fixed left-6 top-6 z-20 rounded-md bg-slate-700 px-4 py-2 shadow-md">
+            <span className="font-mono text-lg font-semibold">
+              <Timer till={pageData.contest.endsAt} running />
+            </span>
+          </div>
+
           {nextChallenge ? (
             <ScheduledHints
               challengeId={nextChallenge.id}

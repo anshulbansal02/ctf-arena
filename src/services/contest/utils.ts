@@ -1,7 +1,6 @@
 import { randomItem } from "@/lib/utils";
 
 export function submissionComparator(keyA: string, keyB: string) {
-  console.log({ keyA, keyB });
   return keyA.toLowerCase() === keyB.toLowerCase();
 }
 

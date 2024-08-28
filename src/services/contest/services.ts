@@ -291,8 +291,7 @@ export async function getTeamLastSubmissionAt(
   contestId: number,
   teamId?: number,
 ): Promise<string> {
-  const cs = TB_contestSubmissions,
-    ce = TB_contestEvents;
+  const cs = TB_contestSubmissions;
 
   const tId = teamId ?? (await getTeamIdByUserId((await getAuthUser()).id));
   if (!tId) throw new Error("Cannot get team last submission");
@@ -304,14 +303,12 @@ export async function getTeamLastSubmissionAt(
 
   if (submission) return submission.createdAt.toString();
 
-  const [event] = await db
-    .select({ createdAt: ce.createdAt })
-    .from(ce)
-    .where(
-      and(eq(ce.teamId, tId), eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST)),
-    );
+  const [contest] = await db
+    .select({ startedAt: TB_contests.startsAt })
+    .from(TB_contests)
+    .where(eq(TB_contests.id, contestId));
 
-  return event.createdAt.toString();
+  return contest.startedAt.toString();
 }
 
 export async function revealHint(challengeId: number, hintId: number) {
@@ -362,6 +359,7 @@ export async function getContestsStartingInOneHour() {
 export async function createContest(data: {
   name: string;
   description: string;
+  shortDescription: string;
   time: { start: Date; end: Date };
   challenges: Array<{
     name?: string;
@@ -383,6 +381,7 @@ export async function createContest(data: {
       .values({
         name: data.name,
         description: data.description,
+        shortDescription: data.shortDescription,
         startsAt: data.time.start,
         endsAt: data.time.end,
       })

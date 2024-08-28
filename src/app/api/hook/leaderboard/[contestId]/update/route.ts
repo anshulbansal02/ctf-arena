@@ -16,16 +16,21 @@ export async function GET(
     "type",
   ) as leaderboard.Leaderboard;
 
-  const send = (data: unknown) => {
-    writer.write(encoder.encode(`data: ${data}\n\n`));
+  const send = (event: string, data: unknown) => {
+    writer.write(
+      encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
+    );
   };
 
   const contestId = +params.contestId;
   if (isNaN(contestId)) throw new Error("Invalid contest id");
 
   const leaderboardListener = async () => {
-    const updatedLeaderboard = await leaderboard.getLeaderboardByName(type, contestId);
-    send(updatedLeaderboard);
+    const updatedLeaderboard = await leaderboard.getLeaderboardByName(
+      type,
+      contestId,
+    );
+    send("leaderboard_update", updatedLeaderboard);
   };
 
   subCache.subscribe(
@@ -40,6 +45,15 @@ export async function GET(
     );
 
     writer.close();
+  });
+
+  // Send initially
+  setImmediate(async () => {
+    const leaderboardData = await leaderboard.getLeaderboardByName(
+      type,
+      contestId,
+    );
+    send("leaderboard_update", leaderboardData);
   });
 
   return new Response(responseStream.readable, {

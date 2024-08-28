@@ -32,7 +32,7 @@ export async function TeamCard(props: TeamCardProps) {
               <Popover.Portal>
                 <Popover.Content className="mt-2 flex w-40 flex-col gap-2 rounded-lg bg-zinc-800 p-2 shadow-lg">
                   <Button
-                    variant="outlined"
+                    variant="ghost"
                     className="w-full"
                     onClick={leaveTeam}
                   >

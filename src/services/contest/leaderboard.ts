@@ -65,13 +65,28 @@ export async function sumOfScoresProcessor(submission: ContestSubmission) {
 export async function getSumOfScores(contestId: number) {
   const cacheKey = leaderboardKey("sum_of_scores", contestId, "prepared");
   const cached = await cache.get(cacheKey);
+  console.log("cached: ", cacheKey, cached);
+
   if (cached) return JSON.parse(cached);
+
+  if (
+    !(await cache.exists(leaderboardKey("sum_of_scores", contestId, "raw")))
+  ) {
+    await rebuildSumOfScores(contestId);
+  }
 
   const scores = await cache.zRangeWithScores(
     leaderboardKey("sum_of_scores", contestId, "raw"),
     0,
     -1,
   );
+
+  const cs = TB_contestSubmissions;
+  const challengesSolvedByEachTeam = await db
+    .select({ teamId: cs.submittedByTeam, count: sum(cs.submittedByTeam) })
+    .from(cs)
+    .where(eq(cs.contestId, contestId))
+    .groupBy(cs.submittedByTeam);
 
   let currentRank = 0,
     lastScore = 0;
@@ -85,7 +100,9 @@ export async function getSumOfScores(contestId: number) {
       rank: currentRank,
       teamId: +teamId,
       score,
-      challengesSolved: 0,
+      challengesSolved: challengesSolvedByEachTeam.find(
+        (k) => k.teamId === +teamId,
+      )?.count,
     };
   });
 
@@ -136,6 +153,12 @@ export async function getSprintingTeams(contestId: number) {
   const cacheKey = leaderboardKey("sprinting_teams", contestId, "prepared");
   const cached = await cache.get(cacheKey);
   if (cached) return JSON.parse(cached);
+
+  if (
+    !(await cache.exists(leaderboardKey("sprinting_teams", contestId, "raw")))
+  ) {
+    await rebuildSprintingTeams(contestId);
+  }
 
   const timeBoundary = 30 * 60 * 1000;
 
@@ -223,6 +246,12 @@ export async function getQuickestFirsts(contestId: number) {
   const cached = await cache.get(cacheKey);
   if (cached) return JSON.parse(cached);
 
+  if (
+    !(await cache.exists(leaderboardKey("quickest_firsts", contestId, "raw")))
+  ) {
+    await rebuildQuickestFirsts(contestId);
+  }
+
   const records = await cache.hGetAll(
     leaderboardKey("quickest_firsts", contestId, "raw"),
   );
@@ -297,7 +326,6 @@ export async function getTeamRankAndScore(contestId: number, teamId: number) {
     leaderboardKey("sum_of_scores", contestId, "raw"),
     teamId.toString(),
   ];
-  // const score = await cache.zScore(args[0], args[1]);
   const [rank, score] = await Promise.all([
     cache.zRank(args[0], args[1]),
     cache.zScore(args[0], args[1]),

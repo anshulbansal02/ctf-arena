@@ -21,7 +21,7 @@ export default async function LeaderboardPage({
       <div className="mt-32 flex flex-col gap-12 lg:flex-row">
         <section className="flex-[2]">
           <h1 className="text-center text-3xl font-normal text-slate-300">
-            Leaderboard &gt; CTF Challenge 1.0
+            Leaderboard &gt; {contest.name}
           </h1>
           <div className="mt-8">
             <MainLeaderboard contestId={+params.slug} />

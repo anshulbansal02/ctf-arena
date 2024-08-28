@@ -14,6 +14,8 @@ export function SprintersLeaderboard(props: Props) {
     }>
   >([]);
 
+  const [contestEnded, setContestEnded] = useState(false);
+
   const teamsOnLeaderboard = useMemo(
     () => leaderboard.map((l) => l.teamId),
     [leaderboard],
@@ -26,13 +28,17 @@ export function SprintersLeaderboard(props: Props) {
       `/api/hook/leaderboard/${props.contestId}/update?type=sprinting_teams`,
     );
 
-    leaderboardEvents.onmessage = (event) => {
-      const data = event.data;
+    leaderboardEvents.addEventListener("leaderboard_update", (e) => {
+      const data = e.data;
       try {
         const updatedLeaderboard = JSON.parse(data);
         setLeaderboard(updatedLeaderboard);
       } catch {}
-    };
+    });
+
+    leaderboardEvents.addEventListener("contest_ended", () => {
+      setContestEnded(true);
+    });
 
     return () => {
       leaderboardEvents.close();

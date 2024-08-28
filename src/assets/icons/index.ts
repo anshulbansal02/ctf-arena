@@ -1,5 +1,6 @@
 export { default as SvgBellActive } from './tsx/bell-active'
 export { default as SvgBell } from './tsx/bell'
+export { default as SvgBulb } from './tsx/bulb'
 export { default as SvgChevronLeft } from './tsx/chevron-left'
 export { default as SvgCross } from './tsx/cross'
 export { default as SvgEmptyBox } from './tsx/empty-box'

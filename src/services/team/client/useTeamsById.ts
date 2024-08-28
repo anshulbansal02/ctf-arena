@@ -29,7 +29,7 @@ export function useTeamsById(opts: Options) {
     setTeamIdsBeingFetched(teamIdsBeingFetched.union(new Set(teamIdsToFetch)));
 
     const teams = await getTeamsDetailsByIds(teamIdsToFetch);
-    setTeamsById({ ...teamsById, ...teams });
+    setTeamsById((t) => ({ ...t, ...teams }));
 
     setTeamIdsBeingFetched(
       teamIdsBeingFetched.difference(new Set(teamIdsToFetch)),

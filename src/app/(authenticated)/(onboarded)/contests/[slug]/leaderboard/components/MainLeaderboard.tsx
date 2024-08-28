@@ -14,8 +14,16 @@ const medalURIs: Record<number, StaticImageData> = {
   3: BronzeMedal,
 };
 
+type LeaderboardData = Array<{
+  rank: number;
+  teamId: number;
+  score: number;
+  challengesSolved: number;
+}>;
+
 interface Props {
   contestId: number;
+  staticData?: LeaderboardData;
 }
 
 function Rank({ index }: { index: number }) {
@@ -34,14 +42,12 @@ function Rank({ index }: { index: number }) {
 }
 
 export function MainLeaderboard(props: Props) {
-  const [leaderboard, setLeaderboard] = useState<
-    Array<{
-      rank: number;
-      teamId: number;
-      score: number;
-      challengesSolved: number;
-    }>
-  >([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardData>(
+    () => props.staticData ?? [],
+  );
+  const [contestEnded, setContestEnded] = useState(false);
+
+  const isStaticLeaderboard = Boolean(props.staticData);
 
   const teamsOnLeaderboard = useMemo(
     () => leaderboard.map((l) => l.teamId),
@@ -51,21 +57,27 @@ export function MainLeaderboard(props: Props) {
   const { teamsById } = useTeamsById({ teamIds: teamsOnLeaderboard });
 
   useEffect(() => {
-    const leaderboardEvents = new EventSource(
-      `/api/hook/leaderboard/${props.contestId}/update?type=sum_of_scores`,
-    );
+    if (!isStaticLeaderboard) {
+      const leaderboardEvents = new EventSource(
+        `/api/hook/leaderboard/${props.contestId}/update?type=sum_of_scores`,
+      );
 
-    leaderboardEvents.onmessage = (event) => {
-      const data = event.data;
-      try {
-        const updatedLeaderboard = JSON.parse(data);
-        setLeaderboard(updatedLeaderboard);
-      } catch {}
-    };
+      leaderboardEvents.addEventListener("leaderboard_update", (e) => {
+        const data = e.data;
+        try {
+          const updatedLeaderboard = JSON.parse(data);
+          setLeaderboard(updatedLeaderboard);
+        } catch {}
+      });
 
-    return () => {
-      leaderboardEvents.close();
-    };
+      leaderboardEvents.addEventListener("contest_ended", () => {
+        setContestEnded(true);
+      });
+
+      return () => {
+        leaderboardEvents.close();
+      };
+    }
   }, [props.contestId]);
 
   return (
@@ -115,7 +127,9 @@ export function MainLeaderboard(props: Props) {
               </div>
             </div>
             <div role="cell" className="flex flex-[4] items-center gap-2">
-              <ProgressBar total={8} value={entry.challengesSolved} />
+              <div className="w-36">
+                <ProgressBar total={8} value={entry.challengesSolved} />
+              </div>
               <span className="text-sm text-zinc-400">
                 {entry.challengesSolved}/8
               </span>
