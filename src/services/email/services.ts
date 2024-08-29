@@ -3,19 +3,10 @@ import { ResendProvider } from "./adapters/resend";
 import { EmailProvider, SendConfig } from "./types";
 
 class EmailService {
-  private defaultConfig: Partial<SendConfig> = {};
-
   constructor(private readonly provider: EmailProvider) {}
 
-  setDefaults(config: Partial<SendConfig>) {
-    this.defaultConfig = config;
-  }
-
-  async send(config: Partial<SendConfig>) {
-    await this.provider.send({
-      ...this.defaultConfig,
-      ...config,
-    } as SendConfig);
+  async send(config: SendConfig) {
+    await this.provider.send(config);
   }
 }
 

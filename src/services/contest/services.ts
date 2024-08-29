@@ -18,13 +18,14 @@ import {
   TB_contests,
 } from "./entities";
 import { getAuthUser } from "../auth";
-import { getTeamIdByUserId } from "../team";
+import { getTeamIdByUserId, TB_teams } from "../team";
 import { scrambleText, submissionComparator } from "./utils";
 import { CONTEST_EVENTS } from "./helpers";
 import { contestQueue } from "../queue";
 import { getTeamRankAndScore } from "./leaderboard";
 import { TB_users } from "../user";
 import { emailService, renderTemplate } from "../email";
+import { config } from "@/config";
 
 export const contestChannel = async (subChannel: "submission") => {
   return `channel:contest:${subChannel}`;
@@ -468,15 +469,15 @@ export async function batchSendContestIntimation(contestId: number) {
 
   users.forEach((user) => {
     emailService.send({
-      address: { to: user.email },
+      address: { from: config.app.sourceEmailAddress , to: user.email },
       body: renderTemplate("contest-intimation", {
         contestName: contest.name,
-        contestURL: "",
+        contestURL: new URL(`contest/${contest.id}`, config.host).href,
         startsAt: contest.startsAt,
         userEmail: user.email,
         userName: user.name!,
       }),
-      subject: "CTF Contest is starting in 1 hour.",
+      subject: `Contest ${contest.name} is starting in less than an hour.`,
     });
   });
 }
@@ -511,4 +512,20 @@ export async function getContestStats(contestId: number) {
   };
 }
 
-export async function getContestParticipants();
+export async function getContestParticipatingTeamIds(contestId: number) {
+  const ce = TB_contestEvents;
+
+  const participants = await db
+    .select({
+      teamId: ce.id,
+    })
+    .from(ce)
+    .where(
+      and(
+        eq(ce.contestId, contestId),
+        eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
+      ),
+    );
+
+  return participants.map((p) => p.teamId);
+}

@@ -1,1 +1,0 @@
-ALTER TABLE "team_requests" ALTER COLUMN "created_by" SET DATA TYPE text;

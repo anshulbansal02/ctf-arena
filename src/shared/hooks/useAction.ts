@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer } from "react";
+import { useToaster } from "./useToaster";
 
 type AsyncFunction<P, R> = (args: P) => Promise<R>;
 
@@ -71,8 +72,12 @@ export function useAction<ParamsType, ReturnType>(
     data: null,
   });
 
+  const toaster = useToaster();
+
   const execute = useCallback(
-    async (params: ParamsType): Promise<ReturnType | undefined> => {
+    async (
+      params: ParamsType,
+    ): Promise<ReturnType | undefined | { error: unknown }> => {
       dispatch({ type: "loading", preserveData: opts?.preserveData });
       try {
         const result = await action(params);
@@ -85,6 +90,20 @@ export function useAction<ParamsType, ReturnType>(
           payload: error,
           preserveData: opts?.preserveData,
         });
+
+        let errorMessage = "Something went wrong. Please try again.";
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
+        const errorReadingTime = Math.max(
+          2500,
+          errorMessage.split(" ").length * 350,
+        ); // Number of words * 350ms;
+
+        toaster.error({ title: errorMessage, timeout: errorReadingTime });
+
+        return { error: errorMessage };
       }
     },
     [action],

@@ -55,7 +55,9 @@ CREATE TABLE IF NOT EXISTS "contest_submissions" (
 CREATE TABLE IF NOT EXISTS "contests" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
+	"short_description" text DEFAULT '',
 	"description" text,
+	"unranked" boolean DEFAULT false,
 	"starts_at" timestamp NOT NULL,
 	"ends_at" timestamp NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
@@ -73,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "team_requests" (
 	"team_id" integer NOT NULL,
 	"status" "team_request_status" DEFAULT 'queued' NOT NULL,
 	"type" "team_request_type" NOT NULL,
-	"created_by" uuid NOT NULL,
+	"created_by" text NOT NULL,
 	"user_email" varchar(255),
 	"metadata" jsonb,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -111,7 +113,7 @@ CREATE TABLE IF NOT EXISTS "user_notifications" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"status" "user_notification_status" DEFAULT 'queued' NOT NULL,
 	"for_user_id" text NOT NULL,
-	"content" jsonb DEFAULT '{}'::jsonb,
+	"content" text DEFAULT '',
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );

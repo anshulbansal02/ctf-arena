@@ -29,7 +29,7 @@ const Button = forwardRef(function Button(
     return (
       <button
         ref={ref}
-        className={clsx(styles.button, styles[variant ?? "primary"], className)}
+        className={clsx(styles.button, styles[variant ?? "primary"], {'cursor-progress': loading}, className)}
         disabled={loading}
         {...elementProps}
       >

@@ -1,5 +1,5 @@
 {
-  "id": "6a3c81f2-c6df-4098-9da6-79d4b03860fb",
+  "id": "fade927b-9b25-4aca-b7f9-bfe2d33d7fe2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -324,11 +324,25 @@
           "primaryKey": false,
           "notNull": true
         },
+        "short_description": {
+          "name": "short_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "''"
+        },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "unranked": {
+          "name": "unranked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "starts_at": {
           "name": "starts_at",
@@ -493,7 +507,7 @@
         },
         "created_by": {
           "name": "created_by",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -752,10 +766,10 @@
         },
         "content": {
           "name": "content",
-          "type": "jsonb",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": "'{}'::jsonb"
+          "default": "''"
         },
         "created_at": {
           "name": "created_at",
@@ -885,6 +899,7 @@
     }
   },
   "schemas": {},
+  "sequences": {},
   "_meta": {
     "columns": {},
     "schemas": {},

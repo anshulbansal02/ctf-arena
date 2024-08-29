@@ -2,14 +2,16 @@ import { connection as dbConnection } from "@/services/db";
 import { contestQueue, jobQueue, notificationsQueue } from "@/services/queue";
 import * as leaderboard from "@/services/contest/leaderboard";
 import { cache } from "@/services/cache";
-import { batchSendInvitations } from "@/services/team";
+import { batchSendInvitations, getTeamsDetailsByIds } from "@/services/team";
 import {
   batchSendContestIntimation,
   contestChannel,
+  getContestParticipatingTeamIds,
   getContestsStartingInOneHour,
 } from "@/services/contest";
 import Bull from "bull";
 import { formatDistanceToNow } from "date-fns";
+import { createNotification } from "./services/user/services";
 
 export async function bootstrap() {
   try {
@@ -40,10 +42,14 @@ export async function bootstrap() {
     repeat: { cron: "* * * * *" },
   });
 
-  jobQueue.process("notifications", async () => {
-    console.info(`[Job] Creating notifications`);
-    // create new notification
-  });
+  notificationsQueue.process(
+    "new-notification",
+    async (job: Bull.Job<{ content: string; userId: string }>) => {
+      console.info(`[Job] Creating notifications`);
+      // create new notification
+      createNotification(job.data);
+    },
+  );
 
   contestQueue.process(
     "minutely-contest-update",
@@ -61,14 +67,29 @@ export async function bootstrap() {
     console.info(`[Job] Hourly contest updates`);
     const contestsStartingInOneHour = await getContestsStartingInOneHour();
 
-    notificationsQueue.addBulk(
-      contestsStartingInOneHour.flatMap((contest) => ({
-        name: "new-notification",
-        data: {
-          content: `Contest <b>${contest.name}</b> is starting in ${formatDistanceToNow(contest.startsAt)}`,
-        },
-      })),
-    );
+    const notifications = (
+      await Promise.all(
+        contestsStartingInOneHour.map(async (contest) => {
+          const participatingTeams = await getContestParticipatingTeamIds(
+            contest.id,
+          );
+          const teams = Object.values(
+            await getTeamsDetailsByIds(participatingTeams),
+          ).filter(Boolean);
+
+          const participants = teams.flatMap((team) => team!.members);
+
+          return participants.map((user) => ({
+            name: "new-notification",
+            data: {
+              content: `Contest <b>${contest.name}</b> is starting in ${formatDistanceToNow(contest.startsAt)}`,
+              userId: user.id,
+            },
+          }));
+        }),
+      )
+    ).flatMap((n) => n);
+    notificationsQueue.addBulk(notifications);
 
     contestsStartingInOneHour.forEach((contest) => {
       batchSendContestIntimation(contest.id);

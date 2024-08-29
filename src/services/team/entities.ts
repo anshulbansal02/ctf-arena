@@ -9,6 +9,7 @@ import {
   jsonb,
   pgView,
   text,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { TB_users } from "../user";
 import { eq, isNull } from "drizzle-orm";
@@ -30,6 +31,7 @@ export const Enum_teamRequestType = pgEnum("team_request_type", [
 export const TB_teams = pgTable("teams", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
+  abandoned: boolean('abandoned').default(false),
   leader: text("leader")
     .notNull()
     .unique()

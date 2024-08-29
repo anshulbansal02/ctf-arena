@@ -1,1 +1,0 @@
-ALTER TABLE "contests" ADD COLUMN "short_description" text DEFAULT '';

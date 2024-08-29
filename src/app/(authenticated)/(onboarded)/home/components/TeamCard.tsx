@@ -7,6 +7,7 @@ import {
 } from "@/services/team";
 import { Avatar, Button } from "@/shared/components";
 import * as Popover from "@radix-ui/react-popover";
+import { LeaveTeamButton } from "./LeaveTeamButton";
 
 type TeamCardProps = { teamId: number } | { userId: string };
 
@@ -31,13 +32,7 @@ export async function TeamCard(props: TeamCardProps) {
               </Popover.Trigger>
               <Popover.Portal>
                 <Popover.Content className="mt-2 flex w-40 flex-col gap-2 rounded-lg bg-zinc-800 p-2 shadow-lg">
-                  <Button
-                    variant="ghost"
-                    className="w-full"
-                    onClick={leaveTeam}
-                  >
-                    Leave Team <SvgMoveOut />
-                  </Button>
+                  <LeaveTeamButton />
                 </Popover.Content>
               </Popover.Portal>
             </Popover.Root>

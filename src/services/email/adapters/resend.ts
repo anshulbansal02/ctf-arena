@@ -10,7 +10,7 @@ export class ResendProvider implements EmailProvider {
   ) {}
 
   async send(config: SendConfig) {
-    const res = await fetch(this.config.API_URL, {
+    await fetch(this.config.API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.config.AUTH_KEY}`,

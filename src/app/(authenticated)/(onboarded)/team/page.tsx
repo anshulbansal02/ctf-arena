@@ -26,7 +26,7 @@ export default async function TeamPage() {
 
   return (
     <section className="mx-auto mb-24 flex min-h-screen max-w-[480px] flex-col items-center">
-      <section className="mt-8 flex w-[420px] flex-col items-center">
+      <section className="mt-12 flex w-[420px] flex-col items-center">
         <h2 className="text-2xl">My Team</h2>
         <TeamCard userId={user.id} />
       </section>

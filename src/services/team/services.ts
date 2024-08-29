@@ -25,7 +25,7 @@ import { config } from "@/config";
 import { TB_contestEvents } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
 import { nanoid } from "nanoid";
-import { jobQueue, notificationsQueue } from "../queue";
+import { notificationsQueue } from "../queue";
 
 export type TeamDetails = {
   id: number;
@@ -78,7 +78,7 @@ export async function createTeamAndSendInvites(props: {
   const user = await getAuthUser();
 
   if (await getTeamIdByUserId(user.id))
-    throw new Error("User is already in a team");
+    throw new Error("You are already in a team");
 
   await db.transaction(async (tx) => {
     const [{ teamId }] = await tx
@@ -201,7 +201,12 @@ export async function getTeams(search?: string): Promise<Array<TeamDetails>> {
     .from(t)
     .leftJoin(ctm, eq(ctm.teamId, t.id))
     .leftJoin(u, eq(ctm.userId, u.id))
-    .where(search ? ilike(t.name, `%${search}%`) : sql`true`)
+    .where(
+      and(
+        search ? ilike(t.name, `%${search}%`) : sql`true`,
+        eq(t.abandoned, false),
+      ),
+    )
     .groupBy(t.id);
 
   return teams;
@@ -295,7 +300,7 @@ export async function sendTeamRequests(teamIds: Array<number>) {
   const user = await getAuthUser();
 
   const teamId = await getTeamIdByUserId(user.id);
-  if (teamId) throw new Error("User is already in a team");
+  if (teamId) throw new Error("You are already in a team");
 
   const [userRequests] = await db
     .select({ count: count() })
@@ -492,7 +497,7 @@ export async function respondToTeamRequest(
           .update(tr)
           .set({ status: "cancelled" })
           .where(eq(tr.id, requestId));
-        throw new Error("User is already in a team");
+        throw new Error("You are already in a team");
       }
 
       // Check if team accepting the request is not in contest
@@ -567,6 +572,14 @@ export async function leaveTeam() {
         and(isNull(TB_teamMembers.leftAt), eq(TB_teamMembers.userId, user.id)),
       );
 
+    // Mark team abandoned if no member is left
+    if (team.members.length === 1) {
+      await tx
+        .update(TB_teams)
+        .set({ abandoned: true })
+        .where(eq(TB_teams.id, team.id));
+    }
+
     cacheTeamDetails({ teamId: team.id });
   });
 }
@@ -633,7 +646,10 @@ export async function batchSendInvitations() {
       const emailBody = renderTemplate("team-invite", {
         inviteeEmail: invite.inviteeEmail!,
         inviterEmail: invite.inviter?.email!,
-        inviteLink: `https://${config.host}/team/invite/${(invite.metadata as { secret: string }).secret}`,
+        inviteLink: new URL(
+          `team/invite/${(invite.metadata as { secret: string }).secret}`,
+          config.host,
+        ).href,
         inviterName: invite.inviter?.name!,
         teamName: invite.teamName!,
       });

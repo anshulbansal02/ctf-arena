@@ -65,7 +65,6 @@ export async function sumOfScoresProcessor(submission: ContestSubmission) {
 export async function getSumOfScores(contestId: number) {
   const cacheKey = leaderboardKey("sum_of_scores", contestId, "prepared");
   const cached = await cache.get(cacheKey);
-  console.log("cached: ", cacheKey, cached);
 
   if (cached) return JSON.parse(cached);
 

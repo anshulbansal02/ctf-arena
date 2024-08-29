@@ -1,6 +1,6 @@
 {
-  "id": "1e497109-060b-4f12-90e3-62c5eb0c33b2",
-  "prevId": "6a3c81f2-c6df-4098-9da6-79d4b03860fb",
+  "id": "4f3f0d87-4016-4367-a6d4-a6ff8af4a37f",
+  "prevId": "fade927b-9b25-4aca-b7f9-bfe2d33d7fe2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -337,6 +337,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "unranked": {
+          "name": "unranked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
         "starts_at": {
           "name": "starts_at",
           "type": "timestamp",
@@ -500,7 +507,7 @@
         },
         "created_by": {
           "name": "created_by",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -565,6 +572,13 @@
           "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
+        },
+        "abandoned": {
+          "name": "abandoned",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "leader": {
           "name": "leader",
@@ -759,10 +773,10 @@
         },
         "content": {
           "name": "content",
-          "type": "jsonb",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": "'{}'::jsonb"
+          "default": "''"
         },
         "created_at": {
           "name": "created_at",

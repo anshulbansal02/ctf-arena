@@ -36,13 +36,9 @@ export function CreateTeamStep(props: Props) {
     mode: "onSubmit",
   });
 
-  const {
-    execute: createTeam,
-    loading,
-    error,
-  } = useAction(createTeamAndSendInvites);
+  const { execute: createTeam, loading } = useAction(createTeamAndSendInvites);
 
-  function handleNext(formData: TeamDetails) {
+  async function handleNext(formData: TeamDetails) {
     switch (stage) {
       case "name":
         const timer = setTimeout(() => {
@@ -59,11 +55,11 @@ export function CreateTeamStep(props: Props) {
         return setStage("invite");
 
       case "invite":
-        createTeam({
+        const result = await createTeam({
           name: formData.name,
           invitees: formData.inviteIds,
         });
-        return props.onNext("finish");
+        if (!result?.error) return props.onNext("finish");
     }
   }
 

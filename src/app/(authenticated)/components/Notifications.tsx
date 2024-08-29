@@ -67,19 +67,24 @@ export function Notifications() {
 
             {notifications?.map((notification, i) => (
               <React.Fragment key={notification.id}>
-                <li className="flex gap-2">
-                  {notification.status !== "seen" && (
-                    <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-[#4ec8c8]"></div>
-                  )}
-                  <div
-                    className={clsx({
-                      "text-gray-400": notification.status === "seen",
-                    })}
-                    dangerouslySetInnerHTML={{
-                      __html: notification.content ?? "",
-                    }}
-                  ></div>
-                  <span className="ml-auto self-center whitespace-nowrap text-sm text-gray-500">
+                <li>
+                  <div className="flex gap-2">
+                    {notification.status !== "seen" && (
+                      <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-[#4ec8c8]" />
+                    )}
+                    <div
+                      className={clsx(
+                        {
+                          "text-gray-400": notification.status === "seen",
+                        },
+                        "leading-snug",
+                      )}
+                      dangerouslySetInnerHTML={{
+                        __html: notification.content ?? "",
+                      }}
+                    ></div>
+                  </div>
+                  <span className="mt-1 block self-center whitespace-nowrap text-right text-sm text-gray-500">
                     {formatDistanceToNowStrict(notification.createdAt, {
                       addSuffix: true,
                     })}
