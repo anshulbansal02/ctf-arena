@@ -115,7 +115,7 @@ export function MainLeaderboard(props: Props) {
                   <Avatar
                     key={member.id}
                     rounded
-                    username={member.id}
+                    username={member.email}
                     title={member.name}
                     size={20}
                     className="-ml-2 rounded-full border border-zinc-950 bg-slate-400 first:ml-0"

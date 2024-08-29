@@ -1,5 +1,5 @@
 import { connection as dbConnection } from "@/services/db";
-import { contestQueue, jobQueue } from "@/services/queue";
+import { contestQueue, jobQueue, notificationsQueue } from "@/services/queue";
 import * as leaderboard from "@/services/contest/leaderboard";
 import { cache } from "@/services/cache";
 import { batchSendInvitations } from "@/services/team";
@@ -9,6 +9,7 @@ import {
   getContestsStartingInOneHour,
 } from "@/services/contest";
 import Bull from "bull";
+import { formatDistanceToNow } from "date-fns";
 
 export async function bootstrap() {
   try {
@@ -60,7 +61,14 @@ export async function bootstrap() {
     console.info(`[Job] Hourly contest updates`);
     const contestsStartingInOneHour = await getContestsStartingInOneHour();
 
-    jobQueue.add("notifications", []);
+    notificationsQueue.addBulk(
+      contestsStartingInOneHour.flatMap((contest) => ({
+        name: "new-notification",
+        data: {
+          content: `Contest <b>${contest.name}</b> is starting in ${formatDistanceToNow(contest.startsAt)}`,
+        },
+      })),
+    );
 
     contestsStartingInOneHour.forEach((contest) => {
       batchSendContestIntimation(contest.id);

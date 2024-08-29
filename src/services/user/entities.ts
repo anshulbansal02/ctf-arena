@@ -1,14 +1,12 @@
 import {
   pgTable,
   serial,
-  uuid,
   timestamp,
   pgEnum,
   jsonb,
   text,
   integer,
   primaryKey,
-  boolean,
 } from "drizzle-orm/pg-core";
 import { AdapterAccountType } from "next-auth/adapters";
 
@@ -70,7 +68,7 @@ export const TB_userNotifications = pgTable("user_notifications", {
   forUser: text("for_user_id")
     .notNull()
     .references(() => TB_users.id, { onDelete: "cascade" }),
-  content: jsonb("content").default({}),
+  content: text("content").default(""),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()

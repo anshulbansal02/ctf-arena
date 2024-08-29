@@ -1,0 +1,1 @@
+ALTER TABLE "contests" ADD COLUMN "unranked" boolean DEFAULT false;

@@ -2,7 +2,6 @@ import {
   pgTable,
   serial,
   varchar,
-  uuid,
   timestamp,
   integer,
   pgEnum,
@@ -73,7 +72,7 @@ export const TB_teamRequest = pgTable("team_requests", {
   // Request/Invite
   type: Enum_teamRequestType("type").notNull(),
   // User who sent sent Request/Invite
-  createdBy: uuid("created_by").notNull(),
+  createdBy: text("created_by").notNull(),
   // Invitee email
   userEmail: varchar("user_email", { length: 255 }),
   metadata: jsonb("metadata"),

@@ -1,0 +1,3 @@
+import type { SVGProps } from "react";
+const SvgEmailUnsubscribe = (props: SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="#e8eaed" viewBox="0 -960 960 960" role="img" {...props}><path d="M480-440 160-640v400h320q0 21 3 40.5t9 39.5H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v228q-18-9-38.5-15t-41.5-9v-124zm0-80 320-200H160zM760-40q-83 0-141.5-58.5T560-240t58.5-141.5T760-440t141.5 58.5T960-240 901.5-98.5 760-40M640-220h240v-40H640zm-480-20v-480z" /></svg>;
+export default SvgEmailUnsubscribe;

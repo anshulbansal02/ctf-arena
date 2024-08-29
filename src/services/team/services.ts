@@ -25,12 +25,17 @@ import { config } from "@/config";
 import { TB_contestEvents } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
 import { nanoid } from "nanoid";
-import { jobQueue } from "../queue";
+import { jobQueue, notificationsQueue } from "../queue";
 
 export type TeamDetails = {
   id: number;
   name: string;
-  members: Array<{ id: string; name: string; isLeader: boolean }>;
+  members: Array<{
+    id: string;
+    name: string;
+    email: string;
+    isLeader: boolean;
+  }>;
 };
 
 const teamCacheKey = (teamId: number) => `team:${teamId}:details`;
@@ -83,7 +88,7 @@ export async function createTeamAndSendInvites(props: {
 
     await tx.insert(TB_teamMembers).values({ teamId, userId: user.id });
 
-    if (props.invitees?.length)
+    if (props.invitees?.length) {
       await tx.insert(TB_teamRequest).values(
         props.invitees.map((i) => ({
           type: "invite" as any,
@@ -95,6 +100,22 @@ export async function createTeamAndSendInvites(props: {
           },
         })),
       );
+
+      const usersWithAccount = await tx
+        .select({ id: TB_users.id })
+        .from(TB_users)
+        .where(inArray(TB_users.email, props.invitees));
+
+      notificationsQueue.addBulk(
+        usersWithAccount.map((user) => ({
+          name: "new-notification",
+          data: {
+            userId: user.id,
+            content: `Received a team invite from <b>${props.name}</b>. View invite on the Team page.`,
+          },
+        })),
+      );
+    }
   });
 }
 
@@ -105,11 +126,12 @@ export async function sendTeamInvites(emails: Array<string>) {
   if (!teamId) throw new Error("You are not in a team.");
 
   const [team] = await db
-    .select({ leaderId: TB_teams.leader })
+    .select({ leaderId: TB_teams.leader, name: TB_teams.name })
     .from(TB_teams)
     .where(eq(TB_teams.id, teamId));
 
-  if (team.leaderId !== user.id) throw new Error("You are not a team leader.");
+  if (team.leaderId !== user.id)
+    throw new Error("You are not the team leader.");
 
   // check sent team invites count
   const dayStart = new Date();
@@ -142,7 +164,20 @@ export async function sendTeamInvites(emails: Array<string>) {
       })),
     );
 
-    // jobQueue.addBulk("notifications", []);
+    const usersWithAccount = await tx
+      .select({ id: TB_users.id })
+      .from(TB_users)
+      .where(inArray(TB_users.email, emails));
+
+    notificationsQueue.addBulk(
+      usersWithAccount.map((user) => ({
+        name: "new-notification",
+        data: {
+          userId: user.id,
+          content: `Received a team invite from <b>${team.name}</b>. View invite on the Team page.`,
+        },
+      })),
+    );
   });
 }
 
@@ -156,11 +191,10 @@ export async function getTeams(search?: string): Promise<Array<TeamDetails>> {
     .select({
       id: t.id,
       name: t.name,
-      members: sql<
-        Array<{ id: string; name: string; isLeader: boolean }>
-      >`json_agg(json_build_object(
+      members: sql<TeamDetails["members"]>`json_agg(json_build_object(
       'id', current_team_members.user_id, 
-      'name', users.name, 
+      'name', users.name,
+      'email', users.email,
       'isLeader', current_team_members.user_id = teams.leader
     ))`,
     })
@@ -187,11 +221,10 @@ export async function getTeamsDetailsByIds(
     .select({
       id: t.id,
       name: t.name,
-      members: sql<
-        Array<{ id: string; name: string; isLeader: boolean }>
-      >`json_agg(json_build_object(
+      members: sql<TeamDetails["members"]>`json_agg(json_build_object(
       'id', current_team_members.user_id, 
       'name', users.name, 
+      'email', users.email,
       'isLeader', current_team_members.user_id = teams.leader
     ))`,
     })
@@ -220,11 +253,10 @@ export async function getTeamDetails(
       id: t.id,
       name: t.name,
       leaderId: t.leader,
-      members: sql<
-        Array<{ id: string; name: string; isLeader: boolean }>
-      >`json_agg(json_build_object(
+      members: sql<TeamDetails["members"]>`json_agg(json_build_object(
       'id', current_team_members.user_id, 
       'name', users.name, 
+      'email', users.email,
       'isLeader', current_team_members.user_id = teams.leader
     ))`,
     })
@@ -293,7 +325,20 @@ export async function sendTeamRequests(teamIds: Array<number>) {
       )
       .returning();
 
-    jobQueue.addBulk([]);
+    const teams = await tx
+      .select({ leader: TB_teams.leader })
+      .from(TB_teams)
+      .where(inArray(TB_teams.id, teamIds));
+
+    notificationsQueue.addBulk(
+      teams.map((team) => ({
+        name: "new-notification",
+        data: {
+          userId: team.leader,
+          content: `Received a join request from <b>${user.name}</b>. View request on the Team page.`,
+        },
+      })),
+    );
   });
 }
 
@@ -333,10 +378,17 @@ export async function getSentTeamRequests() {
 
 // As a team, which users have sent request to join
 export async function getReceivedJoinRequests(teamId: number) {
-  const tr = TB_teamRequest;
+  const tr = TB_teamRequest,
+    u = TB_users;
   const requests = await db
-    .select()
+    .select({
+      id: tr.id,
+      createdAt: tr.createdAt,
+      userName: u.name,
+      userEmail: u.email,
+    })
     .from(tr)
+    .leftJoin(u, eq(tr.createdBy, u.id))
     .where(
       and(
         eq(tr.teamId, teamId),
@@ -361,15 +413,14 @@ export async function getReceivedTeamInvites() {
       createdBy: tr.createdBy,
     })
     .from(tr)
+    .leftJoin(t, eq(tr.teamId, t.id))
     .where(
       and(
         eq(tr.userEmail, user.email),
         inArray(tr.status, ["queued", "sent", "delivered"]),
         eq(tr.type, "invite"),
       ),
-    )
-    .leftJoin(t, eq(tr.teamId, t.id));
-
+    );
   return invites;
 }
 

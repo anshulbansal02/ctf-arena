@@ -15,7 +15,7 @@ export async function Header({ className }: Props) {
   return (
     <header
       className={clsx(
-        "flex h-[80px] w-full items-center bg-[#17191C] p-4 shadow-lg sm:px-4 md:px-8 lg:px-16",
+        "flex h-[80px] w-full items-center bg-[#212428] p-4 shadow-lg sm:px-4 md:px-8 lg:px-16",
         className,
       )}
     >
@@ -25,7 +25,7 @@ export async function Header({ className }: Props) {
       <div className="flex w-60 justify-end gap-4">
         <Notifications />
 
-        <Avatar size={40} username={user.id} />
+        <Avatar size={40} username={user.email} />
 
         <form
           action={async () => {

@@ -1,13 +1,12 @@
 import {
   pgTable,
   serial,
-  uuid,
   timestamp,
   integer,
   text,
   jsonb,
   doublePrecision,
-  varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { TB_users } from "../user";
 import { TB_teams } from "../team";
@@ -17,6 +16,7 @@ export const TB_contests = pgTable("contests", {
   name: text("name").notNull(),
   shortDescription: text("short_description").default(""),
   description: text("description"),
+  unranked: boolean('unranked').default(false),
   startsAt: timestamp("starts_at").notNull(),
   endsAt: timestamp("ends_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),

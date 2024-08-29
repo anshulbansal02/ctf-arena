@@ -19,6 +19,7 @@
     "@react-email/components": "^0.0.21",
     "@react-email/render": "^0.0.16",
     "@types/date-fns": "^2.6.0",
+    "aws-sdk": "^2.1684.0",
     "bull": "^4.16.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",

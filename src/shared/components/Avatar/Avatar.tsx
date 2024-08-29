@@ -19,7 +19,7 @@ export function Avatar({ size = 48, ...props }: Props) {
         width={size}
         height={size}
         style={{ borderRadius: props.rounded ? size : size / 6 }}
-        src={`https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${props.username}`}
+        src={`https://api.dicebear.com/8.x/bottts-neutral/svg?backgroundType=gradientLinear&seed=${props.username}`}
         alt={props.username.toString()}
       />
     </div>

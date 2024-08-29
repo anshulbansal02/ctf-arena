@@ -8,35 +8,39 @@ import {
   markAllNotificationsAsRead,
 } from "@/services/user/services";
 import * as Popover from "@radix-ui/react-popover";
-import React from "react";
+import React, { useEffect } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { useAction } from "@/shared/hooks";
 
 export function Notifications() {
-  const { data: notifications, execute: refetchNotifications } = useAction(
-    getNotifications,
-    {
-      immediate: true,
-      args: null,
-    },
-  );
+  const {
+    data: notifications,
+    execute: refetchNotifications,
+    loading,
+  } = useAction(getNotifications, {
+    immediate: true,
+    preserveData: true,
+    args: null,
+  });
 
   const { execute: markRead } = useAction(markAllNotificationsAsRead);
 
   const unseenNotificationsCount =
     notifications?.filter((n) => n.status !== "seen").length ?? 0;
 
+  useEffect(() => {
+    const interval = setInterval(() => refetchNotifications(null), 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <Popover.Root>
+    <Popover.Root
+      onOpenChange={(open) => {
+        if (!open) markRead(null);
+      }}
+    >
       <Popover.Trigger asChild>
-        <Button
-          variant="outlined"
-          className="relative mr-2 rounded-full"
-          onClick={async () => {
-            await markRead(null);
-            await refetchNotifications(null);
-          }}
-        >
+        <Button variant="outlined" className="relative mr-2 !rounded-full">
           {unseenNotificationsCount > 0 ? <SvgBellActive /> : <SvgBell />}
           {unseenNotificationsCount > 0 && (
             <div className="absolute right-[1px] top-[1px] h-3 w-3 rounded-full bg-red-500"></div>
@@ -46,7 +50,11 @@ export function Notifications() {
       <Popover.Portal>
         <Popover.Content className="z-20 mt-4 max-h-80 w-80 overflow-y-auto rounded-lg bg-zinc-800 px-4 py-3 shadow-lg">
           <ul className="flex flex-col gap-3">
-            {!notifications?.length && (
+            {loading && !notifications?.length && (
+              <p>Getting your notifications</p>
+            )}
+
+            {!loading && !notifications?.length && (
               <li className="flex flex-col items-center gap-2">
                 <SvgEmptyBox width={24} height={24} />
                 <p className="text-center text-sm leading-tight text-gray-400">
@@ -63,13 +71,14 @@ export function Notifications() {
                   {notification.status !== "seen" && (
                     <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-[#4ec8c8]"></div>
                   )}
-                  <p
+                  <div
                     className={clsx({
                       "text-gray-400": notification.status === "seen",
                     })}
-                  >
-                    {notification.content as React.ReactNode}
-                  </p>
+                    dangerouslySetInnerHTML={{
+                      __html: notification.content ?? "",
+                    }}
+                  ></div>
                   <span className="ml-auto self-center whitespace-nowrap text-sm text-gray-500">
                     {formatDistanceToNowStrict(notification.createdAt, {
                       addSuffix: true,

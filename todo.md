@@ -80,14 +80,11 @@ has context menu
 ---
 1. List invites and requests
 2. Readonly notifications for invites, requests, contest starting
-3. Fix hints UI
-4. Handle emails for invites, requests and contest intimation
-5. Create contest intimation template
-6. Fix view invite page UI
-7. look into progress bar not showing
-8. Configure SES provider adapter and sendgrid api key
-9. fix loading state of buttons
-10. reconcile leaderboard and commit on end
-11. configure leaderboard update hook for initial and final fetch
-12. What will change with contest end
-13. Add context menu for team options on team card
+3. Handle emails for invites, requests and contest intimation
+4. Create contest intimation template
+5. Fix view invite page UI
+6. Configure SES provider adapter and sendgrid api key
+7. fix loading state of buttons
+8. Reconcile leaderboard and commit on end
+9. configure leaderboard update hook for initial and final fetch
+10. What will change with contest end

@@ -25,6 +25,9 @@ export const config = {
       },
       ses: {
         key: process.env.SES_API_KEY,
+        aws: {
+          region: process.env.AWS_REGION,
+        },
       },
       sendgrid: {
         key: process.env.SENDGRID_API_KEY,

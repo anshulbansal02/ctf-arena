@@ -1,0 +1,3 @@
+import type { SVGProps } from "react";
+const SvgEmailCheck = (props: SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="#e8eaed" viewBox="0 -960 960 960" role="img" {...props}><path d="M638-80 468-250l56-56 114 114 226-226 56 56zM480-520l320-200H160zm0 80L160-640v400h206l80 80H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v174l-80 80v-174zm0 0" /></svg>;
+export default SvgEmailCheck;

@@ -7,7 +7,7 @@ import { getAuthUser } from "../auth";
 
 export async function createNotification(data: {
   userId: string;
-  content: unknown;
+  content: string;
 }) {
   await db
     .insert(TB_userNotifications)

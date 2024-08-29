@@ -510,3 +510,5 @@ export async function getContestStats(contestId: number) {
     submissionsCount: submissions.count,
   };
 }
+
+export async function getContestParticipants();
