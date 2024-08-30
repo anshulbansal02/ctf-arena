@@ -62,13 +62,11 @@ export function JoinTeamStep(props: Props) {
     }, 100);
   }
 
-  const {
-    execute: sendRequests,
-    loading: sendingRequests,
-    error,
-  } = useAction(async () => {
-    await sendTeamRequests(joinRequestsDraft);
-  });
+  const { execute: sendRequests, loading: sendingRequests } = useAction(
+    async () => {
+      await sendTeamRequests(joinRequestsDraft);
+    },
+  );
 
   return (
     <div className="mt-20 text-center">
@@ -131,7 +129,7 @@ export function JoinTeamStep(props: Props) {
             <li>
               <Image
                 src={AstronautImage}
-                alt="Picture of the author"
+                alt="Astronaut in empty space"
                 className="mx-auto opacity-50 invert"
                 width={100}
                 height={100}

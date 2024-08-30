@@ -1,6 +1,4 @@
 import { getContests } from "@/services/contest";
-import { Avatar } from "@/shared/components";
-import { nanoid } from "nanoid";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 

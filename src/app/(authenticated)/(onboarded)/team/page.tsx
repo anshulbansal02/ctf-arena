@@ -4,14 +4,14 @@ import {
   getReceivedJoinRequests,
   getSentTeamInvites,
   getReceivedTeamInvites,
-  respondToTeamRequest,
   isUserTeamLeader,
   getTeamDetailsByUserId,
 } from "@/services/team";
 import { Avatar, Button } from "@/shared/components";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, formatDistanceToNowStrict } from "date-fns";
 import { SvgEmailSent } from "@/assets/icons";
 import { config } from "@/config";
+import { RequestResponseButton } from "./components/RequestResponseButton";
 
 export default async function TeamPage() {
   const user = await getAuthUser();
@@ -62,8 +62,14 @@ export default async function TeamPage() {
                   </p>
                 </div>
                 <div className="ml-auto flex gap-2">
-                  <Button>Accept</Button>
-                  <Button variant="outlined">Ignore</Button>
+                  <RequestResponseButton
+                    requestId={invite.id}
+                    action="accept"
+                  />
+                  <RequestResponseButton
+                    requestId={invite.id}
+                    action="reject"
+                  />
                 </div>
               </li>
             ))}
@@ -100,8 +106,14 @@ export default async function TeamPage() {
                   <p className="text-sm text-gray-300">{request.userEmail}</p>
                 </div>
                 <div className="ml-auto flex gap-2">
-                  <Button>Accept</Button>
-                  <Button variant="outlined">Ignore</Button>
+                  <RequestResponseButton
+                    requestId={request.id}
+                    action="accept"
+                  />
+                  <RequestResponseButton
+                    requestId={request.id}
+                    action="reject"
+                  />
                 </div>
               </li>
             ))}
@@ -126,7 +138,9 @@ export default async function TeamPage() {
                 </p>
                 <hr className="min-w-4 flex-grow border-gray-600" />
                 <p>
-                  {formatDistanceToNow(invite.createdAt, { addSuffix: true })}
+                  {formatDistanceToNowStrict(invite.createdAt, {
+                    addSuffix: true,
+                  })}
                 </p>
               </li>
             ))}

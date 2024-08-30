@@ -96,7 +96,7 @@ export async function createTeamAndSendInvites(props: {
           userEmail: i,
           createdBy: user.id,
           metadata: {
-            secret: nanoid(24),
+            secret: nanoid(40),
           },
         })),
       );
@@ -159,7 +159,7 @@ export async function sendTeamInvites(emails: Array<string>) {
         userEmail: email,
         createdBy: user.id,
         metadata: {
-          secret: nanoid(24),
+          secret: nanoid(40),
         },
       })),
     );
@@ -684,7 +684,7 @@ export async function getInviteFromSecret(secret: string) {
   const [invite] = await db
     .select()
     .from(TB_teamRequest)
-    .where(sql`metadata->>'secret' = '${secret}'`);
+    .where(sql`metadata->>'secret' = ${secret}`);
 
   return invite;
 }

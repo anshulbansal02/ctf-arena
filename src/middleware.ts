@@ -10,6 +10,8 @@ const routesType = {
   protected: [/^\/onboarding/, /^\/home/, /^\/team/, /^\/contests/],
   // Cannot be viewed by authenticated user
   public: [/^\/$/],
+  // Can be viewed by all users irrespective of authentication
+  common: [/^\/team\/invite\/\w+/],
 };
 
 function isRouteType(patterns: Array<RegExp>, route: string): boolean {
@@ -19,13 +21,17 @@ function isRouteType(patterns: Array<RegExp>, route: string): boolean {
 export async function middleware(request: NextRequest) {
   const session = await attachSession();
 
-  if (isRouteType(routesType.protected, request.nextUrl.pathname)) {
+  const route = request.nextUrl.pathname;
+
+  if (isRouteType(routesType.common, route)) return;
+
+  if (isRouteType(routesType.protected, route)) {
     if (!(session && session.user))
       return NextResponse.redirect(
         new URL(appConfig.routes.default.NO_AUTH, request.url),
       );
     else return authenticatedUserRedirectionRules(request);
-  } else if (isRouteType(routesType.public, request.nextUrl.pathname)) {
+  } else if (isRouteType(routesType.public, route)) {
     if (session && session.user) {
       return NextResponse.redirect(
         new URL(appConfig.routes.default.AUTH, request.url),

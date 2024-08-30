@@ -1,7 +1,8 @@
 "use client";
+import { useLeaderboard } from "@/services/contest/client";
 import { useTeamsById } from "@/services/team/client";
 import { intervalToDuration } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 interface Props {
   contestId: number;
@@ -13,16 +14,15 @@ function msToDuration(ms: number) {
 }
 
 export function QuickestAtLeaderboard(props: Props) {
-  const [leaderboard, setLeaderboard] = useState<
-    Array<{
-      challengeId: number;
-      order: number;
-      teamId: number;
-      timing?: number;
-    }>
-  >([]);
-
-  const [contestEnded, setContestEnded] = useState(false);
+  const { leaderboard, hasContestEnded } = useLeaderboard<{
+    challengeId: number;
+    order: number;
+    teamId: number;
+    timing?: number;
+  }>({
+    contestId: props.contestId,
+    name: "sum_of_scores",
+  });
 
   const teamsOnLeaderboard = useMemo(
     () => leaderboard.map((l) => l.teamId),
@@ -30,28 +30,6 @@ export function QuickestAtLeaderboard(props: Props) {
   );
 
   const { teamsById } = useTeamsById({ teamIds: teamsOnLeaderboard });
-
-  useEffect(() => {
-    const leaderboardEvents = new EventSource(
-      `/api/hook/leaderboard/${props.contestId}/update?type=quickest_firsts`,
-    );
-
-    leaderboardEvents.addEventListener("leaderboard_update", (e) => {
-      const data = e.data;
-      try {
-        const updatedLeaderboard = JSON.parse(data);
-        setLeaderboard(updatedLeaderboard);
-      } catch {}
-    });
-
-    leaderboardEvents.addEventListener("contest_ended", () => {
-      setContestEnded(true);
-    });
-
-    return () => {
-      leaderboardEvents.close();
-    };
-  }, [props.contestId]);
 
   return (
     <div role="table" className="flex w-full flex-col gap-2">

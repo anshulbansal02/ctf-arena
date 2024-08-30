@@ -469,10 +469,10 @@ export async function batchSendContestIntimation(contestId: number) {
 
   users.forEach((user) => {
     emailService.send({
-      address: { from: config.app.sourceEmailAddress , to: user.email },
+      address: { from: config.app.sourceEmailAddress, to: user.email },
       body: renderTemplate("contest-intimation", {
         contestName: contest.name,
-        contestURL: new URL(`contest/${contest.id}`, config.host).href,
+        contestURL: new URL(`contests/${contest.id}`, config.host).href,
         startsAt: contest.startsAt,
         userEmail: user.email,
         userName: user.name!,

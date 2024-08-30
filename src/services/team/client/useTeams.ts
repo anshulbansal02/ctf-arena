@@ -1,5 +1,6 @@
-import { useAction } from "@/shared/hooks";
 import { useEffect } from "react";
+
+import { useAction } from "@/shared/hooks";
 import { getTeams } from "@/services/team";
 
 interface Options {

@@ -90,13 +90,3 @@ export default async function ContestPage({
     </div>
   );
 }
-
-/**
- * (not joined) present, future - BTN Join Contest,
- * (joined, not joined) past - TEXT Ended,
- * (joined, not joined) past, present - TEXT Number of Submissions,
- * (joined, not joined) past, present - BTN Go to leaderboard,
- * (joined, not joined) past, present, future - TEXT Number of participants,
- * (joined, not joined) present, future - TEXT Timer,
- * (joined) present - BTN Go to arena,
- */

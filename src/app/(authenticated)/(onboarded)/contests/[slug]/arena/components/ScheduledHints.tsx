@@ -87,6 +87,19 @@ export function ScheduledHints(props: Props) {
     lastSubmissionAt: Date | null;
   }>({ list: [], lastSubmissionAt: null });
 
+  // TODO: CHECK IF IT WILL WORK
+  useAction(async () => {
+    const [fetchedHints, lastSubmissionAt] = await Promise.all([
+      getChallengeHints(props.challengeId),
+      getTeamLastSubmissionAt(props.contestId),
+    ]);
+
+    return {
+      list: fetchedHints,
+      lastSubmissionAt: new Date(lastSubmissionAt),
+    };
+  });
+
   const toaster = useToaster();
 
   useEffect(() => {

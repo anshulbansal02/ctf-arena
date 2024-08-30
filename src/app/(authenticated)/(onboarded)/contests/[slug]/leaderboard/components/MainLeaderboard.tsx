@@ -5,8 +5,9 @@ import Image, { StaticImageData } from "next/image";
 import GoldMedal from "@/assets/media/gold-medal.png";
 import SilverMedal from "@/assets/media/silver-medal.png";
 import BronzeMedal from "@/assets/media/bronze-medal.png";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTeamsById } from "@/services/team/client";
+import { useLeaderboard } from "@/services/contest/client";
 
 const medalURIs: Record<number, StaticImageData> = {
   1: GoldMedal,
@@ -14,16 +15,8 @@ const medalURIs: Record<number, StaticImageData> = {
   3: BronzeMedal,
 };
 
-type LeaderboardData = Array<{
-  rank: number;
-  teamId: number;
-  score: number;
-  challengesSolved: number;
-}>;
-
 interface Props {
   contestId: number;
-  staticData?: LeaderboardData;
 }
 
 function Rank({ index }: { index: number }) {
@@ -33,7 +26,7 @@ function Rank({ index }: { index: number }) {
   return (
     <Image
       src={medalURIs[rank]}
-      alt="Picture of the author"
+      alt="Medal"
       className="w-8"
       width={100}
       height={100}
@@ -42,12 +35,15 @@ function Rank({ index }: { index: number }) {
 }
 
 export function MainLeaderboard(props: Props) {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardData>(
-    () => props.staticData ?? [],
-  );
-  const [contestEnded, setContestEnded] = useState(false);
-
-  const isStaticLeaderboard = Boolean(props.staticData);
+  const { leaderboard, hasContestEnded } = useLeaderboard<{
+    rank: number;
+    teamId: number;
+    score: number;
+    challengesSolved: number;
+  }>({
+    contestId: props.contestId,
+    name: "sum_of_scores",
+  });
 
   const teamsOnLeaderboard = useMemo(
     () => leaderboard.map((l) => l.teamId),
@@ -55,30 +51,6 @@ export function MainLeaderboard(props: Props) {
   );
 
   const { teamsById } = useTeamsById({ teamIds: teamsOnLeaderboard });
-
-  useEffect(() => {
-    if (!isStaticLeaderboard) {
-      const leaderboardEvents = new EventSource(
-        `/api/hook/leaderboard/${props.contestId}/update?type=sum_of_scores`,
-      );
-
-      leaderboardEvents.addEventListener("leaderboard_update", (e) => {
-        const data = e.data;
-        try {
-          const updatedLeaderboard = JSON.parse(data);
-          setLeaderboard(updatedLeaderboard);
-        } catch {}
-      });
-
-      leaderboardEvents.addEventListener("contest_ended", () => {
-        setContestEnded(true);
-      });
-
-      return () => {
-        leaderboardEvents.close();
-      };
-    }
-  }, [props.contestId]);
 
   return (
     <div role="table" className="relative flex w-full flex-col gap-2">
