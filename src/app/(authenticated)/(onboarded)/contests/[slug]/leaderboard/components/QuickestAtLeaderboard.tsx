@@ -21,8 +21,10 @@ export function QuickestAtLeaderboard(props: Props) {
     timing?: number;
   }>({
     contestId: props.contestId,
-    name: "sum_of_scores",
+    name: "quickest_firsts",
   });
+
+  console.log(leaderboard);
 
   const teamsOnLeaderboard = useMemo(
     () => leaderboard.map((l) => l.teamId),

@@ -23,6 +23,8 @@ import { ScheduledHints } from "./components/ScheduledHints";
 import { useRouter } from "next/navigation";
 import { randomItem } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import MountainImage from "@/assets/media/mountain.png";
+import Image from "next/image";
 
 interface SubmissionForm {
   flag: string;
@@ -173,7 +175,7 @@ export default function SubmissionPage({
         </div>
       )}
       {pageData && (
-        <div>
+        <>
           <div className="fixed left-6 top-6 z-20 rounded-md bg-slate-700 px-4 py-2 shadow-md">
             <span className="font-mono text-lg font-semibold">
               <Timer till={pageData.contest.endsAt} running />
@@ -187,7 +189,7 @@ export default function SubmissionPage({
             />
           ) : null}
 
-          <div className="">
+          <div className="w-full max-w-[420px]">
             <h2 className="mb-4 mt-8 text-center text-2xl font-medium">
               Your Team Stats
             </h2>
@@ -204,11 +206,11 @@ export default function SubmissionPage({
                 )}
 
                 <div className="flex gap-2">
-                  <p className="rounded-md bg-[#31373c] p-1 leading-none">
+                  <p className="rounded-md bg-[#31373c] p-1 px-2 text-lg leading-none">
                     Rank <span className="text-slate-500">|</span>{" "}
-                    {teamStats?.rank ?? "-"}
+                    {teamStats?.rank != null ? teamStats.rank + 1 : "-"}
                   </p>
-                  <p className="rounded-md bg-[#31373c] p-1 leading-none">
+                  <p className="rounded-md bg-[#31373c] p-1 px-2 text-lg leading-none">
                     Score <span className="text-slate-500">|</span>{" "}
                     {teamStats?.score ?? "-"}
                   </p>
@@ -231,29 +233,30 @@ export default function SubmissionPage({
                 <div className="mt-4">
                   <p className="text-right text-sm text-slate-400">
                     {teamStats?.lastSubmissionAt
-                      ? `Last Submitted ${formatDistanceToNow(teamStats.lastSubmissionAt, { addSuffix: true })}`
+                      ? `Last submitted ${formatDistanceToNow(teamStats.lastSubmissionAt, { addSuffix: true })}`
                       : "Getting Team Stats"}
                   </p>
                 </div>
               </div>
             )}
           </div>
+
           {loadingNextChallenge ? (
-            <>
-              <h2 className="mb-4 text-2xl font-medium">
+            <div className="w-full max-w-[420px]">
+              <h2 className="mb-4 mt-16 text-center text-2xl font-medium">
                 Loading Next Challenge
               </h2>
               <Shim classNames="w-full h-[200px]" />
-            </>
-          ) : (
-            <>
+            </div>
+          ) : nextChallenge ? (
+            <div className="w-full max-w-[400px]">
               <h2 className="mb-4 mt-16 text-center text-2xl font-medium">
                 Submit Challenge Flag
               </h2>
               <Confetti
                 render={(launch) => (
                   <form
-                    className="w-[360px] max-w-[360px]"
+                    className="w-full"
                     onSubmit={handleSubmit(
                       handleFlagSubmission(
                         launch.bind(null, submitButtonRef.current!),
@@ -290,9 +293,33 @@ export default function SubmissionPage({
                   </form>
                 )}
               />
-            </>
+            </div>
+          ) : (
+            <div className="mt-16 w-full max-w-[400px]">
+              <Image
+                src={MountainImage}
+                alt="Mountain Peak"
+                width={120}
+                height={120}
+                className="mx-auto opacity-60 invert"
+              />
+              <h2 className="mt-6 text-center text-lg font-medium">
+                WooHoo! You have reached the peak by solving all the challenges.
+              </h2>
+              <p className="mt-2 text-center">
+                Enjoy the view or look how other teams are doing on leaderboard
+              </p>
+              <Button
+                as="link"
+                href="leaderboard"
+                variant="outlined"
+                className="mt-4"
+              >
+                View Leaderboard
+              </Button>
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

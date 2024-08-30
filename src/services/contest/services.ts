@@ -210,6 +210,7 @@ export async function checkAndCreateSubmission(data: {
  * @returns
  */
 export async function getNextContestChallenge(contestId: number) {
+  console.log("Getting next challenge ", contestId);
   const [lastSubmission] = await db
     .select({ order: TB_contestChallenges.order })
     .from(TB_contestSubmissions)
@@ -220,6 +221,8 @@ export async function getNextContestChallenge(contestId: number) {
     .where(eq(TB_contestSubmissions.contestId, contestId))
     .orderBy(desc(TB_contestSubmissions.createdAt))
     .limit(1);
+
+  console.log("lastsubmission: ", lastSubmission);
 
   const nextInOrder = (lastSubmission?.order ?? 0) + 1;
 
@@ -395,7 +398,7 @@ export async function createContest(data: {
         answer: c.answer,
         maxPoints: c.points.max,
         minPoints: c.points.min,
-        order: i,
+        order: i + 1,
         description: c.description,
         hints: c.hints,
         pointsDecayFactor: c.pointsDecayFactor,

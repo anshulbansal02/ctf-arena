@@ -78,11 +78,10 @@ has context menu
 
 
 ---
-1. List invites and requests
-2. Readonly notifications for invites, requests, contest starting
 4. Create contest intimation template
 6. Configure SES provider adapter and sendgrid api key
 7. fix loading state of buttons
 8. Reconcile leaderboard and commit on end
 9. configure leaderboard update hook for initial and final fetch
 10. What will change with contest end
+11. fix submissions last challenge

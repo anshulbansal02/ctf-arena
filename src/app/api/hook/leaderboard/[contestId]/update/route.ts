@@ -53,6 +53,7 @@ export async function GET(
       type,
       contestId,
     );
+    console.log(type, leaderboardData);
     send("leaderboard_update", leaderboardData);
   });
 
