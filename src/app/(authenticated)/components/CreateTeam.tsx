@@ -38,6 +38,23 @@ export function CreateTeamStep(props: Props) {
 
   const { execute: createTeam, loading } = useAction(createTeamAndSendInvites);
 
+  function validateEmails(emails: string[]) {
+    if (!emails) return true;
+
+    const emailsValid = emails.every((e) => validator.isEmail(e));
+    if (!emailsValid) return "Please enter valid email addresses";
+
+    const orgsValid = emails.every((e) =>
+      config.app.organizations.includes(e.split("@")[1].toLowerCase()),
+    );
+    if (!orgsValid) return "Cannot invite users outside of organization";
+
+    if (emails.length > new Set(emails).size)
+      return "Cannot add an email address multiple times";
+
+    return true;
+  }
+
   async function handleNext(formData: TeamDetails) {
     switch (stage) {
       case "name":
@@ -126,21 +143,7 @@ export function CreateTeamStep(props: Props) {
           <div className="mt-2">
             <label className="text-lg">Invite your team members</label>
             <Controller
-              {...register("inviteIds", {
-                validate: (emails) => {
-                  if (!emails) return true;
-                  const emailsValid = emails.every((e) => validator.isEmail(e));
-                  if (!emailsValid) return "Please enter valid email addresses";
-                  const orgsValid = emails.every((e) =>
-                    config.app.organizations.includes(
-                      e.split("@")[1].toLowerCase(),
-                    ),
-                  );
-                  if (!orgsValid)
-                    return "Cannot invite users outside of organization";
-                  return true;
-                },
-              })}
+              {...register("inviteIds", { validate: validateEmails })}
               control={control}
               render={({ field }) => (
                 <TagsInput

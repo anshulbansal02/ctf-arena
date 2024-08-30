@@ -31,7 +31,7 @@ function InvalidInvite(props: {
         <h4 className="mt-10 text-center text-lg font-medium">
           {props.heading}
         </h4>
-        <p className="mt-2 max-w-[420px] text-center text-gray-300">
+        <p className="mt-2 max-w-[360px] text-center text-gray-300">
           {props.body}
         </p>
         <Button variant="outlined" as="link" href="/" className="mt-8 w-full">
@@ -86,7 +86,8 @@ export default async function ViewInvitePage({
             Team Invite
           </h4>
           <h3 className="mt-2 text-center text-2xl">
-            Team <b>{invitingTeam.name}</b> invite you to join them on CTF Arena
+            Team <b>{invitingTeam.name}</b> invites you to join them on CTF
+            Arena
           </h3>
 
           <div className="mt-16">

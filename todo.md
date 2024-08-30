@@ -80,9 +80,7 @@ has context menu
 ---
 1. List invites and requests
 2. Readonly notifications for invites, requests, contest starting
-3. Handle emails for invites, requests and contest intimation
 4. Create contest intimation template
-5. Fix view invite page UI
 6. Configure SES provider adapter and sendgrid api key
 7. fix loading state of buttons
 8. Reconcile leaderboard and commit on end

@@ -119,7 +119,7 @@ export async function createTeamAndSendInvites(props: {
   });
 }
 
-export async function sendTeamInvites(emails: Array<string>) {
+export async function sendTeamInvites(inputEmails: Array<string>) {
   const user = await getAuthUser();
 
   const teamId = await getTeamIdByUserId(user.id);
@@ -133,6 +133,10 @@ export async function sendTeamInvites(emails: Array<string>) {
   if (team.leaderId !== user.id)
     throw new Error("You are not the team leader.");
 
+  const emails = inputEmails
+    .map((e) => e.toLowerCase())
+    .filter((email) => email !== user.email);
+
   // check sent team invites count
   const dayStart = new Date();
   dayStart.setUTCHours(0, 0, 0, 0);
@@ -143,7 +147,7 @@ export async function sendTeamInvites(emails: Array<string>) {
       and(
         eq(TB_teamRequest.type, "invite"),
         eq(TB_teamRequest.teamId, teamId),
-        gt(TB_teamRequest, dayStart),
+        gt(TB_teamRequest.createdAt, dayStart),
       ),
     );
   if (invites.count >= config.app.team.INVITE_USER_LIMIT)

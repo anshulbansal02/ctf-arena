@@ -12,6 +12,7 @@ import { formatDistanceToNow, formatDistanceToNowStrict } from "date-fns";
 import { SvgEmailSent } from "@/assets/icons";
 import { config } from "@/config";
 import { RequestResponseButton } from "./components/RequestResponseButton";
+import { MembersInviteDialog } from "./components/MembersInviteDialog";
 
 export default async function TeamPage() {
   const user = await getAuthUser();
@@ -54,7 +55,7 @@ export default async function TeamPage() {
                     <span className="font-medium leading-tight">
                       {invite.teamName}
                     </span>{" "}
-                    invite you to join their team
+                    invites you to join their team
                   </p>
                   <p className="text-sm text-gray-300">
                     Received{" "}
@@ -126,7 +127,7 @@ export default async function TeamPage() {
           <div className="flex items-center gap-4">
             <h2 className="text-xl">Team Invites Sent</h2>
             <div className="h-4 w-[2px] bg-slate-500" />
-            <Button variant="ghost">Invite Members</Button>
+            <MembersInviteDialog />
           </div>
           <ul className="mt-6">
             {sentInvites.map((invite) => (
