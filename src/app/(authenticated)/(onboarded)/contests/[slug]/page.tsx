@@ -76,11 +76,16 @@ export default async function ContestPage({
           </Button>
         )}
 
-        {["in-progress", "ended"].includes(contestStatus) && (
-          <Button variant="ghost" as="link" href={`${contest.id}/leaderboard`}>
-            View Leaderboard
-          </Button>
-        )}
+        {["in-progress", "ended"].includes(contestStatus) &&
+          !contest.isUnranked && (
+            <Button
+              variant="ghost"
+              as="link"
+              href={`${contest.id}/leaderboard`}
+            >
+              View Leaderboard
+            </Button>
+          )}
       </div>
 
       <div

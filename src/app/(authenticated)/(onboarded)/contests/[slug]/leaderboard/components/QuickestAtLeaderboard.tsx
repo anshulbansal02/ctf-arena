@@ -1,6 +1,7 @@
 "use client";
 import { useLeaderboard } from "@/services/contest/client";
 import { useTeamsById } from "@/services/team/client";
+import { Spinner } from "@/shared/components";
 import { intervalToDuration } from "date-fns";
 import { useMemo } from "react";
 
@@ -14,7 +15,7 @@ function msToDuration(ms: number) {
 }
 
 export function QuickestAtLeaderboard(props: Props) {
-  const { leaderboard, hasContestEnded } = useLeaderboard<{
+  const { leaderboard, hasContestEnded, lastUpdated } = useLeaderboard<{
     challengeId: number;
     order: number;
     teamId: number;
@@ -23,8 +24,6 @@ export function QuickestAtLeaderboard(props: Props) {
     contestId: props.contestId,
     name: "quickest_firsts",
   });
-
-  console.log(leaderboard);
 
   const teamsOnLeaderboard = useMemo(
     () => leaderboard.map((l) => l.teamId),
@@ -49,6 +48,30 @@ export function QuickestAtLeaderboard(props: Props) {
           Timing
         </div>
       </div>
+
+      {!hasContestEnded && !leaderboard.length && (
+        <div className="flex w-full flex-col items-center">
+          {!lastUpdated && (
+            <Spinner
+              color="rgba(255,255,255,0.25)"
+              className="mt-20"
+              size={16}
+            />
+          )}
+
+          {lastUpdated && (
+            <p className="py-40">
+              Waiting for someone to make the first submission.
+            </p>
+          )}
+        </div>
+      )}
+
+      {hasContestEnded && !leaderboard.length && (
+        <div className="flex w-full flex-col items-center">
+          <p className="py-40 text-gray-300">No data to show here</p>
+        </div>
+      )}
 
       <div className="no-scrollbar flex max-h-[360px] w-full flex-col gap-2 overflow-auto rounded-xl">
         {leaderboard.map((entry) => (

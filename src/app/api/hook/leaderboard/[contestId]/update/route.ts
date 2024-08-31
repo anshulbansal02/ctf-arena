@@ -1,4 +1,5 @@
 import { subCache } from "@/services/cache";
+import { getContest } from "@/services/contest";
 import * as leaderboard from "@/services/contest/leaderboard";
 
 export const runtime = "nodejs";
@@ -53,8 +54,10 @@ export async function GET(
       type,
       contestId,
     );
-    console.log(type, leaderboardData);
+
     send("leaderboard_update", leaderboardData);
+    const contest = await getContest(contestId);
+    if (contest.endsAt < new Date()) send("contest_ended", null);
   });
 
   return new Response(responseStream.readable, {

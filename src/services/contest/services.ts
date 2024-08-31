@@ -87,6 +87,7 @@ export async function getContest(contestId: number) {
     .select({
       id: TB_C.id,
       name: TB_C.name,
+      isUnranked: TB_C.unranked,
       description: TB_C.description,
       startsAt: TB_C.startsAt,
       endsAt: TB_C.endsAt,
@@ -210,7 +211,6 @@ export async function checkAndCreateSubmission(data: {
  * @returns
  */
 export async function getNextContestChallenge(contestId: number) {
-  console.log("Getting next challenge ", contestId);
   const [lastSubmission] = await db
     .select({ order: TB_contestChallenges.order })
     .from(TB_contestSubmissions)
@@ -221,8 +221,6 @@ export async function getNextContestChallenge(contestId: number) {
     .where(eq(TB_contestSubmissions.contestId, contestId))
     .orderBy(desc(TB_contestSubmissions.createdAt))
     .limit(1);
-
-  console.log("lastsubmission: ", lastSubmission);
 
   const nextInOrder = (lastSubmission?.order ?? 0) + 1;
 

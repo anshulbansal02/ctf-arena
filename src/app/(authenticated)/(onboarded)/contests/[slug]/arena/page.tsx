@@ -17,7 +17,7 @@ import {
   Timer,
 } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ScheduledHints } from "./components/ScheduledHints";
 import { useRouter } from "next/navigation";
@@ -67,6 +67,8 @@ export default function SubmissionPage({
 }) {
   const { execute: checkAndSubmitFlag, loading: checkingSubmission } =
     useAction(checkAndCreateSubmission);
+
+  const [hasContestEnded, setContestEnded] = useState(false);
 
   const { loading: loadingPageData, data: pageData } = useAction(
     async () => {
@@ -131,9 +133,11 @@ export default function SubmissionPage({
   });
 
   useEffect(() => {
-    const interval = setInterval(() => getTeamStats(params.slug), 10000);
-    return () => clearInterval(interval);
-  }, []);
+    if (!hasContestEnded) {
+      const interval = setInterval(() => getTeamStats(params.slug), 10000);
+      return () => clearInterval(interval);
+    }
+  }, [hasContestEnded]);
 
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -176,9 +180,13 @@ export default function SubmissionPage({
       )}
       {pageData && (
         <>
-          <div className="fixed left-6 top-6 z-20 rounded-md bg-slate-700 px-4 py-2 shadow-md">
+          <div className="fixed left-6 top-5 z-20 rounded-md bg-slate-700 px-4 py-2 shadow-md">
             <span className="font-mono text-lg font-semibold">
-              <Timer till={pageData.contest.endsAt} running />
+              <Timer
+                till={pageData.contest.endsAt}
+                running
+                onUp={() => setContestEnded(true)}
+              />
             </span>
           </div>
 
@@ -270,11 +278,14 @@ export default function SubmissionPage({
                           value: true,
                         },
                       })}
+                      disabled={hasContestEnded}
                       className="w-full"
                       placeholder="Flag{                                                              }"
                     />
                     <p className="mt-2 text-center text-sm text-red-300">
-                      {formErrors.flag?.message}
+                      {hasContestEnded
+                        ? "Contest has ended"
+                        : formErrors.flag?.message}
                     </p>
                     <p className="mt-2 cursor-default text-center text-xs leading-5 text-slate-400">
                       Enter the flag you found without{" "}
@@ -306,17 +317,23 @@ export default function SubmissionPage({
               <h2 className="mt-6 text-center text-lg font-medium">
                 WooHoo! You have reached the peak by solving all the challenges.
               </h2>
-              <p className="mt-2 text-center">
-                Enjoy the view or look how other teams are doing on leaderboard
-              </p>
-              <Button
-                as="link"
-                href="leaderboard"
-                variant="outlined"
-                className="mt-4"
-              >
-                View Leaderboard
-              </Button>
+
+              {!pageData.contest.isUnranked && (
+                <>
+                  <p className="mt-2 text-center">
+                    Enjoy the view or look how other teams are doing on
+                    leaderboard
+                  </p>
+                  <Button
+                    as="link"
+                    href="leaderboard"
+                    variant="outlined"
+                    className="mt-4"
+                  >
+                    View Leaderboard
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </>

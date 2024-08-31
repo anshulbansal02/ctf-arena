@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
+import { Leaderboard } from "../leaderboard";
 
 interface Props {
-  name: "sum_of_scores" | "quickest_firsts" | "sprinting_teams";
+  name: Leaderboard;
   contestId: number;
 }
 
 export function useLeaderboard<T>(props: Props) {
   const [leaderboard, setLeaderboard] = useState<Array<T>>([]);
-  const [contestEnded, setContestEnded] = useState(false);
+  const [hasContestEnded, setContestEnded] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>();
 
   useEffect(() => {
     const leaderboardEvents = new EventSource(
@@ -19,6 +21,7 @@ export function useLeaderboard<T>(props: Props) {
       try {
         const updatedLeaderboard = JSON.parse(data);
         setLeaderboard(updatedLeaderboard);
+        setLastUpdated(new Date());
       } catch {}
     });
 
@@ -32,5 +35,5 @@ export function useLeaderboard<T>(props: Props) {
     };
   }, [props.contestId]);
 
-  return { leaderboard, hasContestEnded: contestEnded };
+  return { leaderboard, hasContestEnded, lastUpdated };
 }

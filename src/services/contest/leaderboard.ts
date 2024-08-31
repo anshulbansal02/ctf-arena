@@ -130,7 +130,7 @@ export async function rebuildSumOfScores(contestId: number) {
   const key = leaderboardKey("sum_of_scores", contestId, "raw");
 
   await cache.del(key);
-  await cache.zAdd(key, records);
+  if (records.length) await cache.zAdd(key, records);
 
   purgeBuildAndNotify("sum_of_scores", contestId);
 }
@@ -202,7 +202,7 @@ export async function rebuildSprintingTeams(contestId: number) {
   const key = leaderboardKey("sprinting_teams", contestId, "raw");
 
   await cache.del(key);
-  await cache.zAdd(key, records);
+  if (records.length) await cache.zAdd(key, records);
 
   purgeBuildAndNotify("sprinting_teams", contestId);
 }

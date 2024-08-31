@@ -10,6 +10,7 @@ import { Button, Logo } from "@/shared/components";
 import Invitation from "@/assets/media/invitation.png";
 import Image from "next/image";
 import { AcceptInvitationButton } from "./components/AcceptInvitationButton";
+import { SignInWithMicrosoft } from "@/app/(public)/components/SignInWithMicrosoft";
 
 function Page(props: { children: React.ReactNode }) {
   return (
@@ -91,33 +92,8 @@ export default async function ViewInvitePage({
           </h3>
 
           <div className="mt-16">
-            <p>You need to sign in to continue</p>
-            <form
-              action={async () => {
-                "use server";
-                await signIn("microsoft-entra-id");
-              }}
-            >
-              <Button type="submit" className="mt-4">
-                <svg
-                  width={16}
-                  viewBox="0 0 2499.6 2500"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M1187.9 1187.9H0V0h1187.9z" fill="#f1511b" />
-                  <path
-                    d="M2499.6 1187.9h-1188V0h1187.9v1187.9z"
-                    fill="#80cc28"
-                  />
-                  <path d="M1187.9 2500H0V1312.1h1187.9z" fill="#00adef" />
-                  <path
-                    d="M2499.6 2500h-1188V1312.1h1187.9V2500z"
-                    fill="#fbbc09"
-                  />
-                </svg>
-                Continue with Microsoft
-              </Button>
-            </form>
+            <p className="mb-4">You need to sign in to continue</p>
+            <SignInWithMicrosoft />
             <p className="mt-1.5 flex cursor-default items-center justify-center gap-1 text-sm text-slate-400">
               <SvgInfoOutlined fill="currentColor" /> Sign In with your Veersa
               Account

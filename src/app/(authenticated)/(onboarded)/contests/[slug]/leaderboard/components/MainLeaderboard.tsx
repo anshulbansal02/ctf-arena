@@ -1,5 +1,5 @@
 "use client";
-import { Avatar, ProgressBar } from "@/shared/components";
+import { Avatar, ProgressBar, Spinner } from "@/shared/components";
 import Image, { StaticImageData } from "next/image";
 
 import GoldMedal from "@/assets/media/gold-medal.png";
@@ -17,6 +17,7 @@ const medalURIs: Record<number, StaticImageData> = {
 
 interface Props {
   contestId: number;
+  totalChallenges: number;
 }
 
 function Rank({ index }: { index: number }) {
@@ -35,7 +36,7 @@ function Rank({ index }: { index: number }) {
 }
 
 export function MainLeaderboard(props: Props) {
-  const { leaderboard, hasContestEnded } = useLeaderboard<{
+  const { leaderboard, hasContestEnded, lastUpdated } = useLeaderboard<{
     rank: number;
     teamId: number;
     score: number;
@@ -71,6 +72,31 @@ export function MainLeaderboard(props: Props) {
           Points
         </div>
       </div>
+
+      {!hasContestEnded && !leaderboard.length && (
+        <div className="flex w-full flex-col items-center">
+          {!lastUpdated && (
+            <Spinner
+              color="rgba(255,255,255,0.25)"
+              className="mt-20"
+              size={24}
+            />
+          )}
+
+          {lastUpdated && (
+            <p className="py-40">
+              Waiting for someone to make the first submission.
+            </p>
+          )}
+        </div>
+      )}
+
+      {hasContestEnded && !leaderboard.length && (
+        <div className="flex w-full flex-col items-center">
+          <p className="py-40 text-gray-300">No data to show here</p>
+        </div>
+      )}
+
       <div className="no-scrollbar flex max-h-[560px] w-full flex-col gap-2 overflow-auto rounded-xl">
         {leaderboard.map((entry, i) => (
           <div
@@ -100,10 +126,13 @@ export function MainLeaderboard(props: Props) {
             </div>
             <div role="cell" className="flex flex-[4] items-center gap-2">
               <div className="w-36">
-                <ProgressBar total={8} value={entry.challengesSolved} />
+                <ProgressBar
+                  total={props.totalChallenges}
+                  value={entry.challengesSolved}
+                />
               </div>
               <span className="text-sm text-zinc-400">
-                {entry.challengesSolved}/8
+                {entry.challengesSolved}/{props.totalChallenges}
               </span>
             </div>
             <div role="cell" className="flex-1 text-lg">

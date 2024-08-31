@@ -29,11 +29,22 @@ const Button = forwardRef(function Button(
     return (
       <button
         ref={ref}
-        className={clsx(styles.button, styles[variant ?? "primary"], {'cursor-progress': loading}, className)}
+        className={clsx(
+          styles.button,
+          styles[variant ?? "primary"],
+          { "cursor-progress": loading },
+          className,
+        )}
         disabled={loading}
         {...elementProps}
       >
-        {loading && <Spinner size={12} className={styles.loader} />}
+        {loading && (
+          <Spinner
+            size={12}
+            className={styles.loader}
+            color={["ghost", "outlined"].includes(variant) ? "#fff" : "#000"}
+          />
+        )}
         {children}
       </button>
     );

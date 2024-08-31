@@ -13,6 +13,7 @@ import {
   ilike,
   inArray,
   isNull,
+  lt,
   notInArray,
   or,
   sql,
@@ -22,7 +23,7 @@ import teamNames from "./team_names.json";
 import { cache } from "../cache";
 import { emailService, renderTemplate } from "../email";
 import { config } from "@/config";
-import { TB_contestEvents } from "../contest";
+import { TB_contestEvents, TB_contests } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
 import { nanoid } from "nanoid";
 import { notificationsQueue } from "../queue";
@@ -48,8 +49,11 @@ async function preconditionIsTeamInContest(teamId: number) {
       and(
         eq(TB_contestEvents.teamId, teamId),
         eq(TB_contestEvents.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
+        lt(TB_contests.startsAt, new Date()),
+        gt(TB_contests.endsAt, new Date()),
       ),
-    );
+    )
+    .leftJoin(TB_contests, eq(TB_contests.id, TB_contestEvents.contestId));
 
   return !!r;
 }

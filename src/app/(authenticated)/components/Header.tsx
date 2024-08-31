@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { SvgLogOut } from "@/assets/icons";
 import React from "react";
 import { Notifications } from "./Notifications";
+import { SignOut } from "./SignOut";
 
 interface Props {
   className?: string;
@@ -27,19 +28,7 @@ export async function Header({ className }: Props) {
 
         <Avatar size={40} username={user.email} />
 
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirect: true, redirectTo: "/" });
-          }}
-        >
-          <Button variant="outlined">
-            <span className="hidden sm:block">Sign Out</span>
-            <span className="sm:hidden">
-              <SvgLogOut />
-            </span>
-          </Button>
-        </form>
+        <SignOut />
       </div>
     </header>
   );

@@ -3,6 +3,7 @@ import { MainLeaderboard } from "./components/MainLeaderboard";
 import { QuickestAtLeaderboard } from "./components/QuickestAtLeaderboard";
 import { SprintersLeaderboard } from "./components/SprintersLeaderboard";
 import { redirect } from "next/navigation";
+import { Timer } from "@/shared/components";
 
 export default async function LeaderboardPage({
   params,
@@ -16,15 +17,34 @@ export default async function LeaderboardPage({
     redirect(`/contests/${contest.id}`);
   }
 
+  if (contest.isUnranked) {
+    redirect(`/contests/${contest.id}`);
+  }
+
   return (
     <div className="px-4 md:px-16">
+      <div className="fixed left-6 top-5 z-20 rounded-md bg-slate-700 px-4 py-2 shadow-md">
+        <span className="font-mono text-lg font-semibold">
+          {contest.endsAt < new Date() ? (
+            "Contest has ended"
+          ) : (
+            <Timer till={contest.endsAt} running />
+          )}
+        </span>
+      </div>
+
       <div className="mt-32 flex flex-col gap-12 lg:flex-row">
         <section className="flex-[2]">
           <h1 className="text-center text-3xl font-normal text-slate-300">
-            Leaderboard &gt; {contest.name}
+            Leaderboard
+            <br />
+            <span className="text-xl font-medium">{contest.name}</span>
           </h1>
           <div className="mt-8">
-            <MainLeaderboard contestId={+params.slug} />
+            <MainLeaderboard
+              contestId={+params.slug}
+              totalChallenges={contest.noOfChallenges}
+            />
           </div>
         </section>
 
