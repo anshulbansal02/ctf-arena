@@ -79,5 +79,4 @@ has context menu
 
 ---
 4. Create contest intimation template
-6. Configure SES provider adapter and sendgrid api key
 8. Reconcile leaderboard and commit on end

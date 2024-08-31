@@ -24,7 +24,7 @@ import { CONTEST_EVENTS } from "./helpers";
 import { contestQueue } from "../queue";
 import { getTeamRankAndScore } from "./leaderboard";
 import { TB_users } from "../user";
-import { emailService, renderTemplate } from "../email";
+import { getEmailService, renderTemplate } from "../email";
 import { config } from "@/config";
 
 export const contestChannelName = async (subChannel: "submission") => {
@@ -471,7 +471,7 @@ export async function batchSendContestIntimation(contestId: number) {
     .from(TB_users);
 
   users.forEach((user) => {
-    emailService.send({
+    getEmailService().send({
       address: { from: config.app.sourceEmailAddress, to: user.email },
       body: renderTemplate("contest-intimation", {
         contestName: contest.name,

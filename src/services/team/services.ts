@@ -21,7 +21,7 @@ import {
 import { randomItem } from "@/lib/utils";
 import teamNames from "./team_names.json";
 import { cache } from "../cache";
-import { emailService, renderTemplate } from "../email";
+import { getEmailService, renderTemplate } from "../email";
 import { config } from "@/config";
 import { TB_contestEvents, TB_contests } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
@@ -145,10 +145,10 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
 
   const emails = inputEmails.map((e) => e.toLowerCase());
 
-  if (emails.includes(user.email))
-    throw new Error(
-      "You cannot include your own email address in the invites.",
-    );
+  // if (emails.includes(user.email))
+  //   throw new Error(
+  //     "You cannot include your own email address in the invites.",
+  //   );
 
   // check sent team invites count
   const [invites] = await db
@@ -670,7 +670,7 @@ export async function batchSendInvitations() {
       });
 
       try {
-        await emailService.send({
+        await getEmailService().send({
           address: {
             from: config.app.sourceEmailAddress,
             to: invite.inviteeEmail!,
@@ -680,7 +680,9 @@ export async function batchSendInvitations() {
         });
 
         invitesSent.push(invite.id);
-      } catch {}
+      } catch (err) {
+        console.error("Error sending invite: ", err);
+      }
     }),
   );
 
