@@ -128,6 +128,7 @@ export function CreateTeamStep(props: Props) {
                 type="button"
                 variant="ghost"
                 onClick={generateName}
+                className="m-1 !h-8 !w-8 !p-0"
                 title="Generate a cool name"
               >
                 <SvgPenSparkle width={20} height={20} />

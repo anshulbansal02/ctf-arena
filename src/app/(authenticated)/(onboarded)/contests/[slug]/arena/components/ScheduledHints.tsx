@@ -34,7 +34,7 @@ function RevealableHint(props: {
 
   function HintText() {
     if (show && revealedHintText)
-      return <p className="my-2">{revealedHintText}</p>;
+      return <p className="my-2 tracking-tight">{revealedHintText}</p>;
 
     return (
       <p className={clsx("my-2 blur-sm", { "animate-pulse": loading })}>
@@ -53,24 +53,20 @@ function RevealableHint(props: {
   }
 
   return (
-    <div className="w-96 py-1">
-      <div className="mb-2 flex items-center gap-1">
-        <SvgBulb width={16} height={16} />
-        <h5 className="mt-[2px] text-sm font-medium leading-none">
-          Hint #{props.number}
-        </h5>
-      </div>
-
+    <div className="w-96">
       <HintText />
-      {!isAlreadyRevealed ? (
-        <p className="mb-2 inline-block rounded-md bg-[#28180f] px-2 py-1 text-sm font-medium leading-none text-amber-400">
-          <span className="font-mono">&gt;</span> Revealing hint will cost{" "}
-          {props.cost} points
-        </p>
-      ) : null}
-      <Button variant="ghost" className="!h-8 !p-2" onClick={toggle}>
-        {show ? "Hide" : "Reveal"}
-      </Button>
+
+      <div className="flex items-center">
+        {!isAlreadyRevealed ? (
+          <p className="inline-block rounded-md bg-[#5f360e] px-2 py-1 text-sm font-medium leading-none text-white">
+            <span className="font-mono">💰</span> Revealing this hint will cost{" "}
+            {props.cost} points
+          </p>
+        ) : null}
+        <Button variant="ghost" className="ml-auto !h-8 !p-2" onClick={toggle}>
+          {show ? "Hide" : !isAlreadyRevealed ? "Reveal" : "Show"}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -119,7 +115,7 @@ export function ScheduledHints(props: Props) {
   useScheduledTasks(
     hints.list.map((hint, i) => ({
       action: () => {
-        toaster.toast({
+        toaster.info({
           content: (
             <RevealableHint
               challengeId={props.challengeId}
@@ -130,6 +126,8 @@ export function ScheduledHints(props: Props) {
               number={i + 1}
             />
           ),
+          icon: <SvgBulb fill="currentColor" />,
+          title: `Hint #${i + 1}`,
           scoped: true,
           persistent: true,
           dismissible: false,

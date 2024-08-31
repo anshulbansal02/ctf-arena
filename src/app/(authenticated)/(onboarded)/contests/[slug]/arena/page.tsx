@@ -127,6 +127,7 @@ export default function SubmissionPage({
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors: formErrors },
   } = useForm<SubmissionForm>({
     mode: "onSubmit",
@@ -154,6 +155,7 @@ export default function SubmissionPage({
       if (isCorrect) {
         next();
         getTeamStats(params.slug);
+        setValue("flag", "");
         // Await for confetti to settle
         await new Promise((r) => setTimeout(r, 2000));
 

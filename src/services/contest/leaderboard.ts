@@ -285,7 +285,7 @@ export async function rebuildQuickestFirsts(contestId: number) {
     .from(cs)
     .leftJoin(cc, eq(cc.id, cs.challengeId))
     .where(eq(cs.contestId, contestId))
-    .groupBy(cs.challengeId);
+    .groupBy(cs.challengeId, cc.order, cs.submittedByTeam);
 
   const records = quickestFirsts.flatMap((record) => [
     record.challengeId.toString(),
@@ -299,7 +299,7 @@ export async function rebuildQuickestFirsts(contestId: number) {
   const key = leaderboardKey("quickest_firsts", contestId, "raw");
 
   await cache.del(key);
-  await cache.hSet(key, records);
+  if (records.length) await cache.hSet(key, records);
 
   purgeBuildAndNotify("quickest_firsts", contestId);
 }
