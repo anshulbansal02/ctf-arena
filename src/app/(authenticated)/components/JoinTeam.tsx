@@ -11,7 +11,7 @@ import { nanoid } from "nanoid";
 import { useState } from "react";
 import AstronautImage from "@/assets/media/astronaut.png";
 import Image from "next/image";
-import { sendTeamRequests } from "@/services/team";
+import { getSentTeamRequests, sendTeamRequests } from "@/services/team";
 import { useForm } from "react-hook-form";
 
 interface Props {
@@ -29,29 +29,34 @@ const TeamsListSkeleton = () => {
 };
 
 export function JoinTeamStep(props: Props) {
-  const toaster = useToaster();
   const [search, setSearch] = useState<string>("");
-  const { teams, loading } = useTeams({ search });
+  const { teams, loading: loadingTeams } = useTeams({ search });
   const [joinRequestsDraft, setJoinRequestsDraft] = useState<Array<number>>([]);
   const [readyToFinish, setReadyToFinish] = useState(false);
+
+  const {
+    data: requestedTeams,
+    execute: refetchRequestedTeams,
+    loading: loadingRequestedTeams,
+  } = useAction(
+    async () => {
+      const requests = await getSentTeamRequests();
+      return requests.map((r) => r.teamId);
+    },
+    {
+      args: null,
+      immediate: true,
+      preserveData: true,
+    },
+  );
+
+  const loading = loadingTeams || loadingRequestedTeams;
 
   const { register, handleSubmit } = useForm<{ search: string }>({
     mode: "onSubmit",
   });
 
   function toggleRequest(teamId: number) {
-    if (
-      !joinRequestsDraft.includes(teamId) &&
-      joinRequestsDraft.length === config.app.team.REQUEST_TEAM_LIMIT
-    ) {
-      return toaster.error({
-        title: `Can not request more than ${config.app.team.REQUEST_TEAM_LIMIT} teams at a time.`,
-        content:
-          "You can withdraw other requests to send request to other teams.",
-        timeout: 5000,
-        scoped: true,
-      });
-    }
     setJoinRequestsDraft((requests) => {
       return requests.includes(teamId)
         ? requests.filter((id) => id !== teamId)
@@ -65,6 +70,7 @@ export function JoinTeamStep(props: Props) {
   const { execute: sendRequests, loading: sendingRequests } = useAction(
     async () => {
       await sendTeamRequests(joinRequestsDraft);
+      await refetchRequestedTeams(null);
     },
   );
 
@@ -76,9 +82,10 @@ export function JoinTeamStep(props: Props) {
         </Button>
         <h2 className="text-3xl">Choose your Team</h2>
       </div>
-      <p className="mt-4 text-balance">
-        You can only send request to {config.app.team.REQUEST_TEAM_LIMIT} teams
-        at a time. First team to accept your request becomes your team.
+      <p className="mt-4">
+        You can only send request to {config.app.team.REQUEST_TEAM_DAY_LIMIT}{" "}
+        teams in a day. First team to accept your request becomes your team.
+        Requests are not withdrawable once sent.
       </p>
       <div className="mx-auto mt-8 flex flex-col items-center gap-4">
         <form
@@ -110,15 +117,20 @@ export function JoinTeamStep(props: Props) {
                 <div>
                   <Button
                     onClick={() => toggleRequest(team.id)}
+                    disabled={requestedTeams?.includes(team.id)}
                     variant={
-                      joinRequestsDraft.includes(team.id)
-                        ? "outlined"
-                        : "primary"
+                      requestedTeams?.includes(team.id)
+                        ? "ghost"
+                        : joinRequestsDraft.includes(team.id)
+                          ? "outlined"
+                          : "primary"
                     }
                   >
-                    {joinRequestsDraft.includes(team.id)
-                      ? "Withdraw Request"
-                      : "Request To Join"}
+                    {requestedTeams?.includes(team.id)
+                      ? "Requested"
+                      : joinRequestsDraft.includes(team.id)
+                        ? "Remove Request"
+                        : "Add Request"}
                   </Button>
                 </div>
               </li>
@@ -149,7 +161,7 @@ export function JoinTeamStep(props: Props) {
       <AnimatePresence>
         {readyToFinish && (
           <motion.div
-            className="fixed bottom-0 left-0 flex w-full justify-center"
+            className="fixed bottom-0 left-0 z-40 flex w-full justify-center"
             initial={{ y: 10, opacity: 0.2 }}
             transition={{ duration: 0.2 }}
             exit={{ y: 10, opacity: 0 }}

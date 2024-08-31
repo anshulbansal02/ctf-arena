@@ -377,7 +377,7 @@ export async function createContest(data: {
     }>;
   }>;
 }) {
-  await db.transaction(async (tx) => {
+  return await db.transaction(async (tx) => {
     const [contest] = await tx
       .insert(TB_contests)
       .values({
@@ -402,6 +402,8 @@ export async function createContest(data: {
         pointsDecayFactor: c.pointsDecayFactor,
       })),
     );
+
+    return contest.id;
   });
 }
 

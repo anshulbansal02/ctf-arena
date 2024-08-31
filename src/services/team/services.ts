@@ -27,6 +27,7 @@ import { TB_contestEvents, TB_contests } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
 import { nanoid } from "nanoid";
 import { notificationsQueue } from "../queue";
+import { startOfDay } from "date-fns";
 
 export type TeamDetails = {
   id: number;
@@ -93,6 +94,11 @@ export async function createTeamAndSendInvites(props: {
     await tx.insert(TB_teamMembers).values({ teamId, userId: user.id });
 
     if (props.invitees?.length) {
+      if (props.invitees.length > config.app.team.INVITE_USER_DAY_LIMIT)
+        throw new Error(
+          `You cannot invite more than ${config.app.team.INVITE_USER_DAY_LIMIT} members in a day`,
+        );
+
       await tx.insert(TB_teamRequest).values(
         props.invitees.map((i) => ({
           type: "invite" as any,
@@ -137,13 +143,14 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
   if (team.leaderId !== user.id)
     throw new Error("You are not the team leader.");
 
-  const emails = inputEmails
-    .map((e) => e.toLowerCase())
-    .filter((email) => email !== user.email);
+  const emails = inputEmails.map((e) => e.toLowerCase());
+
+  if (emails.includes(user.email))
+    throw new Error(
+      "You cannot include your own email address in the invites.",
+    );
 
   // check sent team invites count
-  const dayStart = new Date();
-  dayStart.setUTCHours(0, 0, 0, 0);
   const [invites] = await db
     .select({ count: count() })
     .from(TB_teamRequest)
@@ -151,12 +158,12 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
       and(
         eq(TB_teamRequest.type, "invite"),
         eq(TB_teamRequest.teamId, teamId),
-        gt(TB_teamRequest.createdAt, dayStart),
+        gt(TB_teamRequest.createdAt, startOfDay(new Date())),
       ),
     );
-  if (invites.count >= config.app.team.INVITE_USER_LIMIT)
+  if (invites.count + emails.length > config.app.team.INVITE_USER_DAY_LIMIT)
     throw new Error(
-      `A team can only send invitations to maximum ${config.app.team.INVITE_USER_LIMIT} users`,
+      `A team can only send invitations to maximum of ${config.app.team.INVITE_USER_DAY_LIMIT} users in a day.`,
     );
 
   await db.transaction(async (tx) => {
@@ -317,16 +324,16 @@ export async function sendTeamRequests(teamIds: Array<number>) {
       and(
         eq(TB_teamRequest.createdBy, user.id),
         eq(TB_teamRequest.type, "request"),
-        inArray(TB_teamRequest.status, ["delivered"]),
+        gt(TB_teamRequest.createdAt, startOfDay(new Date())),
       ),
     );
 
-  const limit = config.app.team.REQUEST_TEAM_LIMIT;
-  if (userRequests.count >= limit)
+  const limit = config.app.team.REQUEST_TEAM_DAY_LIMIT;
+  if (userRequests.count + teamIds.length > limit)
     throw new Error(`Cannot send request to more than ${limit} teams`);
 
   await db.transaction(async (tx) => {
-    const requests = await tx
+    await tx
       .insert(TB_teamRequest)
       .values(
         teamIds.map((teamId) => ({

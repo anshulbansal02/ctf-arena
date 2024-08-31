@@ -2,100 +2,95 @@
 
 import { createContest } from "@/services/contest";
 import { Button } from "@/shared/components";
+import { useAction, useToaster } from "@/shared/hooks";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-const contest = {
-  name: "FlagRush (Unranked) 2",
-  time: { start: new Date("2024-08-29"), end: new Date("2024-08-31") },
-  challenges: [
-    {
-      answer: "answer1",
-      hints: [
-        {
-          afterSeconds: 60,
-          cost: 100,
-          id: 1,
-          text: "C1H1: This is some hint that will be given to you during the challenge",
-        },
-        {
-          afterSeconds: 100,
-          cost: 100,
-          id: 2,
-          text: "C1H2: This is some hint that will be given to you during the challenge",
-        },
-        {
-          afterSeconds: 150,
-          cost: 100,
-          id: 3,
-          text: "C1H3: his is some hint that will be given to you during the challenge",
-        },
-      ],
-      points: { max: 500, min: 50 },
-      pointsDecayFactor: 0.5,
-      description: "",
-      name: "",
-    },
-
-    {
-      answer: "answer2",
-      hints: [
-        {
-          afterSeconds: 60,
-          cost: 100,
-          id: 1,
-          text: "C2H1: This is some hint that will be given to you during the challenge",
-        },
-        {
-          afterSeconds: 100,
-          cost: 100,
-          id: 2,
-          text: "C2H2: This is some hint that will be given to you during the challenge",
-        },
-        {
-          afterSeconds: 150,
-          cost: 100,
-          id: 3,
-          text: "C2H3: This is some hint that will be given to you during the challenge",
-        },
-      ],
-      points: { max: 500, min: 50 },
-      pointsDecayFactor: 0.5,
-      description: "",
-      name: "",
-    },
-
-    {
-      answer: "answer3",
-      hints: [
-        {
-          afterSeconds: 60,
-          cost: 100,
-          id: 1,
-          text: "C3H1: This is some hint that will be given to you during the challenge",
-        },
-        {
-          afterSeconds: 100,
-          cost: 100,
-          id: 2,
-          text: "C3H2: This is some hint that will be given to you during the challenge",
-        },
-        {
-          afterSeconds: 150,
-          cost: 100,
-          id: 3,
-          text: "C3H3: This is some hint that will be given to you during the challenge",
-        },
-      ],
-      points: { max: 500, min: 50 },
-      pointsDecayFactor: 0.5,
-      description: "",
-      name: "",
-    },
-  ],
-  description: "",
-  shortDescription:
-    "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.",
-};
+const contestSchema = z.object({
+  name: z.string(),
+  time: z.object({ start: z.coerce.date(), end: z.coerce.date() }),
+  challenges: z.array(
+    z.object({
+      answer: z.string(),
+      hints: z.array(
+        z.object({
+          afterSeconds: z.number(),
+          cost: z.number(),
+          id: z.number(),
+          text: z.string(),
+        }),
+      ),
+      points: z.object({ max: z.number(), min: z.number() }),
+      pointsDecayFactor: z.number(),
+      description: z.string(),
+      name: z.string(),
+    }),
+  ),
+  description: z.string(),
+  shortDescription: z.string(),
+});
 
 export function CreateContest() {
-  return <Button onClick={() => createContest(contest)}>Create Contest</Button>;
+  const { execute: create, loading, success, data } = useAction(createContest);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors: formErrors },
+  } = useForm<{ contestDetails: string }>({
+    mode: "onSubmit",
+  });
+
+  const toaster = useToaster();
+
+  async function handleFormSubmit(data: { contestDetails: string }) {
+    const details = contestSchema.parse(JSON.parse(data.contestDetails));
+    await create(details);
+    setValue("contestDetails", "");
+  }
+
+  useEffect(() => {
+    if (success) toaster.success(`Contest created with id:${data}`);
+  }, [success]);
+
+  function parseAndValidate(input: string) {
+    try {
+      const data = JSON.parse(input);
+      const result = contestSchema.safeParse(data);
+      if (result.error)
+        return JSON.stringify(result.error.flatten().fieldErrors, null, 2);
+
+      return true;
+    } catch (e) {
+      if (e instanceof Error) return e.message;
+      return `${e}`;
+    }
+  }
+
+  return (
+    <div className="my-16 max-w-[600px]">
+      <h5 className="text-center text-lg font-medium">Enter Contest Data</h5>
+
+      <form onSubmit={handleSubmit(handleFormSubmit)}>
+        <textarea
+          className="mt-4 min-h-96 w-[600px] rounded-lg bg-zinc-800 p-4"
+          {...register("contestDetails", { validate: parseAndValidate })}
+        />
+
+        {formErrors.contestDetails?.message && (
+          <p
+            className="text-red-500"
+            dangerouslySetInnerHTML={{
+              __html: formErrors.contestDetails.message,
+            }}
+          ></p>
+        )}
+
+        <Button className="mt-4 w-full" loading={loading}>
+          Create Contest
+        </Button>
+      </form>
+    </div>
+  );
 }

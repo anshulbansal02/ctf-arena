@@ -47,8 +47,8 @@ export const config = {
   app: {
     team: {
       MEMBERS_LIMIT: 4,
-      REQUEST_TEAM_LIMIT: 4,
-      INVITE_USER_LIMIT: 5,
+      REQUEST_TEAM_DAY_LIMIT: 10,
+      INVITE_USER_DAY_LIMIT: 10,
     },
 
     organizations: ["veersatech.com", "veersalabs.com"],

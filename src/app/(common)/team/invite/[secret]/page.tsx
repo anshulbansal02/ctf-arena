@@ -92,7 +92,7 @@ export default async function ViewInvitePage({
           </h3>
 
           <div className="mt-16">
-            <p className="mb-4">You need to sign in to continue</p>
+            <p className="mb-4 text-center">You need to sign in to continue</p>
             <SignInWithMicrosoft />
             <p className="mt-1.5 flex cursor-default items-center justify-center gap-1 text-sm text-slate-400">
               <SvgInfoOutlined fill="currentColor" /> Sign In with your Veersa

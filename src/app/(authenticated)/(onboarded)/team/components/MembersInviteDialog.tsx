@@ -4,10 +4,12 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { config } from "@/config";
 import { sendTeamInvites } from "@/services/team";
 import { Button, TagsInput } from "@/shared/components";
-import { useAction } from "@/shared/hooks";
+import { useAction, useToaster } from "@/shared/hooks";
 import { Controller, useForm } from "react-hook-form";
 import validator from "validator";
 import { SvgCross } from "@/assets/icons";
+import { useEffect } from "react";
+import { joinNamesWithConjunction } from "@/lib/utils";
 
 type FormData = {
   members: Array<string>;
@@ -18,19 +20,31 @@ export function MembersInviteDialog() {
     register,
     control,
     handleSubmit,
+    getValues,
     formState: { errors: formErrors },
   } = useForm<FormData>({
     mode: "onSubmit",
   });
 
-  const { execute: sendInvites, loading } = useAction(sendTeamInvites);
+  const toaster = useToaster();
+
+  const { execute: sendInvites, loading, success } = useAction(sendTeamInvites);
 
   async function handleFormSubmit(data: FormData) {
     await sendInvites(data.members);
   }
 
-  function validateEmails(emails: string[]) {
-    if (!emails) return true;
+  useEffect(() => {
+    if (success)
+      toaster.success({
+        title: "Invitations Sent!",
+        content: `You have invited ${joinNamesWithConjunction(getValues("members"))} to join your team.`,
+        timeout: 6000,
+      });
+  }, [success]);
+
+  function validateEmails(emails: string[] | undefined) {
+    if (!emails?.length) return "Please enter email addresses to send invites";
 
     const emailsValid = emails.every((e) => validator.isEmail(e));
     if (!emailsValid) return "Please enter valid email addresses";

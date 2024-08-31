@@ -1,6 +1,15 @@
 import { getContests } from "@/services/contest";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceStrict, formatDistanceToNow } from "date-fns";
+import { SvgCalendar, SvgTimer } from "@/assets/icons";
+
+function Chip(props: { children: React.ReactNode }) {
+  return (
+    <p className="flex items-center gap-2 rounded-lg bg-slate-700 px-2 py-[6px] text-sm font-medium leading-none">
+      {props.children}
+    </p>
+  );
+}
 
 export default async function ContestsPage() {
   const [activeContests, upcomingContests, pastContests] = await Promise.all([
@@ -22,7 +31,25 @@ export default async function ContestsPage() {
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>
 
-                    <p className="mt-4 text-sm font-light leading-snug text-slate-300">
+                    <div className="mt-2 flex gap-2">
+                      {[
+                        <>
+                          <SvgCalendar />{" "}
+                          {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+                        </>,
+                        <>
+                          <SvgTimer />{" "}
+                          {formatDistanceStrict(
+                            contest.endsAt,
+                            contest.startsAt,
+                          )}
+                        </>,
+                        ...(contest.unranked ? ["Unranked"] : []),
+                      ].map((node) => (
+                        <Chip>{node}</Chip>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-sm font-light leading-snug text-slate-300">
                       {contest.shortDescription}
                     </p>
                   </div>
@@ -54,7 +81,26 @@ export default async function ContestsPage() {
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>
 
-                    <p className="mt-4 text-sm font-light leading-snug text-slate-300">
+                    <div className="mt-2 flex gap-2">
+                      {[
+                        <>
+                          <SvgCalendar />{" "}
+                          {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+                        </>,
+                        <>
+                          <SvgTimer />{" "}
+                          {formatDistanceStrict(
+                            contest.endsAt,
+                            contest.startsAt,
+                          )}
+                        </>,
+                        ...(contest.unranked ? ["Unranked"] : []),
+                      ].map((node) => (
+                        <Chip>{node}</Chip>
+                      ))}
+                    </div>
+
+                    <p className="mt-2 text-sm font-light leading-snug text-slate-300">
                       {contest.shortDescription}
                     </p>
                   </div>
@@ -86,7 +132,26 @@ export default async function ContestsPage() {
                   <div className="text-left">
                     <h3 className="text-xl font-medium">{contest.name}</h3>
 
-                    <p className="mt-4 text-sm font-light leading-snug text-slate-300">
+                    <div className="mt-2 flex gap-2">
+                      {[
+                        <>
+                          <SvgCalendar />{" "}
+                          {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+                        </>,
+                        <>
+                          <SvgTimer />{" "}
+                          {formatDistanceStrict(
+                            contest.endsAt,
+                            contest.startsAt,
+                          )}
+                        </>,
+                        ...(contest.unranked ? ["Unranked"] : []),
+                      ].map((node) => (
+                        <Chip>{node}</Chip>
+                      ))}
+                    </div>
+
+                    <p className="mt-2 text-sm font-light leading-snug text-slate-300">
                       {contest.shortDescription}
                     </p>
                   </div>

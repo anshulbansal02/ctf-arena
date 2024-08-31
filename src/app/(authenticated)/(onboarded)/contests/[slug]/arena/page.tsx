@@ -254,9 +254,14 @@ export default function SubmissionPage({
             </div>
           ) : nextChallenge ? (
             <div className="w-full max-w-[400px]">
-              <h2 className="mb-4 mt-16 text-center text-2xl font-medium">
+              <h2 className="mt-16 text-center text-2xl font-medium">
                 Submit Challenge Flag
               </h2>
+
+              <p className="mb-4 mt-2 text-center text-lg">
+                {nextChallenge.description}
+              </p>
+
               <Confetti
                 render={(launch) => (
                   <form

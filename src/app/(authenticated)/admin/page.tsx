@@ -9,7 +9,6 @@ export default async function AdminPage() {
 
   return (
     <main className="flex min-h-lvh flex-col items-center px-4 py-10">
-      <h2>Create Contest</h2>
       <CreateContest />
     </main>
   );

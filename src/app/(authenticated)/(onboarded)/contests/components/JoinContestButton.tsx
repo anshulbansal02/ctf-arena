@@ -18,7 +18,7 @@ export function JoinContestButton(props: Props) {
 
   return (
     <Button loading={loading} onClick={enterContest}>
-      Join Contest
+      Register For Contest
     </Button>
   );
 }
