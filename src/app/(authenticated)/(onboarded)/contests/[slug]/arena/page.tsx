@@ -159,13 +159,7 @@ export default function SubmissionPage({
         // Await for confetti to settle
         await new Promise((r) => setTimeout(r, 2000));
 
-        // Get the next challenge only if there is one to solve.
-        // TeamStats show number of challenges solved by the team and is lagging by 1 because it is not updated yet
-        if (
-          pageData!.contest.noOfChallenges >
-          (teamStats?.submissionsCount ?? 0) + 1
-        )
-          getNextChallenge(params.slug);
+        getNextChallenge(params.slug);
       } else {
         setError("flag", { message: randomItem(errorMessages) });
       }

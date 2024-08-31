@@ -27,7 +27,7 @@ import { TB_users } from "../user";
 import { emailService, renderTemplate } from "../email";
 import { config } from "@/config";
 
-export const contestChannel = async (subChannel: "submission") => {
+export const contestChannelName = async (subChannel: "submission") => {
   return `channel:contest:${subChannel}`;
 };
 
@@ -191,7 +191,7 @@ export async function checkAndCreateSubmission(data: {
       createdAt: TB_contestSubmissions.createdAt,
     });
 
-  contestQueue.add(await contestChannel("submission"), {
+  contestQueue.add(await contestChannelName("submission"), {
     submissionId: newSubmission.id,
     contestId,
     challengeId,

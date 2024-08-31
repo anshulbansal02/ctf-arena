@@ -5,7 +5,7 @@ import { cache } from "@/services/cache";
 import { batchSendInvitations, getTeamsDetailsByIds } from "@/services/team";
 import {
   batchSendContestIntimation,
-  contestChannel,
+  contestChannelName,
   getContestParticipatingTeamIds,
   getContestsStartingInOneHour,
 } from "@/services/contest";
@@ -111,7 +111,7 @@ export async function bootstrap() {
   });
 
   contestQueue.process(
-    await contestChannel("submission"),
+    await contestChannelName("submission"),
     (job: Bull.Job<leaderboard.ContestSubmission>) => {
       console.info(`[Job] Processing submission id ${job.data.submissionId}`);
       const submission = job.data;

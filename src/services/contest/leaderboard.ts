@@ -3,6 +3,7 @@ import { db } from "../db";
 import { TB_contestChallenges, TB_contestSubmissions } from "./entities";
 import { desc, eq, gt, min, sum } from "drizzle-orm";
 import { subMinutes } from "date-fns";
+import { contestChannel } from "@/services/queue";
 
 /** === TYPES === */
 
@@ -14,7 +15,7 @@ export type ContestSubmission = {
   teamId: number;
   score: number;
   timeTaken: number;
-  createdAt: Date;
+  createdAt: string;
 };
 
 export type Leaderboard =
@@ -30,7 +31,7 @@ export const leaderboardKey = (
   detail: "raw" | "prepared",
 ) => `contest:${contestId}:leaderboard:${type}:${detail}`;
 
-export const leaderboardUpdateChannel = (
+export const leaderboardUpdateChannelName = (
   type: Leaderboard,
   contestId: number,
 ) => `channel:${leaderboardKey(type, contestId, "prepared")}:update`;
@@ -41,9 +42,9 @@ export async function purgeBuildAndNotify(
 ) {
   await cache.del(leaderboardKey(type, contestId, "prepared"));
   await getLeaderboardByName(type, contestId);
-  cache.publish(
-    leaderboardUpdateChannel(type, contestId),
-    JSON.stringify(Date.now()),
+  contestChannel.publisher.publish(
+    leaderboardUpdateChannelName(type, contestId),
+    "123456789",
   );
 }
 
@@ -139,7 +140,7 @@ export async function rebuildSumOfScores(contestId: number) {
 export async function sprintingTeamsProcessor(submission: ContestSubmission) {
   const { contestId, teamId, createdAt } = submission;
 
-  const score = +`${+createdAt}.${teamId}`;
+  const score = +`${+new Date(createdAt)}.${teamId}`;
 
   await cache.zAdd(leaderboardKey("sprinting_teams", contestId, "raw"), [
     { score, value: teamId.toString() },
