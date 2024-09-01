@@ -1,9 +1,17 @@
+import { config } from "@/config";
 import Bull from "bull";
 
-const jobQueue = new Bull("general-job-queue");
+const queueCommonConfig = {
+  redis: {
+    host: config.cache.host,
+    port: config.cache.port,
+  },
+};
 
-const contestQueue = new Bull("contest-queue");
+const jobQueue = new Bull("general-job-queue", queueCommonConfig);
 
-const notificationsQueue = new Bull("notifications-queue");
+const contestQueue = new Bull("contest-queue", queueCommonConfig);
+
+const notificationsQueue = new Bull("notifications-queue", queueCommonConfig);
 
 export { jobQueue, contestQueue, notificationsQueue };
