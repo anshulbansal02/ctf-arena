@@ -460,7 +460,7 @@ export async function getTeamContestStats(contestId: number) {
   };
 }
 
-export async function batchSendContestIntimation(contestId: number) {
+export async function batchSendContestReminder(contestId: number) {
   const [contest] = await db
     .select()
     .from(TB_contests)
@@ -473,7 +473,7 @@ export async function batchSendContestIntimation(contestId: number) {
   users.forEach((user) => {
     getEmailService().send({
       address: { from: config.app.sourceEmailAddress, to: user.email },
-      body: renderTemplate("contest-intimation", {
+      body: renderTemplate("contest-reminder", {
         contestName: contest.name,
         contestURL: new URL(`contests/${contest.id}`, config.host).href,
         startsAt: contest.startsAt,

@@ -4,7 +4,7 @@ import * as leaderboard from "@/services/contest/leaderboard";
 import { cache } from "@/services/cache";
 import { batchSendInvitations, getTeamsDetailsByIds } from "@/services/team";
 import {
-  batchSendContestIntimation,
+  batchSendContestReminder,
   contestChannelName,
   getContestParticipatingTeamIds,
   getContestsStartingInOneHour,
@@ -92,7 +92,7 @@ export async function bootstrap() {
     notificationsQueue.addBulk(notifications);
 
     contestsStartingInOneHour.forEach((contest) => {
-      batchSendContestIntimation(contest.id);
+      batchSendContestReminder(contest.id);
     });
 
     contestsStartingInOneHour.forEach((contest) => {

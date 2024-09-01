@@ -90,7 +90,7 @@ export const TeamInviteEmail = ({
             <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
 
             <Text className="text-center text-[12px] leading-[18px] text-[#666666]">
-              This invitation was intended for{" "}
+              This invitation is intended for{" "}
               <span className="text-black">{inviteeEmail}</span>. You are
               receiving this email because{" "}
               <span className="text-black">{inviterName}</span> used the above

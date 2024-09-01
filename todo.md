@@ -78,5 +78,4 @@ has context menu
 
 
 ---
-4. Create contest intimation template
 8. Reconcile leaderboard and commit on end
