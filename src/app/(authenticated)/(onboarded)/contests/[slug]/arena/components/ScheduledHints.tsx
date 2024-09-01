@@ -83,19 +83,6 @@ export function ScheduledHints(props: Props) {
     lastSubmissionAt: Date | null;
   }>({ list: [], lastSubmissionAt: null });
 
-  // TODO: CHECK IF IT WILL WORK
-  useAction(async () => {
-    const [fetchedHints, lastSubmissionAt] = await Promise.all([
-      getChallengeHints(props.challengeId),
-      getTeamLastSubmissionAt(props.contestId),
-    ]);
-
-    return {
-      list: fetchedHints,
-      lastSubmissionAt: new Date(lastSubmissionAt),
-    };
-  });
-
   const toaster = useToaster();
 
   useEffect(() => {
@@ -104,6 +91,12 @@ export function ScheduledHints(props: Props) {
         getChallengeHints(props.challengeId),
         getTeamLastSubmissionAt(props.contestId),
       ]);
+
+      if (typeof lastSubmissionAt === "object" && "error" in lastSubmissionAt)
+        return { error: lastSubmissionAt.error };
+
+      if (typeof fetchedHints === "object" && "error" in fetchedHints)
+        return { error: fetchedHints.error };
 
       setHints({
         list: fetchedHints,

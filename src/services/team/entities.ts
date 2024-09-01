@@ -31,9 +31,8 @@ export const Enum_teamRequestType = pgEnum("team_request_type", [
 export const TB_teams = pgTable("teams", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
-  abandoned: boolean('abandoned').default(false),
+  abandoned: boolean("abandoned").default(false),
   leader: text("leader")
-    .notNull()
     .unique()
     .references(() => TB_users.id, { onDelete: "restrict" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),

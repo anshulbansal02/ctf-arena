@@ -83,7 +83,7 @@ export async function createTeamAndSendInvites(props: {
   const user = await getAuthUser();
 
   if (await getTeamIdByUserId(user.id))
-    throw new Error("You are already in a team");
+    return { error: "You are already in a team" };
 
   await db.transaction(async (tx) => {
     const [{ teamId }] = await tx
@@ -94,13 +94,20 @@ export async function createTeamAndSendInvites(props: {
     await tx.insert(TB_teamMembers).values({ teamId, userId: user.id });
 
     if (props.invitees?.length) {
-      if (props.invitees.length > config.app.team.INVITE_USER_DAY_LIMIT)
-        throw new Error(
-          `You cannot invite more than ${config.app.team.INVITE_USER_DAY_LIMIT} members in a day`,
-        );
+      const emails = props.invitees.map((e) => e.toLowerCase());
+
+      if (emails.includes(user.email))
+        return {
+          error: "You cannot include your own email address in the invites.",
+        };
+
+      if (emails.length > config.app.team.INVITE_USER_DAY_LIMIT)
+        return {
+          error: `You cannot invite more than ${config.app.team.INVITE_USER_DAY_LIMIT} members in a day`,
+        };
 
       await tx.insert(TB_teamRequest).values(
-        props.invitees.map((i) => ({
+        emails.map((i) => ({
           type: "invite" as any,
           teamId,
           userEmail: i,
@@ -114,7 +121,7 @@ export async function createTeamAndSendInvites(props: {
       const usersWithAccount = await tx
         .select({ id: TB_users.id })
         .from(TB_users)
-        .where(inArray(TB_users.email, props.invitees));
+        .where(inArray(TB_users.email, emails));
 
       notificationsQueue.addBulk(
         usersWithAccount.map((user) => ({
@@ -133,7 +140,7 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
   const user = await getAuthUser();
 
   const teamId = await getTeamIdByUserId(user.id);
-  if (!teamId) throw new Error("You are not in a team.");
+  if (!teamId) return { error: "You are not in a team." };
 
   const [team] = await db
     .select({ leaderId: TB_teams.leader, name: TB_teams.name })
@@ -141,14 +148,14 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
     .where(eq(TB_teams.id, teamId));
 
   if (team.leaderId !== user.id)
-    throw new Error("You are not the team leader.");
+    return { error: "You are not the team leader." };
 
   const emails = inputEmails.map((e) => e.toLowerCase());
 
   if (emails.includes(user.email))
-    throw new Error(
-      "You cannot include your own email address in the invites.",
-    );
+    return {
+      error: "You cannot include your own email address in the invites.",
+    };
 
   // check sent team invites count
   const [invites] = await db
@@ -162,9 +169,9 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
       ),
     );
   if (invites.count + emails.length > config.app.team.INVITE_USER_DAY_LIMIT)
-    throw new Error(
-      `A team can only send invitations to maximum of ${config.app.team.INVITE_USER_DAY_LIMIT} users in a day.`,
-    );
+    return {
+      error: `A team can only send invitations to maximum of ${config.app.team.INVITE_USER_DAY_LIMIT} users in a day.`,
+    };
 
   await db.transaction(async (tx) => {
     await tx.insert(TB_teamRequest).values(
@@ -315,7 +322,7 @@ export async function sendTeamRequests(teamIds: Array<number>) {
   const user = await getAuthUser();
 
   const teamId = await getTeamIdByUserId(user.id);
-  if (teamId) throw new Error("You are already in a team");
+  if (teamId) return { error: "You are already in a team" };
 
   const [userRequests] = await db
     .select({ count: count() })
@@ -330,7 +337,7 @@ export async function sendTeamRequests(teamIds: Array<number>) {
 
   const limit = config.app.team.REQUEST_TEAM_DAY_LIMIT;
   if (userRequests.count + teamIds.length > limit)
-    throw new Error(`Cannot send request to more than ${limit} teams`);
+    return { error: `Cannot send request to more than ${limit} teams` };
 
   await db.transaction(async (tx) => {
     await tx
@@ -479,9 +486,9 @@ export async function respondToTeamRequest(
     .where(eq(tr.id, requestId));
 
   // Check invite and status
-  if (!request) throw new Error("Request not found");
+  if (!request) return { error: "Request not found" };
   if (request.status !== "delivered")
-    throw new Error(`Request not ${response}able.`);
+    return { error: `Request not ${response}able.` };
 
   await db.transaction(async (tx) => {
     const predicate =
@@ -495,7 +502,7 @@ export async function respondToTeamRequest(
         .from(TB_users)
         .where(eq(predicate.by, predicate.value));
 
-      if (!user) throw new Error("User does not exist");
+      if (!user) return { error: "User does not exist" };
 
       if (request.type === "invite") {
         const [team] = await db
@@ -503,7 +510,7 @@ export async function respondToTeamRequest(
           .from(TB_teams)
           .where(eq(TB_teams.id, request.teamId));
         if (team.leaderId !== user.id)
-          throw new Error("You are not a team leader.");
+          return { error: "You are not a team leader." };
       }
 
       // Check if user already in team
@@ -512,13 +519,13 @@ export async function respondToTeamRequest(
           .update(tr)
           .set({ status: "cancelled" })
           .where(eq(tr.id, requestId));
-        throw new Error("You are already in a team");
+        return { error: "You are already in a team" };
       }
 
       // Check if team accepting the request is not in contest
       // Check if user accepting the invite from team is not in contest
       if (await preconditionIsTeamInContest(request.teamId))
-        throw new Error("Team is currently in a contest.");
+        return { error: "Team is currently in a contest." };
 
       // Check if team is full
       const cte = CTE_currentTeamMembers(request.teamId);
@@ -527,7 +534,7 @@ export async function respondToTeamRequest(
         .select({ count: count() })
         .from(cte);
       if (teamMembers.count >= config.app.team.MEMBERS_LIMIT)
-        throw new Error("Team is full.");
+        return { error: "Team is full." };
 
       // Update team members
       await tx.insert(TB_teamMembers).values({
@@ -555,10 +562,10 @@ export async function leaveTeam() {
   const user = await getAuthUser();
   const team = await getTeamDetailsByUserId(user.id);
 
-  if (!team?.id) throw new Error("You are not in a team.");
+  if (!team?.id) return { error: "You are not in a team." };
 
   if (await preconditionIsTeamInContest(team.id))
-    throw new Error("Your team is currently in a contest.");
+    return { error: "Your team is currently in a contest." };
 
   await db.transaction(async (tx) => {
     const leader = team.members.find((u) => u.isLeader);
@@ -591,7 +598,7 @@ export async function leaveTeam() {
     if (team.members.length === 1) {
       await tx
         .update(TB_teams)
-        .set({ abandoned: true })
+        .set({ abandoned: true, leader: null })
         .where(eq(TB_teams.id, team.id));
     }
 

@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useReducer } from "react";
 import { useToaster } from "./useToaster";
 
+class AsyncActionError {
+  message: string;
+  constructor(message: string) {
+    this.message = message;
+  }
+}
+
 type AsyncFunction<P, R> = (args: P) => Promise<R>;
 
 type Event = "loading" | "success" | "error" | "reset";
@@ -14,7 +21,7 @@ type EventWithPayload = {
 type ActionState<R> = {
   loading: boolean;
   error: unknown;
-  data: R | null;
+  data: Exclude<R, { error: string }> | null;
   success: boolean | undefined;
 };
 
@@ -43,7 +50,7 @@ function reducer<R>(
     case "success":
       return {
         success: true,
-        data: event.payload as R,
+        data: event.payload as Exclude<R, { error: string }>,
         error: null,
         loading: false,
       };
@@ -77,10 +84,19 @@ export function useAction<ParamsType, ReturnType>(
   const execute = useCallback(
     async (
       params: ParamsType,
-    ): Promise<ReturnType | undefined | { error: unknown }> => {
+    ): Promise<ReturnType | undefined | { error: string }> => {
       dispatch({ type: "loading", preserveData: opts?.preserveData });
       try {
         const result = await action(params);
+
+        if (
+          result &&
+          typeof result === "object" &&
+          "error" in result &&
+          typeof result.error === "string"
+        )
+          throw new AsyncActionError(result.error);
+
         dispatch({ type: "success", payload: result });
 
         return result;
@@ -92,8 +108,11 @@ export function useAction<ParamsType, ReturnType>(
         });
 
         let errorMessage = "Something went wrong. Please try again.";
-        if (error instanceof Error) {
+
+        if (error instanceof AsyncActionError) {
           errorMessage = error.message;
+        } else if (error instanceof Error && "digest" in error) {
+          errorMessage += ` If the error persists please share this code (${error.digest}) with the support.`;
         }
 
         const errorReadingTime = Math.max(

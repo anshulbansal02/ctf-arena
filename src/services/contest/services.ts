@@ -40,7 +40,7 @@ export async function joinContest(contestId: number) {
 
   const teamId = await getTeamIdByUserId(user.id);
 
-  if (!teamId) throw new Error("You are not in a team");
+  if (!teamId) return { error: "You are not in a team" };
 
   await db.insert(TB_contestEvents).values({
     name: CONTEST_EVENTS.TEAM_ENTERED_CONTEST,
@@ -112,7 +112,7 @@ export async function checkAndCreateSubmission(data: {
   contestId: number;
   challengeId: number;
   submission: string;
-}): Promise<boolean> {
+}) {
   const { contestId, challengeId, submission } = data;
   const now = new Date();
   const user = await getAuthUser();
@@ -126,9 +126,9 @@ export async function checkAndCreateSubmission(data: {
     .from(TB_contests)
     .where(eq(TB_contests.id, contestId));
 
-  if (!contest) throw new Error("Contest not found.");
-  if (contest.startsAt > now) throw new Error("Contest is yet to begin.");
-  if (contest.endsAt < now) throw new Error("Contest has ended.");
+  if (!contest) return { error: "Contest not found." };
+  if (contest.startsAt > now) return { error: "Contest is yet to begin." };
+  if (contest.endsAt < now) return { error: "Contest has ended." };
 
   // Get challenge info
   const [challenge] = await db
@@ -249,7 +249,7 @@ export async function getChallengeHints(challengeId: number) {
     .from(cc)
     .where(eq(cc.id, challengeId));
 
-  if (!challenge) throw new Error("Challenge not found");
+  if (!challenge) return { error: "Challenge not found" };
 
   const teamId = (await getTeamIdByUserId((await getAuthUser()).id))!;
 
@@ -292,11 +292,11 @@ export async function getChallengeHints(challengeId: number) {
 export async function getTeamLastSubmissionAt(
   contestId: number,
   teamId?: number,
-): Promise<string> {
+) {
   const cs = TB_contestSubmissions;
 
   const tId = teamId ?? (await getTeamIdByUserId((await getAuthUser()).id));
-  if (!tId) throw new Error("Cannot get team last submission");
+  if (!tId) return { error: "Cannot get team last submission" };
 
   const [submission] = await db
     .select({ createdAt: cs.createdAt })
@@ -320,7 +320,7 @@ export async function revealHint(challengeId: number, hintId: number) {
     .from(cc)
     .where(eq(cc.id, challengeId));
 
-  if (!res) throw new Error("Hint not found");
+  if (!res) return { error: "Hint not found" };
 
   const hintTaken = (
     res.hints as Array<{
@@ -428,9 +428,12 @@ export async function hasTeamAlreadyJoinedContest(contestId: number) {
 export async function getTeamContestStats(contestId: number) {
   const teamId = await getTeamIdByUserId((await getAuthUser()).id);
 
-  if (!teamId) throw new Error("Team not found");
+  if (!teamId) return { error: "Team not found" };
 
-  const p1 = getTeamLastSubmissionAt(contestId, teamId);
+  const lastSubmissionAt = await getTeamLastSubmissionAt(contestId, teamId);
+
+  if (typeof lastSubmissionAt === "object" && "error" in lastSubmissionAt)
+    return lastSubmissionAt;
 
   const p2 = db
     .select({ count: count() })
@@ -444,11 +447,7 @@ export async function getTeamContestStats(contestId: number) {
 
   const p3 = getTeamRankAndScore(contestId, teamId);
 
-  const [lastSubmissionAt, [submissions], leaderboard] = await Promise.all([
-    p1,
-    p2,
-    p3,
-  ]);
+  const [[submissions], leaderboard] = await Promise.all([p2, p3]);
 
   return {
     teamId,

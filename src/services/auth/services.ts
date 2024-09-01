@@ -14,7 +14,7 @@ export async function getAuthUser() {
 export async function setUserOnboarded() {
   const authUser = await getAuthUser();
 
-  if (!authUser) throw new Error("You are not authenticated");
+  if (!authUser) return { error: "You are not authenticated" };
 
   await db
     .update(TB_users)
