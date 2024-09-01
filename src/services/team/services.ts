@@ -145,10 +145,10 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
 
   const emails = inputEmails.map((e) => e.toLowerCase());
 
-  // if (emails.includes(user.email))
-  //   throw new Error(
-  //     "You cannot include your own email address in the invites.",
-  //   );
+  if (emails.includes(user.email))
+    throw new Error(
+      "You cannot include your own email address in the invites.",
+    );
 
   // check sent team invites count
   const [invites] = await db
