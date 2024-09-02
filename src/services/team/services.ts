@@ -5,6 +5,7 @@ import { db } from "../db";
 import { TB_teamMembers, TB_teamRequest, TB_teams } from "./entities";
 import { TB_users } from "../user";
 import {
+  aliasedTable,
   and,
   asc,
   count,
@@ -671,6 +672,7 @@ export async function batchSendInvitations() {
     TB_TR = TB_teamRequest,
     TB_U = TB_users;
 
+  const inviterTable = aliasedTable(TB_U, "inviter");
   const invites = await db
     .select({
       id: TB_TR.id,
@@ -678,14 +680,15 @@ export async function batchSendInvitations() {
       status: TB_TR.status,
       metadata: TB_TR.metadata,
       inviter: {
-        email: TB_U.email,
-        name: TB_U.name,
+        email: inviterTable.email,
+        name: inviterTable.name,
       },
       inviteeEmail: TB_TR.userEmail,
     })
     .from(TB_TR)
     .leftJoin(TB_T, eq(TB_T.id, TB_TR.teamId))
     .leftJoin(TB_U, eq(TB_U.email, TB_TR.userEmail))
+    .leftJoin(inviterTable, eq(inviterTable.id, TB_TR.createdBy))
     .where(
       and(
         eq(TB_TR.type, "invite"),
