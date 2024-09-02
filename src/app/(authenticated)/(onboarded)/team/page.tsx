@@ -16,6 +16,7 @@ import { MembersInviteDialog } from "./components/MembersInviteDialog";
 
 export default async function TeamPage() {
   const user = await getAuthUser();
+
   const team = await getTeamDetailsByUserId(user.id);
   const isUserLeader = await isUserTeamLeader();
 

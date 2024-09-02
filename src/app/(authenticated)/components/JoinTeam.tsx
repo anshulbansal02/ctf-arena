@@ -71,6 +71,7 @@ export function JoinTeamStep(props: Props) {
     async () => {
       await sendTeamRequests(joinRequestsDraft);
       await refetchRequestedTeams(null);
+      props.onNext("finish");
     },
   );
 
@@ -173,7 +174,7 @@ export function JoinTeamStep(props: Props) {
               onClick={sendRequests}
               loading={sendingRequests}
             >
-              Let&apos;s Go
+              Send & Let&apos;s Go
             </Button>
           </motion.div>
         )}
