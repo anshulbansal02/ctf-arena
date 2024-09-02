@@ -6,8 +6,9 @@ export default defineConfig({
 
   dialect: "postgresql",
   out: "./db",
+
   dbCredentials: {
-    ssl: false,
+    ssl: config.stage === "prod" ? { rejectUnauthorized: false } : false,
     database: config.db.name,
     host: config.db.host,
     port: config.db.port,

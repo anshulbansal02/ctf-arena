@@ -152,8 +152,7 @@ export async function checkAndCreateSubmission(data: {
     .orderBy(desc(TB_contestSubmissions.createdAt))
     .limit(1);
 
-  const timeTaken =
-    Date.now() - +(lastSubmission?.createdAt ?? contest.startsAt);
+  const timeTaken = +now - +(lastSubmission?.createdAt ?? contest.startsAt);
 
   const hintsTaken = (await db
     .select({ data: TB_contestEvents.data })

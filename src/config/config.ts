@@ -1,4 +1,5 @@
 export const config = {
+  stage: (process.env.STAGE ?? "dev") as "dev" | "prod",
   db: {
     name: process.env.DB_NAME!,
     host: process.env.DB_HOST!,

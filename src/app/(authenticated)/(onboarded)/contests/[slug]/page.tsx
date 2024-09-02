@@ -5,7 +5,8 @@ import {
   getContestStats,
   hasTeamAlreadyJoinedContest,
 } from "@/services/contest";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
+import { SvgTimer } from "@/assets/icons";
 
 function getEventStatus(start: Date, end: Date) {
   const now = new Date();
@@ -49,6 +50,13 @@ export default async function ContestPage({
       </div>
 
       <div className="mt-8 flex justify-center gap-3">
+        <div>
+          <p className="rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
+            <SvgTimer />{" "}
+            {formatDistanceStrict(contest.endsAt, contest.startsAt)}
+          </p>
+        </div>
+
         <div>
           <p className="rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
             {contestStats.teamsCount} Teams{" "}
