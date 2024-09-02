@@ -120,4 +120,6 @@ export async function bootstrap() {
       leaderboard.sprintingTeamsProcessor(submission);
     },
   );
+
+  console.info("[Bootstrap] Bootstrapped app successfully");
 }
