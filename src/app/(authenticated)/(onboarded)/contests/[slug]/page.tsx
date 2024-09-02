@@ -33,7 +33,7 @@ export default async function ContestPage({
       <div className="flex flex-col items-center">
         <h2 className="mb-3 mt-12 text-3xl font-medium">{contest.name}</h2>
         {contestStatus === "yet-to-start" && (
-          <p>
+          <p className="text-lg">
             Starts In: <Timer till={contest.startsAt} running />
           </p>
         )}
@@ -90,6 +90,10 @@ export default async function ContestPage({
           </Button>
         )}
 
+        {hasAlreadyJoined && contestStatus === "yet-to-start" && (
+          <p>You have registered for the contest</p>
+        )}
+
         {["in-progress", "ended"].includes(contestStatus) &&
           !contest.isUnranked && (
             <Button
@@ -104,7 +108,7 @@ export default async function ContestPage({
 
       <div
         dangerouslySetInnerHTML={{ __html: contest.description ?? "" }}
-        className="prose prose-invert mt-8"
+        className="prose prose-invert mt-8 pb-36 pt-8"
       ></div>
     </div>
   );
