@@ -498,7 +498,7 @@ export async function respondToTeamRequest(
 
     if (response === "accept") {
       const [user] = await tx
-        .select({ id: TB_users.id, email: TB_users.email })
+        .select({ id: TB_users.id, email: TB_users.email, name: TB_users.name })
         .from(TB_users)
         .where(eq(predicate.by, predicate.value));
 
@@ -529,18 +529,29 @@ export async function respondToTeamRequest(
 
       // Check if team is full
       const cte = CTE_currentTeamMembers(request.teamId);
-      const [teamMembers] = await db
+      const teamMembers = await db
         .with(cte)
-        .select({ count: count() })
+        .select({ userId: cte.userId })
         .from(cte);
-      if (teamMembers.count >= config.app.team.MEMBERS_LIMIT)
-        return { error: "Team is full." };
+      if (teamMembers.length >= config.app.team.MEMBERS_LIMIT)
+        return { error: "Team already has maximum number of members." };
 
       // Update team members
       await tx.insert(TB_teamMembers).values({
         teamId: request.teamId,
         userId: user.id,
       });
+
+      const otherTeamMembers = teamMembers.filter((m) => m.userId !== user.id);
+      notificationsQueue.addBulk(
+        otherTeamMembers.map((member) => ({
+          name: "new-notification",
+          data: {
+            content: `Team member <b>${user.name}</b> left your team.`,
+            userId: member.userId,
+          },
+        })),
+      );
 
       cacheTeamDetails({ teamId: request.teamId });
 
@@ -570,8 +581,8 @@ export async function leaveTeam() {
   await db.transaction(async (tx) => {
     const leader = team.members.find((u) => u.isLeader);
 
+    const ctm = CTE_currentTeamMembers(team.id);
     if (user.id === leader?.id) {
-      const ctm = CTE_currentTeamMembers(team.id);
       const [newLeader] = await db
         .with(ctm)
         .select()
@@ -586,6 +597,17 @@ export async function leaveTeam() {
           .set({ leader: newLeader.userId })
           .where(eq(TB_teams.id, team.id));
     }
+
+    const otherTeamMembers = team.members.filter((m) => m.id !== user.id);
+    notificationsQueue.addBulk(
+      otherTeamMembers.map((member) => ({
+        name: "new-notification",
+        data: {
+          content: `Team member <b>${user.name}</b> left your team.`,
+          userId: member.id,
+        },
+      })),
+    );
 
     await tx
       .update(TB_teamMembers)
