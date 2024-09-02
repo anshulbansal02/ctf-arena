@@ -19,3 +19,8 @@ export function randomInt(min: number, max: number) {
 export function randomItem<T>(items: Array<T>): T {
   return items[randomInt(0, items.length)];
 }
+
+export function intersection<T>(itemsA: Array<T>, itemsB: Array<T>): Array<T> {
+  const sA = new Set(itemsA);
+  return itemsB.filter((item) => sA.has(item));
+}

@@ -1,6 +1,6 @@
 "use server";
 
-import { getAuthUser } from "@/services/auth";
+import { getAuthUser, setUserOnboarded } from "@/services/auth";
 import { db } from "../db";
 import { TB_teamMembers, TB_teamRequest, TB_teams } from "./entities";
 import { TB_users } from "../user";
@@ -18,7 +18,11 @@ import {
   or,
   sql,
 } from "drizzle-orm";
-import { randomItem } from "@/lib/utils";
+import {
+  intersection,
+  joinNamesWithConjunction,
+  randomItem,
+} from "@/lib/utils";
 import teamNames from "./team_names.json";
 import { cache } from "../cache";
 import { getEmailService, renderTemplate } from "../email";
@@ -158,8 +162,8 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
     };
 
   // check sent team invites count
-  const [invites] = await db
-    .select({ count: count() })
+  const invitesSentInThisDay = await db
+    .select({ userEmail: TB_teamRequest.userEmail })
     .from(TB_teamRequest)
     .where(
       and(
@@ -168,7 +172,21 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
         gt(TB_teamRequest.createdAt, startOfDay(new Date())),
       ),
     );
-  if (invites.count + emails.length > config.app.team.INVITE_USER_DAY_LIMIT)
+
+  const alreadySentTo = intersection(
+    invitesSentInThisDay.map((i) => i.userEmail!),
+    emails,
+  );
+
+  if (alreadySentTo.length)
+    return {
+      error: `You have already sent invite(s) to ${joinNamesWithConjunction(alreadySentTo)} in this day.`,
+    };
+
+  if (
+    invitesSentInThisDay.length + emails.length >
+    config.app.team.INVITE_USER_DAY_LIMIT
+  )
     return {
       error: `A team can only send invitations to maximum of ${config.app.team.INVITE_USER_DAY_LIMIT} users in a day.`,
     };
@@ -541,6 +559,8 @@ export async function respondToTeamRequest(
         teamId: request.teamId,
         userId: user.id,
       });
+
+      await setUserOnboarded();
 
       const otherTeamMembers = teamMembers.filter((m) => m.userId !== user.id);
       notificationsQueue.addBulk(

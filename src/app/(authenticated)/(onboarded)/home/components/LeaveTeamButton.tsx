@@ -10,7 +10,8 @@ export function LeaveTeamButton() {
   const router = useRouter();
 
   const { execute, loading } = useAction(async () => {
-    await leaveTeam();
+    const res = await leaveTeam();
+    if (res?.error) return res;
     router.refresh();
   });
 

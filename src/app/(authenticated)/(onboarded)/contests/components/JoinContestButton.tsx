@@ -12,7 +12,8 @@ export function JoinContestButton(props: Props) {
   const router = useRouter();
 
   const { execute: enterContest, loading } = useAction(async () => {
-    await joinContest(props.contestId);
+    const res = await joinContest(props.contestId);
+    if (res?.error) return res;
     router.refresh();
   });
 

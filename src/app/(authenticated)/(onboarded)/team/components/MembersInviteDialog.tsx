@@ -8,8 +8,9 @@ import { useAction, useToaster } from "@/shared/hooks";
 import { Controller, useForm } from "react-hook-form";
 import validator from "validator";
 import { SvgCross } from "@/assets/icons";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { joinNamesWithConjunction } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 type FormData = {
   members: Array<string>;
@@ -26,7 +27,9 @@ export function MembersInviteDialog() {
     mode: "onSubmit",
   });
 
+  const router = useRouter();
   const toaster = useToaster();
+  const [isOpen, setIsOpen] = useState(false);
 
   const { execute: sendInvites, loading, success } = useAction(sendTeamInvites);
 
@@ -35,12 +38,15 @@ export function MembersInviteDialog() {
   }
 
   useEffect(() => {
-    if (success)
+    if (success) {
       toaster.success({
         title: "Invitations Sent!",
         content: `You have invited ${joinNamesWithConjunction(getValues("members"))} to join your team.`,
         timeout: 6000,
       });
+      // setIsOpen(false);
+      router.refresh();
+    }
   }, [success]);
 
   function validateEmails(emails: string[] | undefined) {
@@ -61,7 +67,7 @@ export function MembersInviteDialog() {
   }
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
         <Button variant="ghost">Invite Members</Button>
       </Dialog.Trigger>

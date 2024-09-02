@@ -49,16 +49,16 @@ export default async function ContestPage({
         )}
       </div>
 
-      <div className="mt-8 flex justify-center gap-3">
+      <div className="mt-8 flex flex-wrap justify-center gap-2">
         <div>
-          <p className="rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
+          <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
             <SvgTimer />{" "}
             {formatDistanceStrict(contest.endsAt, contest.startsAt)}
           </p>
         </div>
 
         <div>
-          <p className="rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
+          <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
             <SvgCalendar /> {format(contest.startsAt, "dd/MM/yy hh:mm a")}
           </p>
         </div>

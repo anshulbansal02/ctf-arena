@@ -40,7 +40,9 @@ export async function joinContest(contestId: number) {
 
   const teamId = await getTeamIdByUserId(user.id);
 
-  if (!teamId) return { error: "You are not in a team" };
+  console.log("NOT IN A TEAM", !teamId);
+  if (!teamId)
+    return { error: "You need to be in a team to register for a contest" };
 
   await db.insert(TB_contestEvents).values({
     name: CONTEST_EVENTS.TEAM_ENTERED_CONTEST,

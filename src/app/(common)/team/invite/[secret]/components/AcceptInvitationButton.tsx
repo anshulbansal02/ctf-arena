@@ -10,7 +10,8 @@ export function AcceptInvitationButton(props: { inviteId: number }) {
   const router = useRouter();
 
   const { execute: accept, loading } = useAction(async () => {
-    await respondToTeamRequest(props.inviteId, "accept");
+    const res = await respondToTeamRequest(props.inviteId, "accept");
+    if (res?.error) return res;
     router.replace("/team");
   });
 

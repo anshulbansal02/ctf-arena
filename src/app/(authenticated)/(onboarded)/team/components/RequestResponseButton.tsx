@@ -12,7 +12,8 @@ export function RequestResponseButton(props: {
   const router = useRouter();
 
   const { execute: respond, loading } = useAction(async () => {
-    await respondToTeamRequest(props.requestId, props.action);
+    const res = await respondToTeamRequest(props.requestId, props.action);
+    if (res?.error) return res;
     router.refresh();
   });
 
