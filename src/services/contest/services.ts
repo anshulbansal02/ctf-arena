@@ -122,6 +122,7 @@ export async function checkAndCreateSubmission(data: {
 
   const [contest] = await db
     .select({
+      isUnranked: TB_contests.unranked,
       startsAt: TB_contests.startsAt,
       endsAt: TB_contests.endsAt,
     })
@@ -192,16 +193,17 @@ export async function checkAndCreateSubmission(data: {
       createdAt: TB_contestSubmissions.createdAt,
     });
 
-  contestQueue.add(await contestChannelName("submission"), {
-    submissionId: newSubmission.id,
-    contestId,
-    challengeId,
-    challengeOrder: challenge.order,
-    teamId,
-    score,
-    timeTaken,
-    createdAt: newSubmission.createdAt,
-  });
+  if (!contest.isUnranked)
+    contestQueue.add(await contestChannelName("submission"), {
+      submissionId: newSubmission.id,
+      contestId,
+      challengeId,
+      challengeOrder: challenge.order,
+      teamId,
+      score,
+      timeTaken,
+      createdAt: newSubmission.createdAt,
+    });
 
   return true;
 }
