@@ -506,7 +506,7 @@ export async function respondToTeamRequest(
 
   // Check invite and status
   if (!request) return { error: "Request not found" };
-  if (!["delivered", "sent"].includes(request.status))
+  if (!["delivered", "sent", "queued"].includes(request.status))
     return { error: `Request not ${response}able.` };
 
   await db.transaction(async (tx) => {
