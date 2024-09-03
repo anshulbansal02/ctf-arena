@@ -523,12 +523,12 @@ export async function respondToTeamRequest(
 
       if (!user) return { error: "User does not exist" };
 
-      if (request.type === "invite") {
+      if (request.type === "request") {
         const [team] = await db
           .select({ leaderId: TB_teams.leader })
           .from(TB_teams)
           .where(eq(TB_teams.id, request.teamId));
-        if (team.leaderId !== user.id)
+        if (team.leaderId !== (await getAuthUser()).id)
           return { error: "You are not a team leader." };
       }
 
@@ -574,7 +574,7 @@ export async function respondToTeamRequest(
         })),
       );
 
-      cacheTeamDetails({ teamId: request.teamId });
+      cacheTeamDetails({ teamId: request.teamId, invalidate: true });
 
       // Update all requests created by the user.
       // Update all invites sent to the user.
@@ -645,15 +645,22 @@ export async function leaveTeam() {
         .where(eq(TB_teams.id, team.id));
     }
 
-    cacheTeamDetails({ teamId: team.id });
+    cacheTeamDetails({ teamId: team.id, invalidate: true });
   });
 }
 
 async function cacheTeamDetails(
-  props: { team: TeamDetails } | { teamId: number },
+  props:
+    | { team: TeamDetails }
+    | { teamId: number }
+    | { invalidate: true; teamId: number },
 ) {
   let team: TeamDetails | undefined;
   if ("teamId" in props) {
+    if ("invalidate" in props) {
+      cache.del(teamCacheKey(props.teamId));
+      return;
+    }
     team = await getTeamDetails(props.teamId);
   } else {
     team = props.team;

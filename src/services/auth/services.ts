@@ -16,6 +16,8 @@ export async function setUserOnboarded() {
 
   if (!authUser) return { error: "You are not authenticated" };
 
+  if (authUser.onboarded) return;
+
   await db
     .update(TB_users)
     .set({

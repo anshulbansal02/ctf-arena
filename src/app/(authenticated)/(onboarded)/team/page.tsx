@@ -127,8 +127,12 @@ export default async function TeamPage() {
         <section className="mt-16 flex w-[480px] flex-col items-center">
           <div className="flex items-center gap-4">
             <h2 className="text-xl">Team Invites Sent</h2>
-            <div className="h-4 w-[2px] bg-slate-500" />
-            <MembersInviteDialog />
+            {isUserLeader && (
+              <>
+                <div className="h-4 w-[2px] bg-slate-500" />
+                <MembersInviteDialog />
+              </>
+            )}
           </div>
           <ul className="mt-6">
             {sentInvites.map((invite) => (
