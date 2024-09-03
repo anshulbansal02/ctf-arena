@@ -30,12 +30,12 @@ export const TeamInviteEmail = ({
 }: TeamInviteEmailProps) => {
   return (
     <Html>
-      <Head />
-
-      <Preview>{inviterName} is inviting you to join their team.</Preview>
-
       <Tailwind>
-        <Body className="mx-auto my-auto bg-white px-2 font-sans">
+        <Head />
+
+        <Preview>{inviterName} is inviting you to join their team.</Preview>
+
+        <Body className="mx-auto my-auto bg-zinc-900 px-2 font-sans">
           <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-solid border-[#eaeaea] p-[20px]">
             <Section className="mt-[32px]">
               <Img
@@ -64,7 +64,7 @@ export const TeamInviteEmail = ({
 
             <Section className="mb-[32px] mt-[32px] text-center">
               <Button
-                className="rounded-md border-[0.5px] border-b-[3px] border-solid border-[#D2D2E6] bg-[#FAFAFB] px-5 pb-2 pt-3 text-center text-[14px] font-semibold text-black no-underline"
+                className="rounded-md border-[0.5px] border-b-[3px] border-solid border-[#D2D2E6] bg-[#FAFAFB] px-5 pb-2 pt-3 text-center text-[14px] font-semibold text-black no-underline dark:bg-zinc-100 dark:text-black"
                 href={inviteLink}
               >
                 View Invite

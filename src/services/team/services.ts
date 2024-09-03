@@ -727,7 +727,7 @@ export async function batchSendInvitations() {
             from: config.app.sourceEmailAddress,
             to: invite.inviteeEmail!,
           },
-          subject: `Join ${invite.teamName} on CTF Arena`,
+          subject: `Invite to join ${invite.teamName} on CTF Arena`,
           body: emailBody,
         });
 

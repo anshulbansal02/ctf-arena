@@ -26,6 +26,7 @@ import { getTeamRankAndScore } from "./leaderboard";
 import { TB_users } from "../user";
 import { getEmailService, renderTemplate } from "../email";
 import { config } from "@/config";
+import { addHours } from "date-fns";
 
 export const contestChannelName = async (subChannel: "submission") => {
   return `channel:contest:${subChannel}`;
@@ -40,7 +41,6 @@ export async function joinContest(contestId: number) {
 
   const teamId = await getTeamIdByUserId(user.id);
 
-  console.log("NOT IN A TEAM", !teamId);
   if (!teamId)
     return { error: "You need to be in a team to register for a contest" };
 
@@ -349,7 +349,7 @@ export async function revealHint(challengeId: number, hintId: number) {
 
 export async function getContestsStartingInOneHour() {
   const now = new Date();
-  const after1Hour = new Date(+now + 1 * (60 * 60 * 1000));
+  const after1Hour = addHours(now, 1);
 
   const contestsStartingInOneHour = await db
     .select()
@@ -482,7 +482,7 @@ export async function batchSendContestReminder(contestId: number) {
         userEmail: user.email,
         userName: user.name!,
       }),
-      subject: `Contest ${contest.name} is starting in less than an hour.`,
+      subject: `Contest ${contest.name} is starting soon on CTF Arena`,
     });
   });
 }

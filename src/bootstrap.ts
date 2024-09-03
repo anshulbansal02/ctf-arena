@@ -107,7 +107,7 @@ export async function bootstrap() {
   });
 
   contestQueue.add("hourly-contest-update", null, {
-    repeat: { cron: "0 0 * * *" },
+    repeat: { cron: "* * * * *" },
   });
 
   contestQueue.process(

@@ -1,4 +1,4 @@
-import { Button, Timer } from "@/shared/components";
+import { Button, TimeFormatted, Timer } from "@/shared/components";
 import { JoinContestButton } from "../components/JoinContestButton";
 import {
   getContest,
@@ -59,7 +59,8 @@ export default async function ContestPage({
 
         <div>
           <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
-            <SvgCalendar /> {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+            <SvgCalendar />{" "}
+            <TimeFormatted time={contest.startsAt} format="dd/MM/yy hh:mm a" />
           </p>
         </div>
 

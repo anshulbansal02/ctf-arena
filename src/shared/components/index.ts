@@ -9,3 +9,4 @@ export * from "./Shim/Shim";
 export * from "./Timer/Timer";
 export * from "./Confetti/Confetti";
 export * from "./ProgressBar/ProgressBar";
+export * from "./TimeFormatted/TimeFormatted";

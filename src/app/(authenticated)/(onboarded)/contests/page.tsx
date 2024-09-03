@@ -2,6 +2,7 @@ import { getContests } from "@/services/contest";
 import Link from "next/link";
 import { format, formatDistanceStrict, formatDistanceToNow } from "date-fns";
 import { SvgCalendar, SvgTimer } from "@/assets/icons";
+import { TimeFormatted } from "@/shared/components";
 
 function Chip(props: { children: React.ReactNode }) {
   return (
@@ -35,7 +36,10 @@ export default async function ContestsPage() {
                       {[
                         <>
                           <SvgCalendar />{" "}
-                          {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+                          <TimeFormatted
+                            time={contest.startsAt}
+                            format="dd/MM/yy hh:mm a"
+                          />
                         </>,
                         <>
                           <SvgTimer />{" "}
@@ -85,7 +89,10 @@ export default async function ContestsPage() {
                       {[
                         <>
                           <SvgCalendar />{" "}
-                          {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+                          <TimeFormatted
+                            time={contest.startsAt}
+                            format="dd/MM/yy hh:mm a"
+                          />
                         </>,
                         <>
                           <SvgTimer />{" "}
@@ -136,7 +143,10 @@ export default async function ContestsPage() {
                       {[
                         <>
                           <SvgCalendar />{" "}
-                          {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+                          <TimeFormatted
+                            time={contest.startsAt}
+                            format="dd/MM/yy hh:mm a"
+                          />
                         </>,
                         <>
                           <SvgTimer />{" "}

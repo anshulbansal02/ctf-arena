@@ -1,5 +1,6 @@
 import { SvgCalendar, SvgTimer } from "@/assets/icons";
 import { getContests } from "@/services/contest";
+import { TimeFormatted } from "@/shared/components";
 import {
   format,
   formatDistanceStrict,
@@ -37,7 +38,10 @@ export async function Contests() {
                     {[
                       <>
                         <SvgCalendar />{" "}
-                        {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+                        <TimeFormatted
+                          time={contest.startsAt}
+                          format="dd/MM/yy hh:mm a"
+                        />
                       </>,
                       <>
                         <SvgTimer />{" "}
@@ -79,7 +83,10 @@ export async function Contests() {
                   {[
                     <>
                       <SvgCalendar />{" "}
-                      {format(contest.startsAt, "dd/MM/yy hh:mm a")}
+                      <TimeFormatted
+                        time={contest.startsAt}
+                        format="dd/MM/yy hh:mm a"
+                      />
                     </>,
                     <>
                       <SvgTimer />{" "}
