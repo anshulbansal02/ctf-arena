@@ -568,7 +568,7 @@ export async function respondToTeamRequest(
         otherTeamMembers.map((member) => ({
           name: "new-notification",
           data: {
-            content: `Team member <b>${user.name}</b> left your team.`,
+            content: `Team member <b>${user.name}</b> joined your team.`,
             userId: member.userId,
           },
         })),
