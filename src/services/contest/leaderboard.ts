@@ -44,7 +44,7 @@ export async function purgeBuildAndNotify(
   await getLeaderboardByName(type, contestId);
   contestChannel.publisher.publish(
     leaderboardUpdateChannelName(type, contestId),
-    "123456789",
+    JSON.stringify(new Date()),
   );
 }
 
