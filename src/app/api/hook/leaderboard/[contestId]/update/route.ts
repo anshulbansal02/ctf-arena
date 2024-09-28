@@ -1,6 +1,6 @@
 import { getContest } from "@/services/contest";
 import * as leaderboard from "@/services/contest/leaderboard";
-import { contestChannel } from "@/services/queue";
+import { eventChannel } from "@/services/queue";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,14 +34,14 @@ export async function GET(
     send("leaderboard_update", updatedLeaderboard);
   };
 
-  contestChannel.subscriber.subscribe(
-    leaderboard.leaderboardUpdateChannelName(type, contestId),
+  eventChannel.subscribe(
+    leaderboard.leaderboardChannelName(type, contestId),
     leaderboardListener,
   );
 
   request.signal.addEventListener("abort", () => {
-    contestChannel.subscriber.unsubscribe(
-      leaderboard.leaderboardUpdateChannelName(type, contestId),
+    eventChannel.unsubscribe(
+      leaderboard.leaderboardChannelName(type, contestId),
       leaderboardListener,
     );
 

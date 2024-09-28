@@ -13,7 +13,6 @@ import {
   Text,
 } from "@react-email/components";
 import { Tailwind } from "@react-email/tailwind";
-import { format } from "date-fns";
 
 interface ContestReminderEmailProps {
   userEmail: string;

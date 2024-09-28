@@ -1,11 +1,15 @@
 import { connection as dbConnection } from "@/services/db";
-import { contestQueue, jobQueue, notificationsQueue } from "@/services/queue";
+import {
+  contestChannelName,
+  contestQueue,
+  jobQueue,
+  notificationsQueue,
+} from "@/services/queue";
 import * as leaderboard from "@/services/contest/leaderboard";
 import { cache } from "@/services/cache";
 import { batchSendInvitations, getTeamsDetailsByIds } from "@/services/team";
 import {
   batchSendContestReminder,
-  contestChannelName,
   getContestParticipatingTeamIds,
   getContestsStartingInOneHour,
 } from "@/services/contest";
@@ -111,7 +115,7 @@ export async function bootstrap() {
   });
 
   contestQueue.process(
-    await contestChannelName("submission"),
+    contestChannelName("submission"),
     (job: Bull.Job<leaderboard.ContestSubmission>) => {
       console.info(`[Job] Processing submission id ${job.data.submissionId}`);
       const submission = job.data;

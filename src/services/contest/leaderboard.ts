@@ -3,7 +3,7 @@ import { db } from "../db";
 import { TB_contestChallenges, TB_contestSubmissions } from "./entities";
 import { desc, eq, gt, min, sum } from "drizzle-orm";
 import { subMinutes } from "date-fns";
-import { contestChannel } from "@/services/queue";
+import { eventChannel } from "@/services/queue";
 
 /** === TYPES === */
 
@@ -31,10 +31,8 @@ export const leaderboardKey = (
   detail: "raw" | "prepared",
 ) => `contest:${contestId}:leaderboard:${type}:${detail}`;
 
-export const leaderboardUpdateChannelName = (
-  type: Leaderboard,
-  contestId: number,
-) => `channel:${leaderboardKey(type, contestId, "prepared")}:update`;
+export const leaderboardChannelName = (type: Leaderboard, contestId: number) =>
+  `channel:${leaderboardKey(type, contestId, "prepared")}:update`;
 
 export async function purgeBuildAndNotify(
   type: Leaderboard,
@@ -42,10 +40,7 @@ export async function purgeBuildAndNotify(
 ) {
   await cache.del(leaderboardKey(type, contestId, "prepared"));
   await getLeaderboardByName(type, contestId);
-  contestChannel.publisher.publish(
-    leaderboardUpdateChannelName(type, contestId),
-    JSON.stringify(new Date()),
-  );
+  eventChannel.publish(leaderboardChannelName(type, contestId), new Date());
 }
 
 /** === LEADERBOARDS === */

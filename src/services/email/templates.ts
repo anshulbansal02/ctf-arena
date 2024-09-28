@@ -1,9 +1,10 @@
-import { ContestReminderEmail, TeamInviteEmail } from "@/templates/emails";
+import * as tmpls from "@/templates/emails";
 import { render } from "@react-email/render";
 
 const templates = {
-  "team-invite": TeamInviteEmail,
-  "contest-reminder": ContestReminderEmail,
+  "team-invite": tmpls.TeamInviteEmail,
+  "contest-reminder": tmpls.ContestReminderEmail,
+  "auth-verification-request": tmpls.AuthVerificationRequestEmail,
 } as const;
 
 export function renderTemplate<T extends keyof typeof templates>(

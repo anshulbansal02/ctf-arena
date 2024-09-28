@@ -59,5 +59,6 @@ export const config = {
     organizations: ["veersatech.com", "veersalabs.com"],
 
     sourceEmailAddress: "CTF Arena <notifications@ctf-arena.com>",
+    sourceEmailAddressForAuth: "CTF Arena <auth@ctf-arena.com>",
   },
 };

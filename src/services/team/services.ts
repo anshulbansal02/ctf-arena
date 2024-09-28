@@ -54,7 +54,7 @@ async function preconditionIsTeamInContest(teamId: number) {
     .where(
       and(
         eq(TB_contestEvents.teamId, teamId),
-        eq(TB_contestEvents.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
+        eq(TB_contestEvents.name, CONTEST_EVENTS.PARTICIPANT_REGISTERED),
         lt(TB_contests.startsAt, new Date()),
         gt(TB_contests.endsAt, new Date()),
       ),

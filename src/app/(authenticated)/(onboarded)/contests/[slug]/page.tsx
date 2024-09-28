@@ -3,7 +3,7 @@ import { JoinContestButton } from "../components/JoinContestButton";
 import {
   getContest,
   getContestStats,
-  hasTeamAlreadyJoinedContest,
+  isParticipantRegistered,
 } from "@/services/contest";
 import { format, formatDistanceStrict, formatDistanceToNow } from "date-fns";
 import { SvgCalendar, SvgTimer } from "@/assets/icons";
@@ -22,7 +22,7 @@ export default async function ContestPage({
 }) {
   const [contest, hasAlreadyJoined, contestStats] = await Promise.all([
     getContest(params.slug),
-    hasTeamAlreadyJoinedContest(params.slug),
+    isParticipantRegistered(params.slug),
     getContestStats(params.slug),
   ]);
 

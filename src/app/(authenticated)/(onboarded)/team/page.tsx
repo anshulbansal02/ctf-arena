@@ -7,7 +7,7 @@ import {
   isUserTeamLeader,
   getTeamDetailsByUserId,
 } from "@/services/team";
-import { Avatar, Button } from "@/shared/components";
+import { Avatar } from "@/shared/components";
 import { formatDistanceToNow, formatDistanceToNowStrict } from "date-fns";
 import { SvgEmailSent } from "@/assets/icons";
 import { config } from "@/config";

@@ -24,3 +24,52 @@ export function intersection<T>(itemsA: Array<T>, itemsB: Array<T>): Array<T> {
   const sA = new Set(itemsA);
   return itemsB.filter((item) => sA.has(item));
 }
+
+export function popRandom<T>(items: Array<T>): T {
+  const randomIndex = randomInt(0, items.length);
+  const randomItem = items[randomIndex];
+  items[randomIndex] = items[items.length - 1];
+  items.pop();
+  return randomItem;
+}
+
+export function jsonSafeParse<T>(payload: any) {
+  try {
+    return JSON.parse(payload) as T;
+  } catch {
+    return null;
+  }
+}
+
+export function isSubset(of: number[], elements: number[]) {
+  const superset = new Set(elements);
+  return of.every((item) => superset.has(item));
+}
+
+export function generateShuffledRange(min: number, max: number): number[] {
+  const range = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+  for (let i = range.length - 1; i > 0; i--) {
+    const j = randomInt(0, i);
+    [range[i], range[j]] = [range[j], range[i]];
+  }
+  return range;
+}
+
+export function submissionComparator(keyA: string, keyB: string) {
+  return keyA.toLowerCase() === keyB.toLowerCase();
+}
+
+export function scrambleText(str: string) {
+  const lowerAlpha = "abcdefghijklmnopqrstuvwxyz".split("");
+  const upperAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const numbers = "0123456789".split("");
+
+  return [...str]
+    .map((c) => {
+      if (/[a-z]/.test(c)) return randomItem(lowerAlpha);
+      if (/[A-Z]/.test(c)) return randomItem(upperAlpha);
+      if (/\d/.test(c)) return randomItem(numbers);
+      return c;
+    })
+    .join("");
+}
