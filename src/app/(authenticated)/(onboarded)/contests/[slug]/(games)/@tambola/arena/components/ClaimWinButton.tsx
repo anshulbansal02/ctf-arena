@@ -8,7 +8,7 @@ export function ClaimWinButton(props: {
   rule: {
     name: string;
     title: string;
-    max: number;
+    winsLeft: number;
   };
 }) {
   const { execute: claimWin, loading } = useAction(async (pattern: string) => {
@@ -17,7 +17,7 @@ export function ClaimWinButton(props: {
 
   return (
     <Button onClick={() => claimWin(props.rule.name)} loading={loading}>
-      {props.rule.title}
+      {props.rule.title} &#8212; x{props.rule.winsLeft}
     </Button>
   );
 }

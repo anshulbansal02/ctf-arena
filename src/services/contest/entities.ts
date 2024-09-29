@@ -49,6 +49,7 @@ export const TB_contestChallenges = pgTable("contest_challenges", {
   // How points should depreciated over time (concretely every minute)
   pointsDecayFactor: doublePrecision("points_decay_factor"),
   hints: jsonb("hints").default([]),
+  metadata: jsonb("metadata").default({}),
 });
 
 export const TB_participantContestChallenges = pgTable(

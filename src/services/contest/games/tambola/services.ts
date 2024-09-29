@@ -1,3 +1,5 @@
+"use server";
+
 import {
   generateShuffledRange,
   isSubset,
@@ -8,12 +10,18 @@ import {
 import { getAuthUser } from "@/services/auth";
 import { cache } from "@/services/cache";
 import { db } from "@/services/db";
-import { TB_contests, TB_participantContestChallenges } from "../..";
+import {
+  TB_contestChallenges,
+  TB_contests,
+  TB_participantContestChallenges,
+} from "../..";
 import { and, eq } from "drizzle-orm";
+import { eventChannel } from "@/services/queue";
+import { getTeamIdByUserId } from "@/services/team";
 
 export type TicketItem = number;
 export type Ticket = TicketItem[][];
-type RuleChecker = (ticket: Ticket, marked: number[]) => boolean;
+type RuleChecker = (ticket: Ticket, marked: TicketItem[]) => boolean;
 
 export async function getNewTicket(seed: number | string): Promise<Ticket> {
   let ticket: Ticket;
@@ -95,7 +103,7 @@ const rules: Record<string, RuleChecker> = {
 export async function checkAndClaimWin(
   contestId: number,
   forPattern: keyof typeof rules,
-  markedItems: number[],
+  markedItems: TicketItem[],
 ) {
   const user = await getAuthUser();
 
@@ -105,7 +113,7 @@ export async function checkAndClaimWin(
   // check numbers that should be marked for rule for given ticket
   // check user marked numbers are valid from contest global state and also all pattern numbers are matched
   // create submission for claim
-  // update user_contest_challenge ticket marked numbers to be locked
+  // update user_contest_challenge ticket marked numbers to be claimed
 
   const ticket: Ticket = [];
 
@@ -255,76 +263,90 @@ export async function drawNumber(contestId: number) {
   const user = await getAuthUser();
   if (!user.roles.includes("host")) return { error: "You are not a host" };
 
-  const k = await db
-    .select({ state: TB_contests.gameState })
+  const [contest] = (await db
+    .select({ gameState: TB_contests.gameState })
     .from(TB_contests)
-    .where(eq(TB_contests.id, contestId));
+    .where(eq(TB_contests.id, contestId))) as [
+    {
+      gameState?: {
+        drawSequence: TicketItem[];
+      };
+    },
+  ];
 
-  const drawRange = generateShuffledRange(1, 90);
-
-  const nextDraw = popRandom(drawRange);
+  const drawSequence =
+    contest.gameState?.drawSequence ?? generateShuffledRange(1, 90);
+  const nextDraw = popRandom(drawSequence);
 
   await db
     .update(TB_contests)
-    .set({ gameState: { drawRange, nextDraw } })
+    .set({ gameState: { drawSequence, nextDraw } })
     .where(eq(TB_contests.id, contestId));
 
-  return nextDraw;
+  eventChannel.publish("contest:game:tambola:event:draw_item", nextDraw);
 
-  // update global game state
-  // notify clients
+  return nextDraw;
 }
 
 export async function getNextContestChallenge(contestId: number) {
   const user = await getAuthUser();
+  const teamId = await getTeamIdByUserId(user.id);
 
-  const [currentChallenge] = await db
-    .select({ id: TB_contests.gameState })
+  const [contest] = await db
+    .select({
+      gameState: TB_contests.gameState,
+      participationType: TB_contests.participationType,
+    })
     .from(TB_contests)
     .where(eq(TB_contests.id, contestId));
 
-  const userChallenge = await db
-    .select({
-      state: TB_participantContestChallenges.state,
-    })
-    .from(TB_participantContestChallenges)
+  const gameState = contest.gameState as { currentChallengeId: number };
+
+  const currentChallengeId = gameState.currentChallengeId;
+
+  const pcc = TB_participantContestChallenges,
+    cc = TB_contestChallenges;
+
+  const [challenge] = await db
+    .select()
+    .from(cc)
+    .where(and(eq(cc.contestId, contestId), eq(cc.id, currentChallengeId)));
+
+  let [userChallenge] = (await db
+    .select({ state: pcc.state })
+    .from(pcc)
     .where(
       and(
-        eq(TB_participantContestChallenges.contestId, contestId),
-        eq(TB_participantContestChallenges.challengeId, currentChallenge.id),
-        eq(TB_participantContestChallenges.userId, user.id),
+        eq(pcc.contestId, contestId),
+        eq(pcc.challengeId, currentChallengeId),
+        eq(pcc.userId, user.id),
       ),
-    );
+    )) as [{ state: { ticket: Ticket; claimedItems: TicketItem[] } }];
 
   if (!userChallenge) {
     const ticket = await getNewTicket(contestId);
-    await db
-      .update(TB_participantContestChallenges)
-      .set({
-        config: {
-          ticket,
-          markedItems: [],
-        },
-      })
-      .where(
-        and(
-          eq(TB_participantContestChallenges.contestId, contestId),
-          eq(TB_participantContestChallenges.challengeId, currentChallenge.id),
-          eq(TB_participantContestChallenges.userId, user.id),
-        ),
-      );
+
+    console.table(ticket);
+
+    await db.insert(pcc).values({
+      contestId,
+      challengeId: challenge.id,
+      ...(contest.participationType === "individual"
+        ? { userId: user.id }
+        : { teamId: teamId }),
+      state: {
+        ticket,
+        claimedItems: [],
+      },
+    });
   }
 
-  // return {
-  //   id: number;
-  //   name: string | null;
-  //   description: string | null;
-  //   contestId: number;
-  //   ticket: number;
-  //   winningRules: [{id, name, max}]
-  // };
-
-  // get current challenge id from contest global state
-  // get ticket from user_contest_challenge if existing otherwise get a new ticket and store in same
-  // return ticket and claimed numbers
+  return {
+    id: challenge.id,
+    name: challenge.name,
+    description: challenge.description,
+    ticket: userChallenge.state.ticket,
+    claimedItems: userChallenge.state.claimedItems,
+    winningRules: (challenge.metadata as { winningRules: [] }).winningRules,
+  };
 }

@@ -67,15 +67,20 @@
     flex-direction: column;
   }
 
+  button:focus {
+    background-color: #e0dbd5;
+    outline: none;
+  }
+
   button:disabled {
     cursor: default;
   }
 
-  &.zero button {
+  &.empty button {
     color: transparent;
   }
 
-  &.locked button {
+  &.claimed button {
     background-color: #fffbeb;
     color: #5f4f3f;
   }
@@ -84,16 +89,16 @@
     position: relative;
   }
 
-  &.marked span::after {
+  span::after {
     content: "";
     position: absolute;
-    top: 20%;
+    top: 25%;
     left: 0;
     right: 0;
     border-top: 4px solid #ef4444b0;
     transform: rotate(-20deg) scaleX(0);
     transform-origin: center;
-    transition: all 0.3s cubic-bezier(0.95, 0.05, 0.795, 0.035);
+    transition: all 0.24s cubic-bezier(0.95, 0.05, 0.795, 0.035);
     transform-origin: 100% 50%;
   }
 

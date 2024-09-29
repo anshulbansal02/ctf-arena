@@ -1,5 +1,5 @@
 "use server";
-import { and, asc, count, countDistinct, eq, gt, lt } from "drizzle-orm";
+import { and, asc, count, countDistinct, eq, gt, lt, or } from "drizzle-orm";
 import { db } from "../db";
 import {
   TB_contestChallenges,
@@ -24,16 +24,25 @@ import { scrambleText } from "@/lib/utils";
 export async function joinContest(contestId: number) {
   const user = await getAuthUser();
 
-  const teamId = await getTeamIdByUserId(user.id);
+  const participationType = await getContestParticipationType(contestId);
 
-  if (!teamId)
-    return { error: "You need to be in a team to register for a contest" };
+  if (participationType === "team") {
+    const teamId = await getTeamIdByUserId(user.id);
+    if (!teamId)
+      return { error: "You need to be in a team to register for a contest" };
 
-  await db.insert(TB_contestEvents).values({
-    name: CONTEST_EVENTS.PARTICIPANT_REGISTERED,
-    contestId,
-    teamId: teamId,
-  });
+    await db.insert(TB_contestEvents).values({
+      name: CONTEST_EVENTS.PARTICIPANT_REGISTERED,
+      contestId,
+      teamId: teamId,
+    });
+  } else {
+    await db.insert(TB_contestEvents).values({
+      name: CONTEST_EVENTS.PARTICIPANT_REGISTERED,
+      contestId,
+      userId: user.id,
+    });
+  }
 }
 
 /**
@@ -61,6 +70,17 @@ export async function getContests(type: "active" | "upcoming" | "ended") {
   }
 }
 
+export async function getContestParticipationType(contestId: number) {
+  const [contest] = await db
+    .select({
+      participationType: TB_contests.participationType,
+    })
+    .from(TB_contests)
+    .where(eq(TB_contests.id, contestId));
+
+  return contest.participationType;
+}
+
 /**
  * Get a contest's details by id
  * @param contestId
@@ -75,6 +95,7 @@ export async function getContest(contestId: number) {
       id: TB_C.id,
       name: TB_C.name,
       game: TB_C.game,
+      participation: TB_C.participationType,
       isUnranked: TB_C.unranked,
       description: TB_C.description,
       startsAt: TB_C.startsAt,
@@ -266,7 +287,9 @@ export async function createContest(data: {
 }
 
 export async function isParticipantRegistered(contestId: number) {
-  const teamId = await getTeamIdByUserId((await getAuthUser()).id);
+  const user = await getAuthUser();
+  const teamId = await getTeamIdByUserId(user.id);
+
   const ce = TB_contestEvents;
 
   const [contestJoinedEvent] = await db
@@ -275,8 +298,8 @@ export async function isParticipantRegistered(contestId: number) {
     .where(
       and(
         eq(ce.name, CONTEST_EVENTS.PARTICIPANT_REGISTERED),
-        eq(ce.teamId, teamId!),
         eq(ce.contestId, contestId),
+        or(eq(ce.teamId, teamId!), eq(ce.userId, user.id)),
       ),
     );
 
@@ -349,7 +372,8 @@ export async function getContestStats(contestId: number) {
     cs = TB_contestSubmissions;
   const p1 = db
     .select({
-      count: countDistinct(ce.teamId),
+      teamsCount: countDistinct(ce.teamId),
+      usersCount: countDistinct(ce.userId),
     })
     .from(ce)
     .where(
@@ -366,28 +390,11 @@ export async function getContestStats(contestId: number) {
     .from(cs)
     .where(and(eq(cs.contestId, contestId)));
 
-  const [[teams], [submissions]] = await Promise.all([p1, p2]);
+  const [[participants], [submissions]] = await Promise.all([p1, p2]);
 
   return {
-    teamsCount: teams.count,
+    teamsCount: participants.teamsCount,
+    usersCount: participants.usersCount,
     submissionsCount: submissions.count,
   };
-}
-
-export async function getContestParticipatingTeamIds(contestId: number) {
-  const ce = TB_contestEvents;
-
-  const participants = await db
-    .select({
-      teamId: ce.id,
-    })
-    .from(ce)
-    .where(
-      and(
-        eq(ce.contestId, contestId),
-        eq(ce.name, CONTEST_EVENTS.PARTICIPANT_REGISTERED),
-      ),
-    );
-
-  return participants.map((p) => p.teamId);
 }

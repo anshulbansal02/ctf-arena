@@ -10,6 +10,13 @@ import { z } from "zod";
 const contestSchema = z.object({
   name: z.string(),
   time: z.object({ start: z.coerce.date(), end: z.coerce.date() }),
+  description: z.string(),
+  shortDescription: z.string(),
+  participationType: z.enum(["individual", "team"]),
+  unranked: z.boolean().optional().default(false),
+  game: z.string().min(1),
+  config: z.record(z.string(), z.string()).optional().default({}),
+  initialGameState: z.record(z.string(), z.any()).optional().default({}),
   challenges: z.array(
     z.object({
       answer: z.string(),
@@ -27,8 +34,6 @@ const contestSchema = z.object({
       name: z.string(),
     }),
   ),
-  description: z.string(),
-  shortDescription: z.string(),
 });
 
 export function CreateContest() {

@@ -1,3 +1,5 @@
+"use server";
+
 import { and, desc, eq } from "drizzle-orm";
 import {
   TB_contestChallenges,

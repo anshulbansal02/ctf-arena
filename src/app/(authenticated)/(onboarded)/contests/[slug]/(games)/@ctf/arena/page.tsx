@@ -1,10 +1,12 @@
 import { getContest, isParticipantRegistered } from "@/services/contest";
+import { CTFArena } from "./Arena";
 import { redirect } from "next/navigation";
 
-export default async function GameLayout(
-  game: Record<string, React.ReactNode>,
-  params: { slug: number },
-) {
+export default async function ArenaPage({
+  params,
+}: {
+  params: { slug: number };
+}) {
   const [contest, isRegistered] = await Promise.all([
     getContest(params.slug),
     isParticipantRegistered(params.slug),
@@ -19,7 +21,5 @@ export default async function GameLayout(
 
   if (redirectPath) return redirect(redirectPath);
 
-  const Game = game[contest.game];
-
-  return <Game contest={contest} />;
+  return <CTFArena contest={contest} />;
 }

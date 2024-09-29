@@ -1,4 +1,4 @@
-export function LeaderboardPage() {
+export default async function LeaderboardPage() {
   return (
     <div>
       Show Participant Announcement Page

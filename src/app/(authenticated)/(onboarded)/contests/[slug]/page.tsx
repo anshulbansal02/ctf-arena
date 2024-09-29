@@ -5,8 +5,8 @@ import {
   getContestStats,
   isParticipantRegistered,
 } from "@/services/contest";
-import { format, formatDistanceStrict, formatDistanceToNow } from "date-fns";
-import { SvgCalendar, SvgTimer } from "@/assets/icons";
+import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
+import { SvgCalendar, SvgGameController, SvgTimer } from "@/assets/icons";
 
 function getEventStatus(start: Date, end: Date) {
   const now = new Date();
@@ -52,6 +52,12 @@ export default async function ContestPage({
       <div className="mt-8 flex flex-wrap justify-center gap-2">
         <div>
           <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
+            <SvgGameController /> {contest.game.toUpperCase()}
+          </p>
+        </div>
+
+        <div>
+          <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
             <SvgTimer />{" "}
             {formatDistanceStrict(contest.endsAt, contest.startsAt)}
           </p>
@@ -66,7 +72,10 @@ export default async function ContestPage({
 
         <div>
           <p className="rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
-            {contestStats.teamsCount} Teams{" "}
+            {contest.participation === "individual"
+              ? contestStats.usersCount
+              : contestStats.teamsCount}{" "}
+            {contest.participation === "individual" ? "User(s)" : "Team(s)"}{" "}
             {contestStatus === "ended" ? "Participated" : "Participating"}
           </p>
         </div>

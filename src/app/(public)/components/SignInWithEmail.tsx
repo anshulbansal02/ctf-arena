@@ -1,16 +1,24 @@
 "use client";
 
-import { SvgInfoOutlined } from "@/assets/icons";
+import { SvgEmailSent, SvgInfoOutlined } from "@/assets/icons";
 import { config } from "@/config";
 import { signIn } from "@/services/auth";
 import { Button, Input } from "@/shared/components";
-import { useAction } from "@/shared/hooks";
+import { useAction, useToaster } from "@/shared/hooks";
 import { useForm } from "react-hook-form";
 
 export function SignInWithEmail() {
-  const { execute, loading } = useAction((email: string) =>
-    signIn("magic-link", { email }),
-  );
+  const toaster = useToaster();
+
+  const { execute, loading } = useAction(async (email: string) => {
+    await signIn("magic-link", { email, redirect: false });
+    toaster.success({
+      icon: <SvgEmailSent fill="currentColor" />,
+      title: "Authentication Request Sent",
+      content: `An email has been sent to ${email} with a magic link. Use it to authenticate on CTF Arena. Do not share it with anyone.`,
+      timeout: 20 * 1000,
+    });
+  });
 
   const {
     register,
@@ -39,12 +47,12 @@ export function SignInWithEmail() {
         {...register("email", { required: true, validate: validateEmail })}
       />
       <p className="mt-2 text-sm text-red-300">{formErrors.email?.message}</p>
-      <p className="mt-1.5 flex cursor-default items-center justify-center gap-1 text-sm text-slate-400">
+      <p className="flex cursor-default items-center justify-center gap-1 text-sm text-slate-400">
         <SvgInfoOutlined fill="currentColor" />
-        Use your Veersa email address to sign in with a magic link
+        Enter your Veersa email address to sign in with magic link
       </p>
-      <Button type="submit" loading={loading} className="mt-3 w-full">
-        Send Magic Link
+      <Button type="submit" loading={loading} className="mt-4 w-full">
+        Sign In
       </Button>
     </form>
   );

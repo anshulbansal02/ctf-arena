@@ -8,6 +8,13 @@
       "when": 1727585389840,
       "tag": "0000_graceful_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1727609461231,
+      "tag": "0001_shallow_mercury",
+      "breakpoints": true
     }
   ]
 }
