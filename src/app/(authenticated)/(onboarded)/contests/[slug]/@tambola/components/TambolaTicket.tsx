@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Ticket, TicketItem } from "@/services/contest/games/tambola";
-import { SvgBell } from "@/assets/icons";
+import { SvgStar } from "@/assets/icons";
 import styles from "./tambola-ticket.module.scss";
 
 interface TambolaTicketProps {
@@ -29,7 +29,7 @@ export function TambolaTicket(props: TambolaTicketProps) {
                 onClick={() => props.toggleItem(item)}
               >
                 <span>{item}</span>
-                {props.lockedItems.includes(item) ? <SvgBell /> : null}
+                {props.lockedItems.includes(item) ? <SvgStar /> : null}
               </button>
             </li>
           )),

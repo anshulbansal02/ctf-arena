@@ -1,4 +1,10 @@
 DO $$ BEGIN
+ CREATE TYPE "public"."contest_participation_type" AS ENUM('individual', 'team');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."team_request_status" AS ENUM('queued', 'sent', 'delivered', 'accepted', 'cancelled', 'rejected');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -33,6 +39,7 @@ CREATE TABLE IF NOT EXISTS "contest_events" (
 	"contest_id" integer NOT NULL,
 	"challenge_id" integer,
 	"team_id" integer,
+	"user_id" text,
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"data" jsonb DEFAULT '{}'::jsonb,
@@ -58,9 +65,23 @@ CREATE TABLE IF NOT EXISTS "contests" (
 	"short_description" text DEFAULT '',
 	"description" text,
 	"unranked" boolean DEFAULT false,
+	"game" text NOT NULL,
+	"participation_type" "contest_participation_type" NOT NULL,
+	"config" jsonb DEFAULT '{}'::jsonb,
+	"game_state" jsonb DEFAULT '{}'::jsonb,
 	"starts_at" timestamp NOT NULL,
 	"ends_at" timestamp NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "participant_contest_challenges" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" text,
+	"team_id" integer,
+	"contest_id" integer NOT NULL,
+	"challenge_id" integer,
+	"config" jsonb DEFAULT '{}'::jsonb,
+	"state" jsonb DEFAULT '{}'::jsonb
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "team_members" (
@@ -85,7 +106,8 @@ CREATE TABLE IF NOT EXISTS "team_requests" (
 CREATE TABLE IF NOT EXISTS "teams" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
-	"leader" text NOT NULL,
+	"abandoned" boolean DEFAULT false,
+	"leader" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "teams_name_unique" UNIQUE("name"),
 	CONSTRAINT "teams_leader_unique" UNIQUE("leader")
@@ -116,6 +138,13 @@ CREATE TABLE IF NOT EXISTS "user_notifications" (
 	"content" text DEFAULT '',
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "verification_tokens" (
+	"identifier" text NOT NULL,
+	"token" text NOT NULL,
+	"expires" timestamp NOT NULL,
+	CONSTRAINT "verification_tokens_identifier_token_pk" PRIMARY KEY("identifier","token")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
@@ -154,6 +183,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "contest_events" ADD CONSTRAINT "contest_events_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "contest_submissions" ADD CONSTRAINT "contest_submissions_submitted_by_team_teams_id_fk" FOREIGN KEY ("submitted_by_team") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -173,6 +208,30 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "contest_submissions" ADD CONSTRAINT "contest_submissions_challenge_id_contest_challenges_id_fk" FOREIGN KEY ("challenge_id") REFERENCES "public"."contest_challenges"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "participant_contest_challenges" ADD CONSTRAINT "participant_contest_challenges_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "participant_contest_challenges" ADD CONSTRAINT "participant_contest_challenges_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "participant_contest_challenges" ADD CONSTRAINT "participant_contest_challenges_contest_id_contests_id_fk" FOREIGN KEY ("contest_id") REFERENCES "public"."contests"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "participant_contest_challenges" ADD CONSTRAINT "participant_contest_challenges_challenge_id_contest_challenges_id_fk" FOREIGN KEY ("challenge_id") REFERENCES "public"."contest_challenges"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

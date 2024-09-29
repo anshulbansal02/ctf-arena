@@ -3,10 +3,7 @@
 import { Button } from "@/shared/components";
 import clsx from "clsx";
 import { SvgBell, SvgBellActive, SvgEmptyBox } from "@/assets/icons";
-import {
-  getNotifications,
-  markAllNotificationsAsRead,
-} from "@/services/user/services";
+import { getNotifications, markAllNotificationsAsRead } from "@/services/user";
 import * as Popover from "@radix-ui/react-popover";
 import React, { useEffect } from "react";
 import { formatDistanceToNowStrict } from "date-fns";

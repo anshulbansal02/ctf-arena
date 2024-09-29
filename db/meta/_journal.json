@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1724928089804,
-      "tag": "0000_huge_junta",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1724945756543,
-      "tag": "0001_smart_wallow",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1725184677748,
-      "tag": "0002_stiff_moondragon",
+      "when": 1727585389840,
+      "tag": "0000_graceful_hulk",
       "breakpoints": true
     }
   ]

@@ -1,5 +1,5 @@
 import { SvgInfoOutlined } from "@/assets/icons";
-import { getAuthUser, signIn } from "@/services/auth";
+import { getAuthUser } from "@/services/auth";
 import {
   getInviteFromSecret,
   getTeamDetails,
@@ -10,7 +10,7 @@ import { Button, Logo } from "@/shared/components";
 import Invitation from "@/assets/media/invitation.png";
 import Image from "next/image";
 import { AcceptInvitationButton } from "./components/AcceptInvitationButton";
-import { SignInWithMicrosoft } from "@/app/(public)/components/SignInWithMicrosoft";
+import { SignInWithEmail } from "@/app/(public)/components/SignInWithEmail";
 
 function Page(props: { children: React.ReactNode }) {
   return (
@@ -93,11 +93,7 @@ export default async function ViewInvitePage({
 
           <div className="mt-16">
             <p className="mb-4 text-center">You need to sign in to continue</p>
-            <SignInWithMicrosoft />
-            <p className="mt-1.5 flex cursor-default items-center justify-center gap-1 text-sm text-slate-400">
-              <SvgInfoOutlined fill="currentColor" /> Sign In with your Veersa
-              Account
-            </p>
+            <SignInWithEmail />
           </div>
         </div>
       </Page>

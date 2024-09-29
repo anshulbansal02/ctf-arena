@@ -62,6 +62,20 @@ export const TB_userAccounts = pgTable(
   }),
 );
 
+export const TB_userVerificationTokens = pgTable(
+  "verification_tokens",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
+  },
+  (verificationToken) => ({
+    compositePk: primaryKey({
+      columns: [verificationToken.identifier, verificationToken.token],
+    }),
+  }),
+);
+
 export const TB_userNotifications = pgTable("user_notifications", {
   id: serial("id").primaryKey(),
   status: Enum_userNotificationStatus("status").notNull().default("queued"),

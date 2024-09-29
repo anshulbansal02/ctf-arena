@@ -3,12 +3,28 @@ import { EmailProvider, SendConfig } from "./types";
 import { SESProvider } from "./adapters/ses";
 import { ResendProvider } from "./adapters/resend";
 import { SendGridProvider } from "./adapters/sendgrid";
+import * as tmpls from "@/templates/emails";
+import { render } from "@react-email/render";
+
+const templates = {
+  "team-invite": tmpls.TeamInviteEmail,
+  "contest-reminder": tmpls.ContestReminderEmail,
+  "auth-verification-request": tmpls.AuthVerificationRequestEmail,
+} as const;
 
 class EmailService {
   constructor(private readonly provider: EmailProvider) {}
 
   async send(config: SendConfig) {
     await this.provider.send(config);
+  }
+
+  async renderTemplate<T extends keyof typeof templates>(
+    name: T,
+    props: Parameters<(typeof templates)[T]>[0],
+  ) {
+    const template = templates[name];
+    return render(template(props as any));
   }
 }
 

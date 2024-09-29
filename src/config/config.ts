@@ -56,6 +56,10 @@ export const config = {
       INVITE_USER_DAY_LIMIT: 10,
     },
 
+    onboarding: {
+      skipTeamingStep: false,
+    },
+
     organizations: ["veersatech.com", "veersalabs.com"],
 
     sourceEmailAddress: "CTF Arena <notifications@ctf-arena.com>",

@@ -1,11 +1,10 @@
-import { SvgInfoOutlined } from "@/assets/icons";
 import { Logo } from "@/shared/components";
 import { SignInWithEmail } from "./components/SignInWithEmail";
 
 export default async function Home() {
   return (
     <main className="flex min-h-dvh flex-col items-center px-4">
-      <header className="mt-36">
+      <header className="mt-32">
         <Logo size={1.5} />
       </header>
       <div className="mt-20 text-center">
@@ -17,11 +16,6 @@ export default async function Home() {
       </div>
       <div className="mt-24 text-center">
         <SignInWithEmail />
-
-        <p className="mt-1.5 flex cursor-default items-center justify-center gap-1 text-sm text-slate-400">
-          <SvgInfoOutlined fill="currentColor" />
-          Use your Veersa email address to sign in with a magic link
-        </p>
       </div>
     </main>
   );

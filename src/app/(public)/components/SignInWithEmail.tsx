@@ -1,33 +1,51 @@
 "use client";
 
+import { SvgInfoOutlined } from "@/assets/icons";
+import { config } from "@/config";
 import { signIn } from "@/services/auth";
 import { Button, Input } from "@/shared/components";
 import { useAction } from "@/shared/hooks";
+import { useForm } from "react-hook-form";
 
 export function SignInWithEmail() {
-  const { execute, loading } = useAction(() => signIn("magic-link"));
+  const { execute, loading } = useAction((email: string) =>
+    signIn("magic-link", { email }),
+  );
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors: formErrors },
+  } = useForm<{ email: string }>({
+    mode: "onSubmit",
+  });
+
+  function validateEmail(email: string) {
+    const isOrganizationProvidedEmail = config.app.organizations.some((org) =>
+      email?.endsWith(`@${org}`),
+    );
+    if (!isOrganizationProvidedEmail)
+      return "You can only use organization provided email address";
+
+    return true;
+  }
 
   return (
-    <>
-      <Input type="email" placeholder="username@veersatech.com" />
-      <Button
-        type="submit"
-        loading={loading}
-        onClick={() => execute(null)}
-        className="mt-2"
-      >
-        <svg
-          width={16}
-          viewBox="0 0 2499.6 2500"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M1187.9 1187.9H0V0h1187.9z" fill="#f1511b" />
-          <path d="M2499.6 1187.9h-1188V0h1187.9v1187.9z" fill="#80cc28" />
-          <path d="M1187.9 2500H0V1312.1h1187.9z" fill="#00adef" />
-          <path d="M2499.6 2500h-1188V1312.1h1187.9V2500z" fill="#fbbc09" />
-        </svg>
+    <form onSubmit={handleSubmit((data) => execute(data.email))}>
+      <Input
+        type="email"
+        placeholder="username@veersatech.com"
+        disabled={loading}
+        {...register("email", { required: true, validate: validateEmail })}
+      />
+      <p className="mt-2 text-sm text-red-300">{formErrors.email?.message}</p>
+      <p className="mt-1.5 flex cursor-default items-center justify-center gap-1 text-sm text-slate-400">
+        <SvgInfoOutlined fill="currentColor" />
+        Use your Veersa email address to sign in with a magic link
+      </p>
+      <Button type="submit" loading={loading} className="mt-3 w-full">
         Send Magic Link
       </Button>
-    </>
+    </form>
   );
 }

@@ -5,11 +5,11 @@ interface Props {
   onNext: (choice: "join" | "create" | "finish") => void;
 }
 
-export function FirstChoiceStep(props: Props) {
+export function TeamingChoiceStep(props: Props) {
   return (
     <div className="mt-24 text-center">
       <h2 className="text-3xl font-normal">
-        Hey! 👋 {props.userName},<br /> What would you like to do?
+        {props.userName},<br /> What would you like to do next?
       </h2>
       <div className="mx-auto mt-8 flex h-40">
         <button

@@ -2,9 +2,17 @@ import NextAuth from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { config } from "@/config";
 import { authConfig } from "./config";
+import { VerificationToken } from "next-auth/adapters";
 
 export const { auth: getSession } = NextAuth({
   ...authConfig,
+  adapter: {
+    createVerificationToken: (verificationToken: VerificationToken) =>
+      undefined,
+    useVerificationToken: (params: { identifier: string; token: string }) =>
+      null,
+    getUserByEmail: (email: string) => null,
+  },
   trustHost: true,
 });
 

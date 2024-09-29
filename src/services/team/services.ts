@@ -24,9 +24,9 @@ import {
   joinNamesWithConjunction,
   randomItem,
 } from "@/lib/utils";
-import teamNames from "./team_names.json";
+import staticData from "./data.json";
 import { cache } from "../cache";
-import { getEmailService, renderTemplate } from "../email";
+import { getEmailService } from "../email";
 import { config } from "@/config";
 import { TB_contestEvents, TB_contests } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
@@ -65,7 +65,7 @@ async function preconditionIsTeamInContest(teamId: number) {
 }
 
 export async function generateTeamName(): Promise<string> {
-  return randomItem(teamNames);
+  return randomItem(staticData.teamNames);
 }
 
 const CTE_currentTeamMembers = (teamId?: number) =>
@@ -714,10 +714,12 @@ export async function batchSendInvitations() {
   // Store which invites were sent successfully
   const invitesSent: Array<number> = [];
 
+  const emailService = getEmailService();
+
   // Render template and send invite for each
   await Promise.all(
     invites.map(async (invite) => {
-      const emailBody = renderTemplate("team-invite", {
+      const emailBody = await emailService.renderTemplate("team-invite", {
         inviteeEmail: invite.inviteeEmail!,
         inviterEmail: invite.inviter?.email!,
         inviteLink: new URL(
@@ -729,7 +731,7 @@ export async function batchSendInvitations() {
       });
 
       try {
-        await getEmailService().send({
+        await emailService.send({
           address: {
             from: config.app.sourceEmailAddress,
             to: invite.inviteeEmail!,

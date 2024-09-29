@@ -4,8 +4,8 @@ import {
 } from "@/services/contest/games/tambola";
 import { useAction } from "@/shared/hooks";
 import { useState } from "react";
-import { TambolaTicket } from "./components/TambolaTicket";
-import { ClaimWinButton } from "./components/ClaimWinButton";
+import { TambolaTicket } from "../components/TambolaTicket";
+import { ClaimWinButton } from "../components/ClaimWinButton";
 
 interface TambolaArenaProps {
   contest: {
@@ -35,12 +35,13 @@ export default function TambolaArena(props: TambolaArenaProps) {
     });
   }
 
-  const winningRules = [
-    { id: 1, name: "full_house", title: "Full House", max: 3 },
-  ];
-
   return (
     <div className="mx-auto flex min-h-screen max-w-[600px] flex-col items-center">
+      <div>
+        Current Drawn Number
+        <span></span>
+      </div>
+
       <TambolaTicket
         lockedItems={[]}
         markedItems={[]}
@@ -50,7 +51,7 @@ export default function TambolaArena(props: TambolaArenaProps) {
 
       <div className="mt-16">
         <ul className="flex items-center gap-4">
-          {winningRules.map((rule) => (
+          {nextChallenge.winningRules.map((rule) => (
             <li key={rule.id}>
               <ClaimWinButton
                 contestId={props.contest.id}

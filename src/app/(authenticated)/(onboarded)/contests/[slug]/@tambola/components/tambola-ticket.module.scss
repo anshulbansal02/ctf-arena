@@ -75,11 +75,6 @@
     color: transparent;
   }
 
-  &.marked button {
-    background-color: #3e4d54;
-    color: #fff;
-  }
-
   &.locked button {
     background-color: #fffbeb;
     color: #5f4f3f;
@@ -92,11 +87,17 @@
   &.marked span::after {
     content: "";
     position: absolute;
-    top: 50%;
+    top: 20%;
     left: 0;
     right: 0;
-    border-top: 2px solid #ef4444;
-    transform: rotate(-20deg);
+    border-top: 4px solid #ef4444b0;
+    transform: rotate(-20deg) scaleX(0);
     transform-origin: center;
+    transition: all 0.3s cubic-bezier(0.95, 0.05, 0.795, 0.035);
+    transform-origin: 100% 50%;
+  }
+
+  &.marked span::after {
+    transform: rotate(-20deg) scaleX(1);
   }
 }

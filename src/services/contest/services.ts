@@ -12,7 +12,7 @@ import { getTeamIdByUserId } from "../team";
 import { CONTEST_EVENTS } from "./helpers";
 import { getTeamRankAndScore } from "./leaderboard";
 import { TB_users } from "@/services/user";
-import { getEmailService, renderTemplate } from "@/services/email";
+import { getEmailService } from "@/services/email";
 import { config } from "@/config";
 import { addHours } from "date-fns";
 import { scrambleText } from "@/lib/utils";
@@ -327,10 +327,12 @@ export async function batchSendContestReminder(contestId: number) {
     .select({ name: TB_users.name, email: TB_users.email })
     .from(TB_users);
 
-  users.forEach((user) => {
-    getEmailService().send({
+  const emailService = getEmailService();
+
+  users.forEach(async (user) => {
+    emailService.send({
       address: { from: config.app.sourceEmailAddress, to: user.email },
-      body: renderTemplate("contest-reminder", {
+      body: await emailService.renderTemplate("contest-reminder", {
         contestName: contest.name,
         contestURL: new URL(`contests/${contest.id}`, config.host).href,
         startsAt: contest.startsAt,
@@ -370,24 +372,6 @@ export async function getContestStats(contestId: number) {
     teamsCount: teams.count,
     submissionsCount: submissions.count,
   };
-}
-
-export async function getContestParticipants(contestId: number) {
-  const ce = TB_contestEvents;
-
-  const teams = await db
-    .select({
-      userId: ce.userId,
-    })
-    .from(ce)
-    .where(
-      and(
-        eq(ce.contestId, contestId),
-        eq(ce.name, CONTEST_EVENTS.PARTICIPANT_REGISTERED),
-      ),
-    );
-
-  const teams = participatingTeams.map((p) => p.teamId);
 }
 
 export async function getContestParticipatingTeamIds(contestId: number) {

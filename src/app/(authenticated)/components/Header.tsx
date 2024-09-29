@@ -1,7 +1,6 @@
-import { getAuthUser, signOut } from "@/services/auth";
-import { Avatar, Button, Logo } from "@/shared/components";
+import { getAuthUser } from "@/services/auth";
+import { Avatar, Logo } from "@/shared/components";
 import clsx from "clsx";
-import { SvgLogOut } from "@/assets/icons";
 import React from "react";
 import { Notifications } from "./Notifications";
 import { SignOut } from "./SignOut";

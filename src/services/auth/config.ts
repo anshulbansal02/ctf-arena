@@ -1,9 +1,10 @@
 import "next-auth/jwt";
 import { NextAuthConfig } from "next-auth";
 import EntraID from "next-auth/providers/microsoft-entra-id";
+import { EmailConfig } from "next-auth/providers";
 
 import { config } from "@/config";
-import { sendVerificationRequest } from ".";
+import { getEmailService } from "@/services/email";
 
 declare module "next-auth" {
   interface Session {
@@ -23,11 +24,31 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
   interface JWT {
-    onboarded: boolean;
-    roles: string[];
-    userId: string;
+    user: {
+      onboarded: boolean;
+      roles: string[];
+      id: string;
+    };
   }
 }
+
+export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
+  async (params) => {
+    const emailService = getEmailService();
+    console.log(params);
+    // emailService.send({
+    //   address: {
+    //     from: config.app.sourceEmailAddressForAuth,
+    //     to: params.identifier,
+    //   },
+    //   body: await emailService.renderTemplate("auth-verification-request", {
+    //     authUrl: params.url,
+    //     expires: params.expires,
+    //     userEmail: params.identifier,
+    //   }),
+    //   subject: "Authentication Request",
+    // });
+  };
 
 export const authConfig = {
   providers: [
@@ -40,10 +61,10 @@ export const authConfig = {
       id: "magic-link",
       name: "Email",
       type: "email",
-      maxAge: 60 * 60 * 4, // Email link will expire in 4 hours
+      maxAge: 60 * 60 * 4,
+
       from: config.app.sourceEmailAddressForAuth,
-      options: {},
-      sendVerificationRequest,
+      sendVerificationRequest: sendVerificationRequest,
     },
   ],
   session: { strategy: "jwt" },
@@ -55,20 +76,24 @@ export const authConfig = {
       return isOrganizationProvidedEmail;
     },
 
-    async jwt({ token, user, session }) {
-      if (user) {
-        token.onboarded = Boolean(user.metadata.onboarded);
-        token.roles = user.metadata.roles;
-        token.userId = user.id!;
-      } else if (session?.user.onboarded) {
-        token.onboarded = true;
+    async jwt({ token, user, session, trigger }) {
+      if (trigger === "update") {
+        token.user = { ...token.user, ...session.user };
       }
+
+      if (user) {
+        token.user = {
+          onboarded: Boolean(user.metadata.onboarded),
+          roles: user.metadata.roles ?? [],
+          id: user.id!,
+        };
+      }
+
       return token;
     },
     session({ session, token }) {
-      session.user.onboarded = token.onboarded;
-      session.user.roles = token.roles;
-      session.user.id = token.userId;
+      session.user = { ...session.user, ...token.user };
+
       return session;
     },
   },

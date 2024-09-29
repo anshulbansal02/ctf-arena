@@ -13,7 +13,7 @@ import {
 import { useAction } from "@/shared/hooks";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ScheduledHints } from "../components/ScheduledHints";
+import { ScheduledHints } from "../../components/ScheduledHints";
 import { randomItem } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import MountainImage from "@/assets/media/mountain.png";
