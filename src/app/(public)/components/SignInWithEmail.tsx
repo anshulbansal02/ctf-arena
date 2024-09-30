@@ -10,15 +10,17 @@ import { useForm } from "react-hook-form";
 export function SignInWithEmail() {
   const toaster = useToaster();
 
-  const { execute, loading } = useAction(async (email: string) => {
-    await signIn("magic-link", { email, redirect: false });
-    toaster.success({
-      icon: <SvgEmailSent fill="currentColor" />,
-      title: "Authentication Request Sent",
-      content: `An email has been sent to ${email} with a magic link. Use it to authenticate on CTF Arena. Do not share it with anyone.`,
-      timeout: 20 * 1000,
-    });
-  });
+  const { execute, loading } = useAction(
+    async ({ email }: { email: string }) => {
+      await signIn("magic-link", { email, redirect: false });
+      toaster.success({
+        icon: <SvgEmailSent fill="currentColor" />,
+        title: "Authentication Request Sent",
+        content: `An email has been sent to ${email} with a magic link. Use it to authenticate on CTF Arena. Do not share it with anyone.`,
+        timeout: 20 * 1000,
+      });
+    },
+  );
 
   const {
     register,
@@ -39,7 +41,7 @@ export function SignInWithEmail() {
   }
 
   return (
-    <form onSubmit={handleSubmit((data) => execute(data.email))}>
+    <form onSubmit={handleSubmit(execute)}>
       <Input
         type="email"
         placeholder="username@organization.com"

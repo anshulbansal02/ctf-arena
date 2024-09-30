@@ -8,8 +8,6 @@ class AsyncActionError {
   }
 }
 
-type AsyncFunction<P, R> = (args: P) => Promise<R>;
-
 type Event = "loading" | "success" | "error" | "reset";
 
 type EventWithPayload = {
@@ -21,7 +19,7 @@ type EventWithPayload = {
 type ActionState<R> = {
   loading: boolean;
   error: unknown;
-  data: Exclude<R, { error: string }> | null;
+  data: R | null;
   success: boolean | undefined;
 };
 
@@ -33,7 +31,7 @@ type Options<T> = (
   | {
       immediate: false;
     }
-) & { preserveData?: boolean };
+) & { preserveData?: boolean; noError?: boolean };
 
 function reducer<R>(
   state: ActionState<R>,
@@ -68,11 +66,12 @@ function reducer<R>(
   }
 }
 
-export function useAction<ParamsType, ReturnType>(
-  action: AsyncFunction<ParamsType, ReturnType>,
-  opts?: Options<ParamsType>,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useAction<T extends (...args: any[]) => any>(
+  action: T,
+  opts?: Options<Parameters<T>>,
 ) {
-  const [actionState, dispatch] = useReducer(reducer<ReturnType>, {
+  const [actionState, dispatch] = useReducer(reducer<Awaited<ReturnType<T>>>, {
     success: undefined,
     loading: Boolean(opts?.immediate),
     error: null,
@@ -83,11 +82,11 @@ export function useAction<ParamsType, ReturnType>(
 
   const execute = useCallback(
     async (
-      params: ParamsType,
-    ): Promise<ReturnType | undefined | { error: string }> => {
+      ...args: Parameters<T>
+    ): Promise<Awaited<ReturnType<T>> | undefined | { error: string }> => {
       dispatch({ type: "loading", preserveData: opts?.preserveData });
       try {
-        const result = await action(params);
+        const result = await action(...args);
 
         if (
           result &&
@@ -98,22 +97,13 @@ export function useAction<ParamsType, ReturnType>(
           throw new AsyncActionError(result.error);
 
         dispatch({ type: "success", payload: result });
-
         return result;
       } catch (error) {
-        dispatch({
-          type: "error",
-          payload: error,
-          preserveData: opts?.preserveData,
-        });
-
         let errorMessage = "Something went wrong. Please try again.";
 
-        if (error instanceof AsyncActionError) {
-          errorMessage = error.message;
-        } else if (error instanceof Error && "digest" in error) {
+        if (error instanceof AsyncActionError) errorMessage = error.message;
+        else if (error instanceof Error && "digest" in error)
           errorMessage += ` If the error persists please share this code (${error.digest}) with the support.`;
-        }
 
         const errorReadingTime = Math.max(
           2500,
@@ -121,6 +111,12 @@ export function useAction<ParamsType, ReturnType>(
         ); // Number of words * 350ms;
 
         toaster.error({ title: errorMessage, timeout: errorReadingTime });
+
+        dispatch({
+          type: "error",
+          payload: errorMessage,
+          preserveData: opts?.preserveData,
+        });
 
         return { error: errorMessage };
       }
@@ -130,9 +126,9 @@ export function useAction<ParamsType, ReturnType>(
 
   useEffect(() => {
     if (opts?.immediate) {
-      execute(opts.args);
+      execute(...opts.args);
     }
-  }, []);
+  }, [execute]);
 
   const reset = useCallback(() => {
     dispatch({ type: "reset" });

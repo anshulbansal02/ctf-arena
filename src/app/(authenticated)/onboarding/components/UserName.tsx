@@ -22,8 +22,8 @@ export function UserNameStep(props: Props) {
     mode: "onSubmit",
   });
 
-  const action = useAction(async (newName: string) => {
-    await updateUserName(newName);
+  const action = useAction(async ({ name }: { name: string }) => {
+    await updateUserName(name);
     router.refresh();
     const nextStep = config.app.onboarding.skipTeamingStep
       ? "finish"
@@ -37,10 +37,7 @@ export function UserNameStep(props: Props) {
         Hey! 👋 User
         <br /> What would you like us to call you?
       </h2>
-      <form
-        className="mt-16"
-        onSubmit={handleSubmit(({ name }) => action.execute(name))}
-      >
+      <form className="mt-16" onSubmit={handleSubmit(action.execute)}>
         <Input
           type="text"
           autoComplete="name"

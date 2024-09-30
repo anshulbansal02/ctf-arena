@@ -1,7 +1,7 @@
 {
   "name": "FlagRush (Unranked)",
   "time": { "start": "2024-08-29", "end": "2024-08-31" },
-  "participationType": "team",
+  "participationType": "individual",
   "unranked": true,
   "game": "tambola",
   "challenges": [

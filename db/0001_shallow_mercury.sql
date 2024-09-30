@@ -1,1 +1,0 @@
-ALTER TABLE "contest_challenges" ADD COLUMN "metadata" jsonb DEFAULT '{}'::jsonb;

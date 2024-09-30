@@ -46,9 +46,8 @@ function RevealableHint(props: {
   const isAlreadyRevealed = Boolean(props.text ?? revealedHint);
 
   function toggle() {
-    if (!isAlreadyRevealed) {
-      getRevealedHint(null);
-    }
+    if (!isAlreadyRevealed) getRevealedHint();
+
     setShow(!show);
   }
 

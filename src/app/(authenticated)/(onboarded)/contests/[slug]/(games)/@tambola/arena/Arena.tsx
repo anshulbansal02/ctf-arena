@@ -27,7 +27,7 @@ export function TambolaArena(props: TambolaArenaProps) {
     data: nextChallenge,
   } = useAction(getNextContestChallenge, {
     immediate: true,
-    args: props.contest.id,
+    args: [props.contest.id],
   });
 
   const [lastDrawn, setLastDrawn] = useState<TicketItem>(41);

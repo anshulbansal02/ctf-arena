@@ -78,7 +78,7 @@ export function CTFArena(props: CTFArenaProps) {
     data: nextChallenge,
   } = useAction(getNextContestChallenge, {
     immediate: true,
-    args: props.contest.id,
+    args: [props.contest.id],
   });
 
   const {
@@ -90,7 +90,7 @@ export function CTFArena(props: CTFArenaProps) {
       await new Promise((r) => setTimeout(r, 1000));
       return await getTeamContestStats(n);
     },
-    { immediate: true, args: props.contest.id, preserveData: true },
+    { immediate: true, args: [props.contest.id], preserveData: true },
   );
 
   const {

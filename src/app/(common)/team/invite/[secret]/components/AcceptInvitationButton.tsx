@@ -16,7 +16,7 @@ export function AcceptInvitationButton(props: { inviteId: number }) {
   });
 
   return (
-    <Button onClick={() => accept(null)} loading={loading}>
+    <Button onClick={accept} loading={loading}>
       <SvgEmailCheck fill="#000" /> Accept Invitation
     </Button>
   );

@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS "contest_challenges" (
 	"min_points" integer DEFAULT 0,
 	"answer" text NOT NULL,
 	"points_decay_factor" double precision,
-	"hints" jsonb DEFAULT '[]'::jsonb
+	"hints" jsonb DEFAULT '[]'::jsonb,
+	"metadata" jsonb DEFAULT '{}'::jsonb
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "contest_events" (

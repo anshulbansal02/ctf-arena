@@ -326,8 +326,6 @@ export async function getNextContestChallenge(contestId: number) {
   if (!userChallenge) {
     const ticket = await getNewTicket(contestId);
 
-    console.table(ticket);
-
     await db.insert(pcc).values({
       contestId,
       challengeId: challenge.id,

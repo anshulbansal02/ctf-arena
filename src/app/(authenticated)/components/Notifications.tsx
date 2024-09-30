@@ -17,7 +17,7 @@ export function Notifications() {
   } = useAction(getNotifications, {
     immediate: true,
     preserveData: true,
-    args: null,
+    args: [],
   });
 
   const { execute: markRead } = useAction(markAllNotificationsAsRead);
@@ -26,14 +26,14 @@ export function Notifications() {
     notifications?.filter((n) => n.status !== "seen").length ?? 0;
 
   useEffect(() => {
-    const interval = setInterval(() => refetchNotifications(null), 5000);
+    const interval = setInterval(() => refetchNotifications(), 5000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <Popover.Root
       onOpenChange={(open) => {
-        if (!open) markRead(null);
+        if (!open) markRead();
       }}
     >
       <Popover.Trigger asChild>

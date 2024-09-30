@@ -19,7 +19,7 @@ export function LeaveTeamButton() {
     <Button
       variant="ghost"
       className="w-full"
-      onClick={() => execute(null)}
+      onClick={execute}
       loading={loading}
     >
       Leave Team <SvgMoveOut />

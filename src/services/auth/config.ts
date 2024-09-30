@@ -37,7 +37,8 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
     const emailService = getEmailService();
 
     if (config.stage === "dev") {
-      return console.info("New Sign In Request: ", params);
+      const { request, ...rest } = params;
+      return console.table(rest);
     }
 
     emailService.send({

@@ -14,7 +14,7 @@ export function DrawItemButton(props: {
   });
 
   return (
-    <Button loading={action.loading} onClick={() => action.execute(null)}>
+    <Button loading={action.loading} onClick={action.execute}>
       <SvgDrawItem /> Draw Item
     </Button>
   );

@@ -189,7 +189,7 @@ export async function revealHint(challengeId: number, hintId: number) {
     .from(cc)
     .where(eq(cc.id, challengeId));
 
-  if (!res) return { error: "Hint not found" };
+  if (!res) throw new Error("Hint not available");
 
   const hintTaken = (
     res.hints as Array<{
@@ -314,7 +314,7 @@ export async function getTeamContestStats(contestId: number) {
   const lastSubmissionAt = await getTeamLastSubmissionAt(contestId, teamId);
 
   if (typeof lastSubmissionAt === "object" && "error" in lastSubmissionAt)
-    return lastSubmissionAt;
+    throw new Error(lastSubmissionAt.error);
 
   const p2 = db
     .select({ count: count() })
