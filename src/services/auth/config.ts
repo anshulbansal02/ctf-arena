@@ -1,7 +1,7 @@
 import "next-auth/jwt";
 import { NextAuthConfig } from "next-auth";
-import EntraID from "next-auth/providers/microsoft-entra-id";
 import { EmailConfig } from "next-auth/providers";
+import EntraID from "next-auth/providers/microsoft-entra-id";
 
 import { config } from "@/config";
 import { getEmailService } from "@/services/email";
@@ -32,22 +32,26 @@ declare module "next-auth/jwt" {
   }
 }
 
-export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
+const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
   async (params) => {
     const emailService = getEmailService();
-    console.log(params);
-    // emailService.send({
-    //   address: {
-    //     from: config.app.sourceEmailAddressForAuth,
-    //     to: params.identifier,
-    //   },
-    //   body: await emailService.renderTemplate("auth-verification-request", {
-    //     authUrl: params.url,
-    //     expires: params.expires,
-    //     userEmail: params.identifier,
-    //   }),
-    //   subject: "Authentication Request",
-    // });
+
+    if (config.stage === "dev") {
+      return console.info("New Sign In Request: ", params);
+    }
+
+    emailService.send({
+      address: {
+        from: config.app.sourceEmailAddress.auth,
+        to: params.identifier,
+      },
+      body: await emailService.renderTemplate("auth-verification-request", {
+        authUrl: params.url,
+        expires: params.expires,
+        userEmail: params.identifier,
+      }),
+      subject: "Authentication Request",
+    });
   };
 
 export const authConfig = {
@@ -62,8 +66,8 @@ export const authConfig = {
       name: "Email",
       type: "email",
       maxAge: 60 * 60 * 4,
-      from: config.app.sourceEmailAddressForAuth,
-      sendVerificationRequest: sendVerificationRequest,
+      from: config.app.sourceEmailAddress.auth,
+      sendVerificationRequest: sendVerificationRequestEmail,
     },
   ],
   session: { strategy: "jwt" },

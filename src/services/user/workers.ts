@@ -1,5 +1,5 @@
 import type { Job } from "bull";
-import { notificationsQueue } from "../queue";
+import { notificationsQueue } from "@/services/queue";
 import { createNotification } from "./services";
 
 export function setupUserQueues() {

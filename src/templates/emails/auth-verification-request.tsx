@@ -1,4 +1,3 @@
-import { TimeFormatted } from "@/shared/components";
 import {
   Body,
   Button,
@@ -38,12 +37,8 @@ export const AuthVerificationRequestEmail = ({
             <Container className="p-[20px]">
               <Text className="text-center text-[16px]">
                 Hey! {userEmail}, The contest is starting in less than an hour
-                at{" "}
-                <span className="font-semibold">
-                  <TimeFormatted time={expires} format="dd MMM yy hh:mm a" />
-                </span>
-                . Be sure your team is ready for the thrilling series of
-                challenges.
+                at <span className="font-semibold"></span>. Be sure your team is
+                ready for the thrilling series of challenges.
               </Text>
 
               <Section className="mb-[32px] mt-[32px] text-center">

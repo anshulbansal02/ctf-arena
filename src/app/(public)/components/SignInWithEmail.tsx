@@ -3,7 +3,7 @@
 import { SvgEmailSent, SvgInfoOutlined } from "@/assets/icons";
 import { config } from "@/config";
 import { signIn } from "@/services/auth";
-import { Button, Input } from "@/shared/components";
+import { Button, Input, Tooltip } from "@/shared/components";
 import { useAction, useToaster } from "@/shared/hooks";
 import { useForm } from "react-hook-form";
 
@@ -42,15 +42,21 @@ export function SignInWithEmail() {
     <form onSubmit={handleSubmit((data) => execute(data.email))}>
       <Input
         type="email"
-        placeholder="username@veersatech.com"
+        placeholder="username@organization.com"
         disabled={loading}
+        className="min-w-96"
+        rightSlot={
+          <Tooltip
+            text="Enter your Veersa email address to sign in with a magic link"
+            className="grid h-10 w-10 place-items-center"
+          >
+            <SvgInfoOutlined fill="currentColor" />
+          </Tooltip>
+        }
         {...register("email", { required: true, validate: validateEmail })}
       />
       <p className="mt-2 text-sm text-red-300">{formErrors.email?.message}</p>
-      <p className="flex cursor-default items-center justify-center gap-1 text-sm text-slate-400">
-        <SvgInfoOutlined fill="currentColor" />
-        Enter your Veersa email address to sign in with magic link
-      </p>
+
       <Button type="submit" loading={loading} className="mt-4 w-full">
         Sign In
       </Button>

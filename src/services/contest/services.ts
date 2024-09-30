@@ -354,7 +354,10 @@ export async function batchSendContestReminder(contestId: number) {
 
   users.forEach(async (user) => {
     emailService.send({
-      address: { from: config.app.sourceEmailAddress, to: user.email },
+      address: {
+        from: config.app.sourceEmailAddress.notifications,
+        to: user.email,
+      },
       body: await emailService.renderTemplate("contest-reminder", {
         contestName: contest.name,
         contestURL: new URL(`contests/${contest.id}`, config.host).href,

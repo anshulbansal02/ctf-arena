@@ -24,7 +24,7 @@ class EmailService {
     props: Parameters<(typeof templates)[T]>[0],
   ) {
     const template = templates[name];
-    return render(template(props as any));
+    return await render(template(props as any));
   }
 }
 

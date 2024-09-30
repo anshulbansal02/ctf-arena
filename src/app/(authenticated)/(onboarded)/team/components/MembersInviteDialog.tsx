@@ -101,7 +101,7 @@ export function MembersInviteDialog() {
                       type="email"
                       className="mt-6 w-full"
                       autoFocus
-                      placeholder="username@veersatech.com"
+                      placeholder="username@organization.com"
                     />
                   )}
                 />

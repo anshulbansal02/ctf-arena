@@ -733,7 +733,7 @@ export async function batchSendInvitations() {
       try {
         await emailService.send({
           address: {
-            from: config.app.sourceEmailAddress,
+            from: config.app.sourceEmailAddress.notifications,
             to: invite.inviteeEmail!,
           },
           subject: `Invite to join ${invite.teamName} on CTF Arena`,

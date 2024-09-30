@@ -8,7 +8,6 @@ import { TambolaTicket } from "./components/TambolaTicket";
 import { ClaimWinButton } from "./components/ClaimWinButton";
 import usePersistedState from "@/shared/hooks/usePersistedState";
 import { useState } from "react";
-import { Tooltip } from "@/shared/components";
 
 interface TambolaArenaProps {
   contest: {
@@ -81,15 +80,33 @@ export function TambolaArena(props: TambolaArenaProps) {
       winsLeft: 3,
     },
     {
-      id: 2,
+      id: 3,
+      name: "bottom_line",
+      title: "Bottom Line",
+      winsLeft: 1,
+    },
+    {
+      id: 4,
       name: "top_line",
-      title: "Top Line",
+      title: "Middle Line",
+      winsLeft: 0,
+    },
+    {
+      id: 5,
+      name: "top_line",
+      title: "Corners With Star",
       winsLeft: 2,
+    },
+    {
+      id: 6,
+      name: "top_line",
+      title: "Corners",
+      winsLeft: 0,
     },
   ];
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-[600px] flex-col items-center">
+    <div className="mx-auto mb-20 flex min-h-screen max-w-[600px] flex-col items-center">
       {nextChallenge ? (
         <div>
           <div className="mt-8 text-center">
@@ -97,7 +114,7 @@ export function TambolaArena(props: TambolaArenaProps) {
             <h3 className="mt-4 text-3xl font-medium">{lastDrawn}</h3>
           </div>
 
-          <div className="mt-16">
+          <div className="mt-16 flex justify-center">
             <TambolaTicket
               claimedItems={nextChallenge.claimedItems}
               markedItems={markedItems}
@@ -115,13 +132,11 @@ export function TambolaArena(props: TambolaArenaProps) {
             <ul className="mt-6 flex flex-wrap items-center justify-center gap-6">
               {winningRules.map((rule) => (
                 <li key={rule.id}>
-                  <Tooltip text="Lorem ipsum dolor sit amet">
-                    <ClaimWinButton
-                      contestId={props.contest.id}
-                      markedItems={markedItems}
-                      rule={rule}
-                    />
-                  </Tooltip>
+                  <ClaimWinButton
+                    contestId={props.contest.id}
+                    markedItems={markedItems}
+                    rule={rule}
+                  />
                 </li>
               ))}
             </ul>

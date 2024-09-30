@@ -259,7 +259,7 @@ function batchCreateTickets(): Ticket[] {
   });
 }
 
-export async function drawNumber(contestId: number) {
+export async function drawItem(contestId: number) {
   const user = await getAuthUser();
   if (!user.roles.includes("host")) return { error: "You are not a host" };
 
@@ -349,4 +349,11 @@ export async function getNextContestChallenge(contestId: number) {
     claimedItems: userChallenge.state.claimedItems,
     winningRules: (challenge.metadata as { winningRules: [] }).winningRules,
   };
+}
+
+export async function getGameState(contestId: number) {
+  const contest = await db
+    .select()
+    .from(TB_contests)
+    .where(eq(TB_contests.id, contestId));
 }

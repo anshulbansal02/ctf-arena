@@ -50,7 +50,7 @@ export function AnimatedNames() {
           exit="exit"
           transition={{
             y: { type: "spring", stiffness: 300, damping: 200 },
-            opacity: { duration: 0.5 },
+            opacity: { duration: 0.4 },
           }}
           suppressHydrationWarning
         >

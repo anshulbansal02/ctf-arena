@@ -152,7 +152,7 @@ export function CreateTeamStep(props: Props) {
                   type="email"
                   className="mt-2 w-full"
                   autoFocus
-                  placeholder="username@veersatech.com"
+                  placeholder="username@organization.com"
                 />
               )}
             />
