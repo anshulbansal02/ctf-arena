@@ -46,7 +46,7 @@ export function Notifications() {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content className="z-20 mt-4 max-h-80 w-80 overflow-y-auto rounded-lg bg-zinc-800 px-4 py-3 shadow-lg">
-          <ul className="flex flex-col gap-3">
+          <ul className="-order-1 flex flex-col gap-3">
             {loading && !notifications?.length && (
               <p>Getting your notifications</p>
             )}

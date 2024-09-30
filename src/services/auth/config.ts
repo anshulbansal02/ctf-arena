@@ -67,6 +67,7 @@ export const authConfig = {
       type: "email",
       maxAge: 60 * 60 * 4,
       from: config.app.sourceEmailAddress.auth,
+      options: {},
       sendVerificationRequest: sendVerificationRequestEmail,
     },
   ],
