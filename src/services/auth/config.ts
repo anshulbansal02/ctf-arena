@@ -73,7 +73,7 @@ export const authConfig = {
   session: { strategy: "jwt" },
   callbacks: {
     signIn({ user }) {
-      const isOrganizationProvidedEmail = config.app.organizations.some((org) =>
+      const isOrganizationProvidedEmail = config.app.org.domains.some((org) =>
         user.email?.endsWith(`@${org}`),
       );
       return isOrganizationProvidedEmail;

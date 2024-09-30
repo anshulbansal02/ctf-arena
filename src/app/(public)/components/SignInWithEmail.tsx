@@ -29,7 +29,7 @@ export function SignInWithEmail() {
   });
 
   function validateEmail(email: string) {
-    const isOrganizationProvidedEmail = config.app.organizations.some((org) =>
+    const isOrganizationProvidedEmail = config.app.org.domains.some((org) =>
       email?.endsWith(`@${org}`),
     );
     if (!isOrganizationProvidedEmail)
@@ -47,7 +47,7 @@ export function SignInWithEmail() {
         className="min-w-96"
         rightSlot={
           <Tooltip
-            text="Enter your Veersa email address to sign in with a magic link"
+            text={`Enter your ${config.app.org.name} email address to sign in with a magic link`}
             className="grid h-10 w-10 place-items-center"
           >
             <SvgInfoOutlined fill="currentColor" />

@@ -60,7 +60,10 @@ export const config = {
       skipTeamingStep: false,
     },
 
-    organizations: ["veersatech.com", "veersalabs.com"],
+    org: {
+      name: "Veersa",
+      domains: ["veersatech.com", "veersalabs.com"],
+    },
 
     sourceEmailAddress: {
       auth: "CTF Arena <auth@ctf-arena.com>",
