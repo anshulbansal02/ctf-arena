@@ -1,69 +1,81 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 
+type EventName = string;
 type EventHandler<T> = (data: T) => void;
 
-// Store the shared EventSource instance
-let eventSource: EventSource | null = null;
-const eventHandlers: Record<string, Set<(event: any) => void>> = {};
+type ServerEventsState = {
+  eventSubscribers: Record<EventName, number>;
+  eventSource: EventSource | null;
+};
 
-const eventSourceUrl = "/api/events";
+const initialState = (): ServerEventsState => ({
+  eventSource: null,
+  eventSubscribers: {},
+});
 
-// Custom hook to handle Server-Sent Events (SSE)
-export function useServerEvent<T>(
-  eventName: string,
-  handler: EventHandler<T>,
-  scope?: Record<string, number | string>,
-) {
-  const handlerRef = useRef(handler);
+const serverEventsStore = create<ServerEventsState>()(
+  subscribeWithSelector(initialState),
+);
 
-  useEffect(() => {
-    handlerRef.current = handler;
-  }, [handler]);
-
-
-  useEffect(() => {
-    // Initialize EventSource connection if not already present
-    if (!eventSource) {
-      eventSource = new EventSource(eventSourceUrl); // Replace with your SSE endpoint
-
-      // Set up generic listener to dispatch events to the registered handlers
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          const { type, payload } = data;
-          if (eventHandlers[type]) {
-            eventHandlers[type].forEach((callback) => callback(payload));
-          }
-        } catch (err) {
-          console.error("Error parsing SSE event", err);
-        }
-      };
-
-      eventSource.onerror = (error) => {
-        console.error("SSE connection error", error);
-        eventSource?.close();
-      };
-    }
-
-    // Register the handler for the specified event
-    if (!eventHandlers[eventName]) {
-      eventHandlers[eventName] = new Set();
-    }
-    eventHandlers[eventName].add((event) => handlerRef.current(event));
-
-    // Clean up the handler when the component unmounts
-    return () => {
-      eventHandlers[eventName].delete((event) => handlerRef.current(event));
-
-      // If no handlers remain, close the SSE connection
-      if (eventHandlers[eventName].size === 0) {
-        delete eventHandlers[eventName];
-      }
-
-      if (Object.keys(eventHandlers).length === 0 && eventSource) {
-        eventSource.close();
-        eventSource = null;
-      }
+function addEventSubscriber(name: EventName) {
+  serverEventsStore.setState((state) => {
+    const newCount = (state.eventSubscribers[name] ?? 0) + 1;
+    return {
+      eventSubscribers: { ...state.eventSubscribers, [name]: newCount },
     };
+  });
+}
+
+function removeEventSubscriber(name: EventName) {
+  serverEventsStore.setState((state) => {
+    if (!state.eventSubscribers[name]) return state;
+
+    state.eventSubscribers[name]--;
+    if (state.eventSubscribers[name] === 0) delete state.eventSubscribers[name];
+
+    return { eventSubscribers: { ...state.eventSubscribers } };
+  });
+}
+
+serverEventsStore.subscribe(
+  (state) => state.eventSubscribers,
+  (eventSubscribers) => {
+    const subscribedEvents = Object.keys(eventSubscribers);
+    const eventSourceUrl = `/api/events?${new URLSearchParams({ events: subscribedEvents.join(",") })}`;
+
+    serverEventsStore.getState().eventSource?.close();
+
+    serverEventsStore.setState(() => ({
+      eventSource: new EventSource(eventSourceUrl),
+    }));
+  },
+);
+
+const useEventSource = () => serverEventsStore().eventSource;
+
+export function useServerEvent<T>(
+  eventName: EventName,
+  handler: EventHandler<T>,
+) {
+  const eventSource = useEventSource();
+
+  useEffect(() => {
+    if (!eventSource) return;
+
+    function wrappedHandler(event: MessageEvent<any>) {
+      const data = event.data;
+      handler(data);
+    }
+    eventSource.addEventListener(eventName, wrappedHandler);
+
+    return () => eventSource.removeEventListener(eventName, wrappedHandler);
+  }, [eventName, eventSource]);
+
+  // On Event Name Change
+  useEffect(() => {
+    addEventSubscriber(eventName);
+    return () => removeEventSubscriber(eventName);
   }, [eventName]);
 }

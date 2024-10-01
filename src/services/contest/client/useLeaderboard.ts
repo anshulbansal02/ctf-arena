@@ -18,7 +18,6 @@ export function useLeaderboard<T>(props: Props) {
       setLeaderboard(data);
       setLastUpdated(new Date());
     },
-    { contestId: props.contestId, leaderboardName: props.name },
   );
 
   useServerEvent(
@@ -26,7 +25,6 @@ export function useLeaderboard<T>(props: Props) {
     () => {
       setContestEnded(true);
     },
-    { contestId: props.contestId },
   );
 
   return { leaderboard, hasContestEnded, lastUpdated };

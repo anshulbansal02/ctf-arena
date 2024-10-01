@@ -18,6 +18,7 @@ import {
 import { and, eq } from "drizzle-orm";
 import { eventChannel } from "@/services/queue";
 import { getTeamIdByUserId } from "@/services/team";
+import contestEvents from "../../events";
 
 export type TicketItem = number;
 export type Ticket = TicketItem[][];
@@ -283,7 +284,7 @@ export async function drawItem(contestId: number) {
     .set({ gameState: { drawSequence, nextDraw } })
     .where(eq(TB_contests.id, contestId));
 
-  eventChannel.publish("contest:game:tambola:event:draw_item", nextDraw);
+  eventChannel.publish(contestEvents.game(contestId, "item_drawn"), nextDraw);
 
   return nextDraw;
 }

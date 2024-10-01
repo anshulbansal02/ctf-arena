@@ -7,6 +7,7 @@ import { useAction, useServerEvent, useToaster } from "@/shared/hooks";
 import { TambolaTicket } from "./components/TambolaTicket";
 import { ClaimWinButton } from "./components/ClaimWinButton";
 import usePersistedState from "@/shared/hooks/usePersistedState";
+import contestEvents from "@/services/contest/events";
 import { useState } from "react";
 
 interface TambolaArenaProps {
@@ -39,30 +40,27 @@ export function TambolaArena(props: TambolaArenaProps) {
   );
 
   useServerEvent<TicketItem>(
-    "item-drawn",
+    contestEvents.game(props.contest.id, "item_drawn"),
     (drawnItem) => {
       setLastDrawn(drawnItem);
     },
-    { contestId: props.contest.id },
   );
 
   useServerEvent(
-    "next-challenge-started",
+    contestEvents.game(props.contest.id, "next_challenge_started"),
     () => {
       getNextChallenge(props.contest.id);
     },
-    { contestId: props.contest.id },
   );
 
   useServerEvent<{ name: string; title: string; winLeft: number }>(
-    "win-claimed",
+    contestEvents.game(props.contest.id, "win_claimed"),
     (data) => {
       toaster.info({
         title: `${data.title} Win Claimed`,
         content: `A user claimed win for pattern "${data.title}. ${data.winLeft} wins are left for the rule."`,
       });
     },
-    { contestId: props.contest.id },
   );
 
   function toggleItem(item: TicketItem) {

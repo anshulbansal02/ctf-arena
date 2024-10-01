@@ -1,20 +1,39 @@
 "use client";
 import { useEffect, useMemo } from "react";
 import { getTeamsDetailsByIds, TeamDetails } from "../services";
-import { atom, useAtom } from "jotai";
+import { create } from "zustand";
+
+const store = create<{
+  teamIdsBeingFetched: Set<number>;
+  teamsById: Record<number, TeamDetails | undefined>;
+}>()(() => ({ teamIdsBeingFetched: new Set(), teamsById: {} }));
+
+function addTeamIdsBeingFetched(teamIds: number[]) {
+  store.setState((state) => ({
+    teamIdsBeingFetched: state.teamIdsBeingFetched.union(new Set(teamIds)),
+  }));
+}
+
+function removeTeamIdsBeingFetched(teamIds: number[]) {
+  store.setState((state) => ({
+    teamIdsBeingFetched: state.teamIdsBeingFetched.difference(new Set(teamIds)),
+  }));
+}
+
+function updateTeamsById(teamsById: Record<number, TeamDetails | undefined>) {
+  store.setState((state) => ({
+    teamsById: { ...state.teamsById, ...teamsById },
+  }));
+}
+
+const useStore = () => store();
 
 interface Options {
   teamIds: Array<number>;
 }
 
-const teamIdsBeingFetchedAtom = atom(new Set<number>());
-const teamsByIdAtom = atom<Record<number, TeamDetails | undefined>>({});
-
 export function useTeamsById(opts: Options) {
-  const [teamIdsBeingFetched, setTeamIdsBeingFetched] = useAtom(
-    teamIdsBeingFetchedAtom,
-  );
-  const [teamsById, setTeamsById] = useAtom(teamsByIdAtom);
+  const { teamIdsBeingFetched, teamsById } = useStore();
 
   const teamIdsFetched = useMemo(
     () => new Set(Object.keys(teamsById).map(Number)),
@@ -26,14 +45,12 @@ export function useTeamsById(opts: Options) {
       (id) => !(teamIdsBeingFetched.has(id) || teamIdsFetched.has(id)),
     );
 
-    setTeamIdsBeingFetched(teamIdsBeingFetched.union(new Set(teamIdsToFetch)));
+    addTeamIdsBeingFetched(teamIdsToFetch);
 
     const teams = await getTeamsDetailsByIds(teamIdsToFetch);
-    setTeamsById((t) => ({ ...t, ...teams }));
+    updateTeamsById(teams);
 
-    setTeamIdsBeingFetched(
-      teamIdsBeingFetched.difference(new Set(teamIdsToFetch)),
-    );
+    removeTeamIdsBeingFetched(teamIdsToFetch);
   }
 
   useEffect(() => {

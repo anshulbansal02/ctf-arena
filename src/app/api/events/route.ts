@@ -1,10 +1,9 @@
+import { eventChannel } from "@/services/queue";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Record<string, string | number> },
-) {
+export async function GET(request: Request) {
   const responseStream = new TransformStream();
   const encoder = new TextEncoder();
   const writer = responseStream.writable.getWriter();
@@ -15,8 +14,18 @@ export async function GET(
     );
   };
 
-  // Cleanup
+  const eventNames = new URL(request.url).searchParams
+    .get("events")
+    ?.split(",");
+  const subscribedEvents = new Set<string>(eventNames);
+
+  function allChannelsListener(message: unknown, channel?: string) {
+    if (channel && subscribedEvents.has(channel)) sendEvent(channel, message);
+  }
+  eventChannel.subscribe("*", allChannelsListener);
+
   request.signal.addEventListener("abort", () => {
+    eventChannel.unsubscribe("*", allChannelsListener);
     writer.close();
   });
 

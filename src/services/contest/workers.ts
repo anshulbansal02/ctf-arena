@@ -2,6 +2,7 @@ import { differenceInMilliseconds, subHours } from "date-fns";
 import type { Job } from "bull";
 import { batchSendContestReminder, getUpcomingContestsOfHours } from ".";
 import { contestQueue, eventChannel } from "@/services/queue";
+import contestEvents from "./events";
 
 type Contest = {
   id: number;
@@ -14,8 +15,6 @@ type Contest = {
   endsAt: Date;
   createdAt: Date;
 };
-
-type ContestEvent = "contest_started" | "contest_ended";
 
 export function setupContestQueues() {
   // Processor for contest submission
@@ -36,7 +35,7 @@ export function setupContestQueues() {
 
         contestQueue.add(
           "event",
-          { name: "contest_started", contest },
+          { name: "started", contest },
           {
             jobId: `event_contest_${contest.id}_started`,
             delay: differenceInMilliseconds(contest.startsAt, now),
@@ -45,7 +44,7 @@ export function setupContestQueues() {
 
         contestQueue.add(
           "event",
-          { name: "contest_ended", contest },
+          { name: "ended", contest },
           {
             jobId: `event_contest_${contest.id}_ended`,
             delay: differenceInMilliseconds(contest.endsAt, now),
@@ -72,9 +71,9 @@ export function setupContestQueues() {
   // Processor for arbitrary contest events
   contestQueue.process(
     "event",
-    (job: Job<{ name: ContestEvent; contest: Contest }>) => {
+    (job: Job<{ name: string; contest: Contest }>) => {
       const { name: eventName, contest } = job.data;
-      eventChannel.publish(`contest:${eventName}`, contest);
+      eventChannel.publish(contestEvents.game(contest.id, eventName), contest);
     },
   );
 

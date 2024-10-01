@@ -40,12 +40,12 @@ class EventChannel {
     listenersMapForChannel.set(listener, wrappedListener);
     this.listenersMap.set(channel, listenersMapForChannel);
 
-    this.subClient.subscribe(channel, wrappedListener);
+    this.subClient.pSubscribe(channel, wrappedListener);
   }
 
   async unsubscribe<T>(channel: string, listener: EventListener<T>) {
     const rawListener = this.listenersMap.get(channel)?.get(listener);
-    this.subClient.unsubscribe(channel, rawListener);
+    this.subClient.pUnsubscribe(channel, rawListener);
   }
 }
 
