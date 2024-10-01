@@ -15,7 +15,7 @@ export function SignInWithEmail() {
       await signIn("magic-link", { email, redirect: false });
       toaster.success({
         icon: <SvgEmailSent fill="currentColor" />,
-        title: "Authentication Request Sent",
+        title: "Check your email",
         content: `An email has been sent to ${email} with a magic link. Use it to authenticate on CTF Arena. Do not share it with anyone.`,
         timeout: 20 * 1000,
       });

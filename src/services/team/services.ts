@@ -716,8 +716,7 @@ export async function batchSendInvitations() {
 
   const emailService = getEmailService();
 
-  // Render template and send invite for each
-  await Promise.all(
+  const inviteEmails = await Promise.all(
     invites.map(async (invite) => {
       const emailBody = await emailService.renderTemplate("team-invite", {
         inviteeEmail: invite.inviteeEmail!,
@@ -730,22 +729,18 @@ export async function batchSendInvitations() {
         teamName: invite.teamName!,
       });
 
-      try {
-        await emailService.send({
-          address: {
-            from: config.app.sourceEmailAddress.notifications,
-            to: invite.inviteeEmail!,
-          },
-          subject: `Invite to join ${invite.teamName} on CTF Arena`,
-          body: emailBody,
-        });
-
-        invitesSent.push(invite.id);
-      } catch (err) {
-        console.error("Error sending invite: ", err);
-      }
+      return {
+        address: {
+          from: config.app.sourceEmailAddress.notifications,
+          to: invite.inviteeEmail!,
+        },
+        subject: `Invite to join ${invite.teamName} on CTF Arena`,
+        body: emailBody,
+      };
     }),
   );
+
+  await emailService.batchSend(inviteEmails);
 
   if (invitesSent.length)
     // Update status

@@ -352,22 +352,25 @@ export async function batchSendContestReminder(contestId: number) {
 
   const emailService = getEmailService();
 
-  users.forEach(async (user) => {
-    emailService.send({
+  const emails = await Promise.all(
+    users.map(async (user) => ({
+      subject: `Contest ${contest.name} is starting soon on CTF Arena`,
       address: {
         from: config.app.sourceEmailAddress.notifications,
         to: user.email,
       },
       body: await emailService.renderTemplate("contest-reminder", {
+        participationType: contest.participationType,
         contestName: contest.name,
         contestURL: new URL(`contests/${contest.id}`, config.host).href,
         startsAt: contest.startsAt,
         userEmail: user.email,
         userName: user.name!,
       }),
-      subject: `Contest ${contest.name} is starting soon on CTF Arena`,
-    });
-  });
+    })),
+  );
+
+  emailService.batchSend(emails);
 }
 
 export async function getContestStats(contestId: number) {

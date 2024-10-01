@@ -73,3 +73,16 @@ export function scrambleText(str: string) {
     })
     .join("");
 }
+
+export function groupBy<K extends PropertyKey, T>(
+  items: Array<T>,
+  keySelector: (item: T, index: number) => K,
+): Partial<Record<K, T[]>> {
+  const group: Partial<Record<K, T[]>> = {};
+  items.forEach((item, i) => {
+    const key = keySelector(item, i);
+    if (!group[key]) group[key] = [];
+    group[key].push(item);
+  });
+  return group;
+}

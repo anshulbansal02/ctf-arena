@@ -15,8 +15,12 @@ const templates = {
 class EmailService {
   constructor(private readonly provider: EmailProvider) {}
 
-  async send(config: SendConfig) {
-    await this.provider.send(config);
+  async send(email: SendConfig) {
+    await this.provider.send(email);
+  }
+
+  async batchSend(emails: SendConfig[]) {
+    await this.provider.batchSend(emails);
   }
 
   async renderTemplate<T extends keyof typeof templates>(

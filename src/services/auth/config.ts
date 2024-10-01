@@ -37,8 +37,8 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
     const emailService = getEmailService();
 
     if (config.stage === "dev") {
-      const { request, ...rest } = params;
-      return console.table(rest);
+      const { request, provider, theme, ...rest } = params;
+      return console.info(rest);
     }
 
     emailService.send({
@@ -47,7 +47,7 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
         to: params.identifier,
       },
       body: await emailService.renderTemplate("auth-verification-request", {
-        authUrl: params.url,
+        magicLink: params.url,
         expires: params.expires,
         userEmail: params.identifier,
       }),

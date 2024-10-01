@@ -9,4 +9,5 @@ export interface SendConfig {
 
 export interface EmailProvider {
   send: (config: SendConfig) => Promise<void>;
+  batchSend: (configs: SendConfig[]) => Promise<void>;
 }
