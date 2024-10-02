@@ -4,7 +4,7 @@ import { createNotification } from "./services";
 
 export function setupUserQueues() {
   notificationsQueue.process(
-    "new-notification",
+    "new_notification",
     async (job: Job<{ content: string; userId: string }>) => {
       console.info(`[Job] Creating notifications`);
       // create new notification

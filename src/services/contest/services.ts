@@ -16,6 +16,7 @@ import { getEmailService } from "@/services/email";
 import { config } from "@/config";
 import { addHours } from "date-fns";
 import { scrambleText } from "@/lib/utils";
+import { contestQueue } from "../queue";
 
 /**
  * Join a contest by contest id
@@ -234,7 +235,6 @@ export async function createContest(data: {
   participationType: "individual" | "team";
   unranked: boolean;
   game: string;
-  config: unknown;
   initialGameState: unknown;
   time: { start: Date; end: Date };
   challenges: Array<{
@@ -249,15 +249,15 @@ export async function createContest(data: {
       afterSeconds: number;
       id: number;
     }>;
+    config: unknown;
   }>;
 }) {
-  return await db.transaction(async (tx) => {
+  const contest = await db.transaction(async (tx) => {
     const [contest] = await tx
       .insert(TB_contests)
       .values({
         name: data.name,
         description: data.description,
-        config: data.config,
         game: data.game,
         unranked: data.unranked,
         gameState: data.initialGameState,
@@ -266,7 +266,7 @@ export async function createContest(data: {
         startsAt: data.time.start,
         endsAt: data.time.end,
       })
-      .returning({ id: TB_contests.id });
+      .returning();
 
     await tx.insert(TB_contestChallenges).values(
       data.challenges.map((c, i) => ({
@@ -279,11 +279,16 @@ export async function createContest(data: {
         description: c.description,
         hints: c.hints,
         pointsDecayFactor: c.pointsDecayFactor,
+        config: c.config,
       })),
     );
 
-    return contest.id;
+    return contest;
   });
+
+  contestQueue.add("new_contest", contest);
+
+  return contest;
 }
 
 export async function isParticipantRegistered(contestId: number) {

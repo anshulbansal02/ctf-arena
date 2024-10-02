@@ -80,6 +80,10 @@ export function useAction<T extends (...args: any[]) => any>(
 
   const toaster = useToaster();
 
+  const setState = useCallback((state: Awaited<ReturnType<T>>) => {
+    dispatch({ type: "success", payload: state });
+  }, []);
+
   const execute = useCallback(
     async (
       ...args: Parameters<T>
@@ -128,11 +132,11 @@ export function useAction<T extends (...args: any[]) => any>(
     if (opts?.immediate) {
       execute(...opts.args);
     }
-  }, [execute]);
+  }, []);
 
   const reset = useCallback(() => {
     dispatch({ type: "reset" });
   }, []);
 
-  return { ...actionState, execute, reset };
+  return { ...actionState, execute, reset, setState };
 }

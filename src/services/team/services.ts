@@ -130,7 +130,7 @@ export async function createTeamAndSendInvites(props: {
 
       notificationsQueue.addBulk(
         usersWithAccount.map((user) => ({
-          name: "new-notification",
+          name: "new_notification",
           data: {
             userId: user.id,
             content: `Received a team invite from <b>${props.name}</b>. View invite on the Team page.`,
@@ -212,7 +212,7 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
 
     notificationsQueue.addBulk(
       usersWithAccount.map((user) => ({
-        name: "new-notification",
+        name: "new_notification",
         data: {
           userId: user.id,
           content: `Received a team invite from <b>${team.name}</b>. View invite on the Team page.`,
@@ -378,7 +378,7 @@ export async function sendTeamRequests(teamIds: Array<number>) {
 
     notificationsQueue.addBulk(
       teams.map((team) => ({
-        name: "new-notification",
+        name: "new_notification",
         data: {
           userId: team.leader,
           content: `Received a join request from <b>${user.name}</b>. View request on the Team page.`,
@@ -566,7 +566,7 @@ export async function respondToTeamRequest(
       const otherTeamMembers = teamMembers.filter((m) => m.userId !== user.id);
       notificationsQueue.addBulk(
         otherTeamMembers.map((member) => ({
-          name: "new-notification",
+          name: "new_notification",
           data: {
             content: `Team member <b>${user.name}</b> joined your team.`,
             userId: member.userId,
@@ -622,7 +622,7 @@ export async function leaveTeam() {
     const otherTeamMembers = team.members.filter((m) => m.id !== user.id);
     notificationsQueue.addBulk(
       otherTeamMembers.map((member) => ({
-        name: "new-notification",
+        name: "new_notification",
         data: {
           content: `Team member <b>${user.name}</b> left your team.`,
           userId: member.id,

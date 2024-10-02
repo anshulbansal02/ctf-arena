@@ -41,8 +41,8 @@ export function jsonSafeParse<T>(payload: any) {
   }
 }
 
-export function isSubset(of: number[], elements: number[]) {
-  const superset = new Set(elements);
+export function isSubset(of: number[], from: number[]) {
+  const superset = new Set(from);
   return of.every((item) => superset.has(item));
 }
 

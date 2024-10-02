@@ -42,7 +42,7 @@ export function AnimatedNames() {
     <div className="relative mt-4 w-full text-center text-xl font-medium text-slate-300">
       <AnimatePresence>
         <motion.span
-          className="lett absolute left-0 w-full"
+          className="absolute left-0 w-full"
           key={currentIdx}
           variants={variants}
           initial="enter"

@@ -26,7 +26,6 @@ export const TB_contests = pgTable("contests", {
   game: text("game").notNull(),
   participationType:
     Enum_contestParticipationType("participation_type").notNull(),
-  config: jsonb("config").default({}),
   gameState: jsonb("game_state").default({}),
   startsAt: timestamp("starts_at").notNull(),
   endsAt: timestamp("ends_at").notNull(),
@@ -49,7 +48,7 @@ export const TB_contestChallenges = pgTable("contest_challenges", {
   // How points should depreciated over time (concretely every minute)
   pointsDecayFactor: doublePrecision("points_decay_factor"),
   hints: jsonb("hints").default([]),
-  metadata: jsonb("metadata").default({}),
+  config: jsonb("config").default({}),
 });
 
 export const TB_participantContestChallenges = pgTable(
@@ -64,16 +63,15 @@ export const TB_participantContestChallenges = pgTable(
     challengeId: integer("challenge_id").references(
       () => TB_contestChallenges.id,
     ),
-    config: jsonb("config").default({}),
     state: jsonb("state").default({}),
   },
 );
 
 export const TB_contestSubmissions = pgTable("contest_submissions", {
   id: serial("id").primaryKey(),
-  submittedByTeam: integer("submitted_by_team")
-    .notNull()
-    .references(() => TB_teams.id, { onDelete: "no action" }),
+  submittedByTeam: integer("submitted_by_team").references(() => TB_teams.id, {
+    onDelete: "no action",
+  }),
   submittedByUser: text("submitted_by_user")
     .notNull()
     .references(() => TB_users.id, { onDelete: "no action" }),

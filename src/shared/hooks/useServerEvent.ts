@@ -47,6 +47,7 @@ serverEventsStore.subscribe(
 
     serverEventsStore.getState().eventSource?.close();
 
+    if (!subscribedEvents.length) return;
     serverEventsStore.setState(() => ({
       eventSource: new EventSource(eventSourceUrl),
     }));

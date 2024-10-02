@@ -3,11 +3,13 @@ import type { Job } from "bull";
 import { batchSendContestReminder, getUpcomingContestsOfHours } from ".";
 import { contestQueue, eventChannel } from "@/services/queue";
 import contestEvents from "./events";
+import { initGameState } from "./games/tambola";
 
 type Contest = {
   id: number;
   name: string;
   shortDescription: string | null;
+  game: string;
   description: string | null;
   unranked: boolean | null;
   participationType: "individual" | "team";
@@ -24,7 +26,7 @@ export function setupContestQueues() {
 
   // Processor for upcoming contests
   contestQueue.process(
-    "upcoming-contests",
+    "upcoming_contests",
     async (job: Job<{ upcomingContestsTill: number }>) => {
       const contests = await getUpcomingContestsOfHours(
         job.data.upcomingContestsTill,
@@ -51,7 +53,7 @@ export function setupContestQueues() {
           },
         );
 
-        contestQueue.add("minute-lap", contest, {
+        contestQueue.add("minute_lap", contest, {
           jobId: `contest_${contest.id}_minute_lap`,
           repeat: {
             startDate: contest.startsAt,
@@ -78,7 +80,7 @@ export function setupContestQueues() {
   );
 
   // Processor for each minute passed in a contest
-  contestQueue.process("minute-lap", (job: Job<{ contest: Contest }>) => {
+  contestQueue.process("minute_lap", (job: Job<{ contest: Contest }>) => {
     const { contest } = job.data;
     // Update leaderboard
     // do other things
@@ -88,5 +90,11 @@ export function setupContestQueues() {
   contestQueue.process("reminder", (job: Job<{ contest: Contest }>) => {
     const { contest } = job.data;
     batchSendContestReminder(contest.id);
+  });
+
+  // Init game for new contest
+  contestQueue.process("new_contest", (job: Job<{ contest: Contest }>) => {
+    const { contest } = job.data;
+    if (contest.game === "tambola") initGameState(contest.id);
   });
 }

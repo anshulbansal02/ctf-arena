@@ -48,8 +48,8 @@ export async function Contests() {
                         {formatDistanceStrict(contest.endsAt, contest.startsAt)}
                       </>,
                       ...(contest.unranked ? ["Unranked"] : []),
-                    ].map((node) => (
-                      <Chip>{node}</Chip>
+                    ].map((node, i) => (
+                      <Chip key={i}>{node}</Chip>
                     ))}
                   </div>
                   <p className="mt-2 text-sm font-light leading-snug text-slate-300">
@@ -93,8 +93,8 @@ export async function Contests() {
                       {formatDistanceStrict(contest.endsAt, contest.startsAt)}
                     </>,
                     ...(contest.unranked ? ["Unranked"] : []),
-                  ].map((node) => (
-                    <Chip>{node}</Chip>
+                  ].map((node, i) => (
+                    <Chip key={i}>{node}</Chip>
                   ))}
                 </div>
 
