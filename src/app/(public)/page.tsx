@@ -1,6 +1,7 @@
 import { Logo } from "@/shared/components";
 import { SignInWithEmail } from "./components/SignInWithEmail";
 import { AnimatedNames } from "./components/AnimatedNames";
+import { SvgAttribution } from "@/assets/icons";
 
 export default async function Home() {
   return (
@@ -19,6 +20,14 @@ export default async function Home() {
       <div className="mt-24 text-center">
         <SignInWithEmail />
       </div>
+
+      <a
+        href="/attributions"
+        className="fixed bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 text-sm font-medium text-slate-400"
+      >
+        <SvgAttribution fill="currentColor" />
+        See Attributions
+      </a>
     </main>
   );
 }

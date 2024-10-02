@@ -1,0 +1,3 @@
+import type { SVGProps } from "react";
+const SvgAttribution = (props: SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="#e8eaed" viewBox="0 -960 960 960" role="img" {...props}><path d="M430-200h100v-180h60v-184q0-27-28.5-41.5T480-620t-81.5 14.5T370-564v184h60zm50 120q-82 0-155-31.5t-127.5-86-86-127.5T80-480q0-83 31.5-155.5t86-127 127.5-86T480-880q83 0 155.5 31.5t127 86 86 127T880-480q0 82-31.5 155t-86 127.5-127 86T480-80m0-80q133 0 226.5-93.5T800-480t-93.5-226.5T480-800t-226.5 93.5T160-480t93.5 226.5T480-160m0-480q26 0 43-17t17-43-17-43-43-17-43 17-17 43 17 43 43 17m0 160" /></svg>;
+export default SvgAttribution;
