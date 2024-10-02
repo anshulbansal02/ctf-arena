@@ -3,7 +3,7 @@ import type { Job } from "bull";
 import { batchSendContestReminder, getUpcomingContestsOfHours } from ".";
 import { contestQueue, eventChannel } from "@/services/queue";
 import contestEvents from "./events";
-import { initGameState } from "./games/tambola";
+import { initGameState, onContestSubmission } from "./games/tambola";
 
 type Contest = {
   id: number;
@@ -18,10 +18,23 @@ type Contest = {
   createdAt: Date;
 };
 
+type ContestSubmission = {
+  id: number;
+  metadata: unknown;
+  createdAt: Date;
+  contestId: number;
+  challengeId: number;
+  submittedByTeam: number | null;
+  submittedByUser: string;
+  timeTaken: number;
+  submission: string | null;
+  score: number;
+};
+
 export function setupContestQueues() {
   // Processor for contest submission
-  contestQueue.process("submission", async (job: Job<{}>) => {
-    //
+  contestQueue.process("submission", async (job: Job<ContestSubmission>) => {
+    const submission = job.data;
   });
 
   // Processor for upcoming contests

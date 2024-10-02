@@ -67,7 +67,9 @@ export function useServerEvent<T>(
 
     function wrappedHandler(event: MessageEvent<any>) {
       const data = event.data;
-      handler(data);
+      try {
+        handler(JSON.parse(data));
+      } catch {}
     }
     eventSource.addEventListener(eventName, wrappedHandler);
 

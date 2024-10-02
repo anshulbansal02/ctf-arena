@@ -26,8 +26,9 @@ export function TambolaArena(props: TambolaArenaProps) {
 
   const {
     execute: getNextChallenge,
-    loading: loadingNextChallenge,
+    loading,
     data: nextChallenge,
+    setState: setChallengeData,
   } = useAction(
     async () => {
       const challenge = await getNextContestChallenge(props.contest.id);
@@ -62,20 +63,43 @@ export function TambolaArena(props: TambolaArenaProps) {
     },
   );
 
-  useServerEvent<{ name: string; title: string; winLeft: number }>(
-    contestEvents.game(props.contest.id, "win_claimed"),
-    (data) => {
-      toaster.info({
-        title: `${data.title} Win Claimed`,
-        content: `A user claimed win for pattern "${data.title}. ${data.winLeft} wins are left for the rule."`,
-      });
-    },
-  );
+  useServerEvent<{
+    name: string;
+    title: string;
+    claimsLeft: number;
+    claimedBy: string;
+  }>(contestEvents.leaderboard(props.contest.id, "win_claimed"), (data) => {
+    const winningPatterns = nextChallenge?.winningPatterns.map((p) => {
+      if (p.name !== data.name) return p;
+      return { ...p, claimsLeft: data.claimsLeft };
+    })!;
+
+    setChallengeData({
+      ...nextChallenge!,
+      winningPatterns,
+    });
+
+    toaster.info({
+      title: `${data.title} win claimed!`,
+      content: `${data.claimedBy} claimed win for pattern "${data.title}". ${data.claimsLeft} wins are left for the ${data.title}."`,
+      timeout: 5000,
+    });
+  });
 
   function toggleItem(item: TicketItem) {
     setMarkedItems((items) => {
       if (items.includes(item)) return items.filter((t) => t !== item);
       return [...items, item];
+    });
+  }
+
+  function updateClaimedItems(claimedItems: TicketItem[]) {
+    setChallengeData({
+      ...nextChallenge!,
+      user: {
+        ...nextChallenge!.user,
+        claimedItems: [...nextChallenge!.user.claimedItems, ...claimedItems],
+      },
     });
   }
 
@@ -88,7 +112,7 @@ export function TambolaArena(props: TambolaArenaProps) {
             <LastDrawnItem contestId={props.contest.id} />
           </div>
 
-          <div className="mt-16 flex justify-center">
+          <div className="mt-12 flex justify-center">
             <TambolaTicket
               claimedItems={nextChallenge.user.claimedItems}
               markedItems={markedItems}
@@ -110,6 +134,7 @@ export function TambolaArena(props: TambolaArenaProps) {
                     contestId={props.contest.id}
                     markedItems={markedItems}
                     pattern={pattern}
+                    onSuccessfulClaim={updateClaimedItems}
                   />
                 </li>
               ))}

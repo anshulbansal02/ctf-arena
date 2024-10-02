@@ -30,6 +30,18 @@
           },
           {
             "totalClaims": 5,
+            "name": "middle_line",
+            "points": 5,
+            "title": "Mid Lane"
+          },
+          {
+            "totalClaims": 5,
+            "name": "bottom_line",
+            "points": 5,
+            "title": "Bottom Row"
+          },
+          {
+            "totalClaims": 5,
             "name": "corners_with_star",
             "points": 8,
             "title": "Starry Corners"

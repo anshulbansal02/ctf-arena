@@ -13,7 +13,7 @@ import {
 } from "../..";
 import { and, asc, count, eq } from "drizzle-orm";
 import { contestQueue, eventChannel } from "@/services/queue";
-import { getTeamIdByUserId } from "@/services/team";
+import { getTeamDetailsByUserId, getTeamIdByUserId } from "@/services/team";
 import contestEvents from "../../events";
 import { batchCreateTickets } from "./helpers";
 import {
@@ -75,7 +75,7 @@ export async function checkAndClaimWin(
 ) {
   return await db.transaction(async (tx) => {
     const user = await getAuthUser();
-    const teamId = await getTeamIdByUserId(user.id);
+    const team = await getTeamDetailsByUserId(user.id);
     const participationType = await getContestParticipationType(contestId);
 
     const [contest] = await tx
@@ -95,10 +95,28 @@ export async function checkAndClaimWin(
     const patternConfig = challengeConfig.winningPatterns.find(
       (p) => p.name === forPattern,
     );
-    if (!patternConfig) return { error: "Invalid pattern being claimed" };
+    if (!patternConfig)
+      return { error: "Cannot claim win for invalid pattern." };
+
+    const cs = TB_contestSubmissions;
+
+    const [userSubmission] = await tx
+      .select()
+      .from(cs)
+      .where(
+        and(
+          eq(cs.contestId, contestId),
+          eq(cs.challengeId, currentChallengeId),
+          participationType === "team"
+            ? eq(cs.submittedByTeam, team?.id!)
+            : eq(cs.submittedByUser, user.id),
+          eq(cs.submission, forPattern),
+        ),
+      );
+    if (userSubmission)
+      return { error: "You have already claimed win for this pattern." };
 
     // Check if any claims are left for this pattern
-    const cs = TB_contestSubmissions;
     const [submissions] = await tx
       .select({ count: count() })
       .from(cs)
@@ -110,13 +128,13 @@ export async function checkAndClaimWin(
         ),
       );
     if (submissions.count >= patternConfig.totalClaims)
-      return { error: "Claims for this pattern are exhausted" };
+      return { error: "No claims left for this pattern." };
 
     // Check user ticket for valid claim
     const pcc = TB_participantContestChallenges;
     const participantCriteria =
       participationType === "team"
-        ? eq(pcc.teamId, teamId!)
+        ? eq(pcc.teamId, team?.id!)
         : eq(pcc.userId, user.id);
     const [userChallenge] = (await tx
       .select({ state: pcc.state })
@@ -135,13 +153,19 @@ export async function checkAndClaimWin(
       [...markedItems, ...userChallenge.state.claimedItems],
       gameState.itemsDrawn,
     );
-    if (!result.isValid) return false;
+    if (!result.isValid) return result;
 
     // Create submission and update user state
     await tx
       .update(pcc)
       .set({
-        state: { ...userChallenge.state, claimedItems: result.claimedItems },
+        state: {
+          ...userChallenge.state,
+          claimedItems: [
+            ...userChallenge.state.claimedItems,
+            ...result.claimedItems,
+          ],
+        },
       })
       .where(
         and(
@@ -151,22 +175,28 @@ export async function checkAndClaimWin(
         ),
       );
 
-    const submission = await tx
+    const [submission] = await tx
       .insert(cs)
       .values({
         challengeId: currentChallengeId,
         contestId,
         score: patternConfig.points,
         submittedByUser: user.id,
-        submittedByTeam: participationType === "team" ? teamId : null,
+        submittedByTeam: participationType === "team" ? team?.id : null,
         timeTaken: 0,
         submission: forPattern,
       })
       .returning();
 
+    eventChannel.publish(contestEvents.leaderboard(contestId, "win_claimed"), {
+      name: patternConfig.name,
+      title: patternConfig.title,
+      claimsLeft: patternConfig.totalClaims - submissions.count - 1,
+      claimedBy: participationType === "team" ? team?.name : user.name,
+    });
     contestQueue.add("submission", submission);
 
-    return true;
+    return result;
   });
 }
 

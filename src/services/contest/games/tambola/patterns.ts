@@ -51,10 +51,9 @@ export const WinningPatterns: Record<string, RuleChecker> = {
       bottomRow.at(0)!,
       bottomRow.at(-1)!,
     ];
-    const centerNumber =
-      ticket[~~(ticket.length / 2)][~~(ticket[0].length / 2)];
-    const patterNums = [...corners, centerNumber];
-    if (!(isSubset(patterNums, marked) && isSubset(patterNums, drawn)))
+    const centerNumber = ticket[1].filter(Boolean)[2];
+    const patternNums = [...corners, centerNumber];
+    if (!(isSubset(patternNums, marked) && isSubset(patternNums, drawn)))
       return Result.N();
     return Result.Y(bottomRow);
   },
@@ -77,8 +76,7 @@ export const WinningPatterns: Record<string, RuleChecker> = {
   },
 
   center: (ticket, marked, drawn) => {
-    const centerNumber =
-      ticket[~~(ticket.length / 2)][~~(ticket[0].length / 2)];
+    const centerNumber = ticket[1].filter(Boolean)[2];
     if (!(isSubset([centerNumber], marked) && isSubset([centerNumber], drawn)))
       return Result.N();
     return Result.Y([centerNumber]);

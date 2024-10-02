@@ -12,23 +12,30 @@ export function ClaimWinButton(props: {
     claimsLeft: number;
     points: number;
   };
+  onSuccessfulClaim: (claimedItems: TicketItem[]) => void;
 }) {
   const toaster = useToaster();
 
-  const {
-    execute: claimWin,
-    loading,
-    data,
-  } = useAction(async (pattern: string) => {
-    const isValid = await checkAndClaimWin(
+  const { execute: claimWin, loading } = useAction(async (pattern: string) => {
+    const result = await checkAndClaimWin(
       props.contestId,
       pattern,
       props.markedItems,
     );
-    if (typeof isValid === "object" && "error" in isValid) return isValid;
+    if ("error" in result) return result;
 
-    if (!isValid) {
-      toaster.error("Not correct");
+    if (!result.isValid) {
+      toaster.error(
+        `Your claim to win ${props.pattern.title} is not valid. Please try again later.`,
+      );
+    } else {
+      toaster.success({
+        title: "Win Claimed!",
+        content: `Yay! You have claimed your win for ${props.pattern.title}. Let's go for other wins.`,
+        timeout: 5000,
+      });
+      // Trigger fireworks
+      props.onSuccessfulClaim(result.claimedItems);
     }
   });
 
