@@ -7,6 +7,7 @@ import {
 } from "@/services/contest";
 import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
 import { SvgCalendar, SvgGameController, SvgTimer } from "@/assets/icons";
+import { getAuthUser } from "@/services/auth";
 
 function getEventStatus(start: Date, end: Date) {
   const now = new Date();
@@ -20,7 +21,8 @@ export default async function ContestPage({
 }: {
   params: { slug: number };
 }) {
-  const [contest, hasAlreadyJoined, contestStats] = await Promise.all([
+  const [user, contest, hasAlreadyJoined, contestStats] = await Promise.all([
+    getAuthUser(),
     getContest(params.slug),
     isParticipantRegistered(params.slug),
     getContestStats(params.slug),
@@ -89,6 +91,12 @@ export default async function ContestPage({
       </div>
 
       <div className="mt-8 flex justify-center gap-6">
+        {user.roles.includes("host") ? (
+          <Button as="link" href={`${contest.id}/host`}>
+            Host Options
+          </Button>
+        ) : null}
+
         {!hasAlreadyJoined &&
           ["in-progress", "yet-to-start"].includes(contestStatus) && (
             <JoinContestButton contestId={contest.id} />

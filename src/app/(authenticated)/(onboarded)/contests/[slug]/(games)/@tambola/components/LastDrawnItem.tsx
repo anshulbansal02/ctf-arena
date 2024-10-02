@@ -7,13 +7,13 @@ import { AnimatePresence, motion } from "framer-motion";
 const variants = {
   enter: () => {
     return {
-      y: -8,
+      scale: 0,
       opacity: 0,
     };
   },
   center: {
     zIndex: 1,
-    y: 0,
+    scale: 1,
     opacity: 1,
   },
   exit: () => {
@@ -41,7 +41,7 @@ export function LastDrawnItem(props: { contestId: number }) {
   );
 
   return (
-    <div className="relative mt-4 w-full text-center text-3xl font-medium text-slate-300">
+    <div className="relative mt-4 h-12 w-full text-center text-3xl font-medium text-slate-300">
       <AnimatePresence>
         <motion.h3
           className="absolute left-0 w-full"

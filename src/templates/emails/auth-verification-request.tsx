@@ -55,7 +55,7 @@ export const AuthVerificationRequestEmail = ({
             </Section>
 
             <Row>
-              <Column style={{ paddingRight: 8, width: 0 }}>
+              <Column>
                 <Img src={lockIconURI} height={20} alt="Lock Icon" />
               </Column>
               <Column>

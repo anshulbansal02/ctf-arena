@@ -66,7 +66,7 @@ export const config = {
     },
 
     sourceEmailAddress: {
-      auth: "CTF Arena <auth@ctf-arena.com>",
+      auth: "CTF Arena <onboarding@resend.dev>",
       notifications: "CTF Arena <notifications@ctf-arena.com>",
     },
   },

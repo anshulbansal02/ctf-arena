@@ -62,7 +62,7 @@ export async function getNewTicket(seed: number | string): Promise<Ticket> {
     const tickets = batchCreateTickets();
     const ticket = tickets.pop()!;
 
-    await cache.set(cacheKey, JSON.stringify(cachedTicketsForContest));
+    await cache.set(cacheKey, JSON.stringify(tickets));
 
     return ticket;
   }
@@ -132,7 +132,7 @@ export async function checkAndClaimWin(
 
     const result = WinningPatterns[forPattern](
       userTicket,
-      markedItems,
+      [...markedItems, ...userChallenge.state.claimedItems],
       gameState.itemsDrawn,
     );
     if (!result.isValid) return false;
@@ -166,7 +166,7 @@ export async function checkAndClaimWin(
 
     contestQueue.add("submission", submission);
 
-    return submission;
+    return true;
   });
 }
 
@@ -250,7 +250,7 @@ export async function getGameState(contestId: number) {
 
 export async function drawItem(contestId: number) {
   const user = await getAuthUser();
-  if (!user.roles.includes("host")) return { error: "You are not a host" };
+  if (!user.roles.includes("host")) throw new Error("You are not a host");
 
   const [contest] = (await db
     .select({ gameState: TB_contests.gameState })
@@ -261,7 +261,11 @@ export async function drawItem(contestId: number) {
     },
   ];
 
-  const nextDraw = randomItem(contest.gameState.drawSequence);
+  const nextDraw = randomItem(
+    contest.gameState.drawSequence.filter(
+      (item) => !contest.gameState.itemsDrawn.includes(item),
+    ),
+  );
 
   await db
     .update(TB_contests)
@@ -286,4 +290,21 @@ export async function getLastDrawnItem(contestId: number) {
     .where(eq(TB_contests.id, contestId))) as [{ gameState: TambolaGameState }];
 
   return contest.gameState.lastDrawnItem;
+}
+
+export async function getWinsClaimedForChallenge(
+  contestId: number,
+  challengeId: number,
+) {
+  const cs = TB_contestSubmissions;
+  const submissions = await db
+    .select({
+      pattern: cs.submission,
+      count: count(),
+    })
+    .from(cs)
+    .where(and(eq(cs.contestId, contestId), eq(cs.challengeId, challengeId)))
+    .groupBy(cs.submission);
+
+  return Object.fromEntries(submissions.map((s) => [s.pattern!, s.count]));
 }

@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { Ticket, TicketItem } from "@/services/contest/games/tambola";
 import { SvgStar } from "@/assets/icons";
 import styles from "./tambola-ticket.module.scss";
+import { Tooltip } from "@/shared/components";
 
 interface TambolaTicketProps {
   claimedItems: TicketItem[];
@@ -24,15 +25,26 @@ export function TambolaTicket(props: TambolaTicketProps) {
                 [styles.claimed]: props.claimedItems.includes(item),
               })}
             >
-              <button
-                disabled={!item || props.claimedItems.includes(item)}
-                onClick={(e) => {
-                  if (e.isTrusted) props.toggleItem(item);
-                }}
-              >
-                <span>&nbsp;{item}&nbsp;</span>
-                {props.claimedItems.includes(item) ? <SvgStar /> : null}
-              </button>
+              {props.claimedItems.includes(item) ? (
+                <Tooltip
+                  asChild
+                  text="You have claimed win for this item and it cannot be unmarked."
+                >
+                  <button disabled>
+                    <span>&nbsp;{item}&nbsp;</span>
+                    <SvgStar fill="#FBBB3F" />
+                  </button>
+                </Tooltip>
+              ) : (
+                <button
+                  disabled={!item}
+                  onClick={(e) => {
+                    if (e.isTrusted) props.toggleItem(item);
+                  }}
+                >
+                  <span>&nbsp;{item}&nbsp;</span>
+                </button>
+              )}
             </li>
           )),
         )}

@@ -33,8 +33,10 @@ class EventChannel {
     if (!listenersMapForChannel) listenersMapForChannel = new Map();
 
     const wrappedListener = (message: string, channel?: string) => {
-      const data = JSON.parse(message);
-      listener(data, channel);
+      try {
+        const data = JSON.parse(message);
+        listener(data, channel);
+      } catch {}
     };
 
     listenersMapForChannel.set(listener, wrappedListener);

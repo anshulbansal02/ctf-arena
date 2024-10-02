@@ -2,6 +2,7 @@
 import {
   getNextContestChallenge,
   getUserChallenge,
+  getWinsClaimedForChallenge,
   TicketItem,
 } from "@/services/contest/games/tambola";
 import { useAction, useServerEvent, useToaster } from "@/shared/hooks";
@@ -9,7 +10,7 @@ import { TambolaTicket } from "./components/TambolaTicket";
 import { ClaimWinButton } from "./components/ClaimWinButton";
 import usePersistedState from "@/shared/hooks/usePersistedState";
 import contestEvents from "@/services/contest/events";
-import { LastDrawnItem } from "./components/LastDrawnItem";
+import { LastDrawnItem } from "../components/LastDrawnItem";
 
 interface TambolaArenaProps {
   contest: {
@@ -30,11 +31,17 @@ export function TambolaArena(props: TambolaArenaProps) {
   } = useAction(
     async () => {
       const challenge = await getNextContestChallenge(props.contest.id);
-      const userChallenge = await getUserChallenge(
-        props.contest.id,
-        challenge.id,
-      );
-      return { ...challenge, user: userChallenge };
+      const [userChallenge, winsClaimed] = await Promise.all([
+        getUserChallenge(props.contest.id, challenge.id),
+        getWinsClaimedForChallenge(props.contest.id, challenge.id),
+      ]);
+
+      const winningPatterns = challenge.config.winningPatterns.map((p) => ({
+        ...p,
+        claimsLeft: p.totalClaims - (winsClaimed[p.name] ?? 0),
+      }));
+
+      return { ...challenge, winningPatterns, user: userChallenge };
     },
     {
       immediate: true,
@@ -97,7 +104,7 @@ export function TambolaArena(props: TambolaArenaProps) {
               someone else does.
             </p>
             <ul className="mt-6 flex flex-wrap items-center justify-center gap-6">
-              {nextChallenge.config.winningPatterns.map((pattern) => (
+              {nextChallenge.winningPatterns.map((pattern) => (
                 <li key={pattern.name}>
                   <ClaimWinButton
                     contestId={props.contest.id}

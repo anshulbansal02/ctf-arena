@@ -93,8 +93,8 @@ export function setupContestQueues() {
   });
 
   // Init game for new contest
-  contestQueue.process("new_contest", (job: Job<{ contest: Contest }>) => {
-    const { contest } = job.data;
+  contestQueue.process("new_contest", (job: Job<Contest>) => {
+    const contest = job.data;
     if (contest.game === "tambola") initGameState(contest.id);
   });
 }

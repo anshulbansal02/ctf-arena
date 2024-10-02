@@ -15,7 +15,6 @@ const contestSchema = z.object({
   participationType: z.enum(["individual", "team"]),
   unranked: z.boolean().optional().default(false),
   game: z.string().min(1),
-  config: z.record(z.string(), z.string()).optional().default({}),
   initialGameState: z.record(z.string(), z.any()).optional().default({}),
   challenges: z.array(
     z.object({
@@ -32,6 +31,7 @@ const contestSchema = z.object({
       pointsDecayFactor: z.number(),
       description: z.string(),
       name: z.string(),
+      config: z.any().optional().default({}),
     }),
   ),
 });
@@ -56,7 +56,7 @@ export function CreateContest() {
   }
 
   useEffect(() => {
-    if (success) toaster.success(`Contest created with id:${data}`);
+    if (success) toaster.success(`Contest created with id:${data?.id}`);
   }, [success]);
 
   function parseAndValidate(input: string) {

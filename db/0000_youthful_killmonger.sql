@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "contest_challenges" (
 	"answer" text NOT NULL,
 	"points_decay_factor" double precision,
 	"hints" jsonb DEFAULT '[]'::jsonb,
-	"metadata" jsonb DEFAULT '{}'::jsonb
+	"config" jsonb DEFAULT '{}'::jsonb
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "contest_events" (
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "contest_events" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "contest_submissions" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"submitted_by_team" integer NOT NULL,
+	"submitted_by_team" integer,
 	"submitted_by_user" text NOT NULL,
 	"time_taken" integer NOT NULL,
 	"submission" text,
@@ -68,7 +68,6 @@ CREATE TABLE IF NOT EXISTS "contests" (
 	"unranked" boolean DEFAULT false,
 	"game" text NOT NULL,
 	"participation_type" "contest_participation_type" NOT NULL,
-	"config" jsonb DEFAULT '{}'::jsonb,
 	"game_state" jsonb DEFAULT '{}'::jsonb,
 	"starts_at" timestamp NOT NULL,
 	"ends_at" timestamp NOT NULL,
@@ -81,7 +80,6 @@ CREATE TABLE IF NOT EXISTS "participant_contest_challenges" (
 	"team_id" integer,
 	"contest_id" integer NOT NULL,
 	"challenge_id" integer,
-	"config" jsonb DEFAULT '{}'::jsonb,
 	"state" jsonb DEFAULT '{}'::jsonb
 );
 --> statement-breakpoint

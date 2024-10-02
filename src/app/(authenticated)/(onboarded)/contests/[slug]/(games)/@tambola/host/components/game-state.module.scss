@@ -1,0 +1,44 @@
+.marked {
+  position: relative;
+}
+
+.gridItems {
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  place-items: center;
+  gap: 4px;
+}
+
+.drawSequenceItem {
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background-color: rgb(64, 66, 63);
+  height: 36px;
+  width: 36px;
+
+  &.marked {
+    background-color: rgb(24, 25, 24);
+    color: rgb(152, 152, 152);
+
+    span {
+      position: relative;
+    }
+
+    & span::after {
+      content: "";
+      position: absolute;
+      top: 25%;
+      left: 0;
+      right: 0;
+      border-top: 3px solid #bdffec52;
+      transform: rotate(-20deg) scaleX(1);
+      transform-origin: center;
+      transition: all 0.24s cubic-bezier(0.95, 0.05, 0.795, 0.035);
+      transform-origin: 100% 50%;
+    }
+  }
+}

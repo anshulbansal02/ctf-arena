@@ -1,5 +1,5 @@
 {
-  "id": "bc525adb-cb3b-4be2-ad73-0c5fa0e4378e",
+  "id": "a2f79fe7-aaac-4ebd-ba90-34400d22739b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -70,8 +70,8 @@
           "notNull": false,
           "default": "'[]'::jsonb"
         },
-        "metadata": {
-          "name": "metadata",
+        "config": {
+          "name": "config",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false,
@@ -224,7 +224,7 @@
           "name": "submitted_by_team",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "submitted_by_user": {
           "name": "submitted_by_user",
@@ -383,13 +383,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "config": {
-          "name": "config",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'::jsonb"
-        },
         "game_state": {
           "name": "game_state",
           "type": "jsonb",
@@ -455,13 +448,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
-        },
-        "config": {
-          "name": "config",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'::jsonb"
         },
         "state": {
           "name": "state",
