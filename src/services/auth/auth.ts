@@ -29,7 +29,10 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
         to: params.identifier,
       },
       body: await emailService.renderTemplate("auth-verification-request", {
-        magicLink: params.url,
+        magicLink: new URL(
+          `/api/auth/callback/magic-link?${new URLSearchParams({ token: params.token, email: params.identifier })}`,
+          config.host,
+        ).toString(),
         expires: params.expires,
         userEmail: params.identifier,
       }),

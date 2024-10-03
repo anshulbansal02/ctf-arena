@@ -22,13 +22,14 @@ export default async function Home() {
         <SignInWithEmail />
       </div>
 
-      <Link
-        href="/attributions"
-        className="fixed bottom-0 right-0 flex items-center gap-1 bg-[#151619] bg-opacity-40 px-4 py-3 text-sm font-medium leading-none text-slate-300 backdrop-blur-lg"
-      >
-        <SvgAttribution fill="currentColor" />
-        See Attributions
-      </Link>
+      <div className="fixed bottom-3 left-4 flex items-center gap-5 text-sm leading-none text-slate-400">
+        <Link href="/attributions" className="flex items-center gap-1">
+          <SvgAttribution fill="currentColor" />
+          See Attributions
+        </Link>
+
+        <Link href="/support">Support</Link>
+      </div>
     </main>
   );
 }
