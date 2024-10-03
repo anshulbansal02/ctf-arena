@@ -102,7 +102,7 @@ export const TeamInviteEmail = ({
               <span className="text-black">{inviterName}</span> used the above
               email address to create an invitation for you on CTF Arena. If you
               do not wish to accept the invitation, you can ignore this email.
-              If you'd rather not receive future emails from CTF Arena,{" "}
+              If you&apos;d rather not receive future emails from CTF Arena,{" "}
               <Link
                 href="/notifications/opt-out"
                 className="text-[#666666] underline"

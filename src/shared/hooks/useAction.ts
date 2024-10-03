@@ -66,7 +66,6 @@ function reducer<R>(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useAction<T extends (...args: any[]) => any>(
   action: T,
   opts?: Options<Parameters<T>>,

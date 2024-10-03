@@ -118,7 +118,7 @@ export const ContestReminderEmail = ({
                   : "your team is "}
                 participating in the contest{" "}
                 <span className="text-black">{contestName}</span> on CTF Arena.
-                If you'd rather not receive future emails from CTF Arena,{" "}
+                If you&apos;d rather not receive future emails from CTF Arena,{" "}
                 <Link
                   href="/notifications/opt-out"
                   className="text-[#666666] underline"

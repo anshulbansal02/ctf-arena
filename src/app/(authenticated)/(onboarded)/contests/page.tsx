@@ -49,8 +49,8 @@ export default async function ContestsPage() {
                           )}
                         </>,
                         ...(contest.unranked ? ["Unranked"] : []),
-                      ].map((node) => (
-                        <Chip>{node}</Chip>
+                      ].map((node, i) => (
+                        <Chip key={i}>{node}</Chip>
                       ))}
                     </div>
                     <p className="mt-2 text-sm font-light leading-snug text-slate-300">
@@ -102,8 +102,8 @@ export default async function ContestsPage() {
                           )}
                         </>,
                         ...(contest.unranked ? ["Unranked"] : []),
-                      ].map((node) => (
-                        <Chip>{node}</Chip>
+                      ].map((node, i) => (
+                        <Chip key={i}>{node}</Chip>
                       ))}
                     </div>
 
@@ -156,8 +156,8 @@ export default async function ContestsPage() {
                           )}
                         </>,
                         ...(contest.unranked ? ["Unranked"] : []),
-                      ].map((node) => (
-                        <Chip>{node}</Chip>
+                      ].map((node, i) => (
+                        <Chip key={i}>{node}</Chip>
                       ))}
                     </div>
 

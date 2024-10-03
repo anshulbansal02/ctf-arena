@@ -2,6 +2,7 @@ import { Logo } from "@/shared/components";
 import { SignInWithEmail } from "./components/SignInWithEmail";
 import { AnimatedNames } from "./components/AnimatedNames";
 import { SvgAttribution } from "@/assets/icons";
+import Link from "next/link";
 
 export default async function Home() {
   return (
@@ -21,13 +22,13 @@ export default async function Home() {
         <SignInWithEmail />
       </div>
 
-      <a
+      <Link
         href="/attributions"
-        className="fixed bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 text-sm font-medium text-slate-400"
+        className="fixed bottom-0 right-0 flex items-center gap-1 bg-[#151619] bg-opacity-40 px-4 py-3 text-sm font-medium leading-none text-slate-300 backdrop-blur-lg"
       >
         <SvgAttribution fill="currentColor" />
         See Attributions
-      </a>
+      </Link>
     </main>
   );
 }

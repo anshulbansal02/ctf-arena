@@ -99,7 +99,7 @@ export const AuthVerificationRequestEmail = ({
             <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
 
             <Text className="text-center text-[12px] leading-[18px] text-[#666666]">
-              If you didn't try to login, you can safely ignore this email.
+              If you didn&apos;t try to login, you can safely ignore this email.
             </Text>
           </Container>
         </Body>

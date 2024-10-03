@@ -46,7 +46,7 @@ export function UserNameStep(props: Props) {
         />
         <p className="mt-2 text-sm text-red-300">{formErrors.name?.message}</p>
         <Button type="submit" className="mt-4 w-full">
-          Let's Go
+          Let&apos;s Go
         </Button>
       </form>
     </div>

@@ -7,10 +7,6 @@ const nextConfig = {
   reactStrictMode: false,
   experimental: {
     instrumentationHook: true,
-    serverComponentsExternalPackages: [
-      "@react-email/components",
-      "@react-email/render",
-    ],
   },
   images: {
     dangerouslyAllowSVG: true,

@@ -37,6 +37,12 @@ const attributions = [
     title: "Tambola/Housie Ticket Generation Algorithm",
     text: "A complex process of making unique tickets for the game of Tambola or Housie explained simply by Mark Henderson.",
   },
+  {
+    name: "ticket-tear-effect",
+    url: "https://codepen.io/Pustelto/pen/YwBZwK",
+    title: "Ticket Tear Effect",
+    text: "A CSS ticket tear effect created by Tomas Pustelnik on CodePen.",
+  },
 ];
 
 export default function AttributionPage() {
@@ -48,8 +54,8 @@ export default function AttributionPage() {
       <h2 className="mt-8 text-xl font-medium">Attributions</h2>
       <p className="mt-3 text-center text-sm font-light text-slate-300">
         These acknowledgments recognize the contributions of developers and
-        creators whose work has complemented this platform's experience. While
-        this list is not exhaustive, the efforts of all libraries, code
+        creators whose work has complemented this platform&apos;s experience.
+        While this list is not exhaustive, the efforts of all libraries, code
         snippets, assets and algorithms contributors are equally valued and
         appreciated.
       </p>
@@ -63,7 +69,11 @@ export default function AttributionPage() {
               <p className="font-light text-slate-200">{attribution.text}</p>
               <p className="mt-1">
                 <span className="text-slate-300">Source:&nbsp;</span>
-                <a href={attribution.url} className="text-[#4EC8C8]">
+                <a
+                  href={attribution.url}
+                  target="_blank"
+                  className="text-[#4EC8C8]"
+                >
                   {attribution.url}
                 </a>
               </p>

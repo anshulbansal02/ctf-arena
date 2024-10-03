@@ -31,7 +31,7 @@ const contestSchema = z.object({
       pointsDecayFactor: z.number(),
       description: z.string(),
       name: z.string(),
-      config: z.any().optional().default({}),
+      config: z.record(z.unknown()),
     }),
   ),
 });

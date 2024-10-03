@@ -1,10 +1,10 @@
 import clsx from "clsx";
-import { Toast as ToastType } from "./../store";
+import { toastStore } from "@/shared/store";
 
 import { SvgCross } from "@/assets/icons";
 import styles from "./toast.module.scss";
 
-interface ToastProps extends ToastType {
+interface ToastProps extends toastStore.Toast {
   onDismiss: (id: number) => void;
   className?: string;
 }
@@ -21,7 +21,13 @@ export function Toast({
   return (
     <div className={clsx(styles.container, styles[className ?? ""])}>
       {icon && <div className={styles.icon}>{icon}</div>}
-      <div className={styles.body} style={{ paddingLeft: icon ? 0 : "1rem", paddingRight: !dismissible ? "1rem" : 0 }}>
+      <div
+        className={styles.body}
+        style={{
+          paddingLeft: icon ? 0 : "1rem",
+          paddingRight: !dismissible ? "1rem" : 0,
+        }}
+      >
         {title && <h4 className={styles.title}>{title}</h4>}
         {content &&
           (typeof content === "string" ? (

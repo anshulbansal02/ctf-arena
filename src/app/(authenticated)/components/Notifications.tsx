@@ -55,7 +55,7 @@ export function Notifications() {
               <li className="flex flex-col items-center gap-2">
                 <SvgEmptyBox width={24} height={24} />
                 <p className="text-center text-sm leading-tight text-gray-400">
-                  You don't have any notifications.
+                  You don&apos;t have any notifications.
                   <br />
                   Check back later.
                 </p>

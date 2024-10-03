@@ -3,7 +3,7 @@ import type { Job } from "bull";
 import { batchSendContestReminder, getUpcomingContestsOfHours } from ".";
 import { contestQueue, eventChannel } from "@/services/queue";
 import contestEvents from "./events";
-import { initGameState, onContestSubmission } from "./games/tambola";
+import { initGameState } from "./games/tambola";
 
 type Contest = {
   id: number;

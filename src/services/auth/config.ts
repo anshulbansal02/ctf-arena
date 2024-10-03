@@ -1,10 +1,7 @@
 import "next-auth/jwt";
 import { NextAuthConfig } from "next-auth";
-import { EmailConfig } from "next-auth/providers";
-import EntraID from "next-auth/providers/microsoft-entra-id";
 
 import { config } from "@/config";
-import { getEmailService } from "@/services/email";
 
 declare module "next-auth" {
   interface Session {
@@ -32,46 +29,8 @@ declare module "next-auth/jwt" {
   }
 }
 
-const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
-  async (params) => {
-    const emailService = getEmailService();
-
-    if (config.stage === "dev") {
-      const { request, provider, theme, ...rest } = params;
-      return console.info(rest);
-    }
-
-    emailService.send({
-      address: {
-        from: config.app.sourceEmailAddress.auth,
-        to: params.identifier,
-      },
-      body: await emailService.renderTemplate("auth-verification-request", {
-        magicLink: params.url,
-        expires: params.expires,
-        userEmail: params.identifier,
-      }),
-      subject: "Authentication Request",
-    });
-  };
-
 export const authConfig = {
-  providers: [
-    EntraID({
-      clientId: config.auth.azure.accountId,
-      clientSecret: config.auth.azure.secret,
-      tenantId: config.auth.azure.tenantId,
-    }),
-    {
-      id: "magic-link",
-      name: "Email",
-      type: "email",
-      maxAge: 60 * 60 * 4,
-      from: config.app.sourceEmailAddress.auth,
-      options: {},
-      sendVerificationRequest: sendVerificationRequestEmail,
-    },
-  ],
+  providers: [],
   session: { strategy: "jwt" },
   callbacks: {
     signIn({ user }) {

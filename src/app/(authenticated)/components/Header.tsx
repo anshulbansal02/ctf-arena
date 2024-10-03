@@ -25,7 +25,7 @@ export async function Header({ className }: Props) {
       <div className="flex w-60 justify-end gap-4">
         <Notifications />
 
-        <Avatar size={40} username={user.email} />
+        <Avatar size={40} username={user.email} className="hidden lg:block" />
 
         <SignOut />
       </div>
