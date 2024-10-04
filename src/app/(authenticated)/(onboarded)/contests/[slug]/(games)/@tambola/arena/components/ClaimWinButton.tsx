@@ -41,7 +41,10 @@ export function ClaimWinButton(props: {
 
   return (
     <Button onClick={() => claimWin(props.pattern.name)} loading={loading}>
-      {props.pattern.title} &#8212; x{props.pattern.claimsLeft}
+      {props.pattern.title}{" "}
+      <span className="rounded-md bg-slate-300 px-2 py-1 pt-[5px] text-sm font-medium leading-none">
+        {props.pattern.claimsLeft} left
+      </span>
     </Button>
   );
 }

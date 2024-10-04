@@ -9,13 +9,20 @@ interface TambolaTicketProps {
   markedItems: TicketItem[];
   toggleItem: (item: TicketItem) => void;
   ticket: Ticket;
+  loading?: boolean;
 }
 
+const emptyTambolaTicket: Ticket = Array.from({ length: 9 }, () =>
+  Array.from({ length: 3 }, () => 0),
+);
+
 export function TambolaTicket(props: TambolaTicketProps) {
+  const ticket = props.loading ? emptyTambolaTicket : props.ticket;
+
   return (
     <div className={styles.ticket}>
       <ul className={styles.grid}>
-        {props.ticket.map((row, i) =>
+        {ticket.map((row, i) =>
           row.map((item, j) => (
             <li
               key={`cell-${i}-${j}`}

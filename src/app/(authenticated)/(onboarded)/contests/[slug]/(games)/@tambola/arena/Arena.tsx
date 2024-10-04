@@ -25,24 +25,30 @@ export function TambolaArena(props: TambolaArenaProps) {
   const toaster = useToaster();
 
   const {
+    execute: getUserChallengeData,
+    data: userChallengeData,
+    setState: setUserChallengeData,
+  } = useAction(getUserChallenge);
+
+  const {
     execute: getNextChallenge,
-    loading,
-    data: nextChallenge,
+    data: challengeData,
     setState: setChallengeData,
   } = useAction(
     async () => {
       const challenge = await getNextContestChallenge(props.contest.id);
-      const [userChallenge, winsClaimed] = await Promise.all([
-        getUserChallenge(props.contest.id, challenge.id),
-        getWinsClaimedForChallenge(props.contest.id, challenge.id),
-      ]);
-
+      const winsClaimed = await getWinsClaimedForChallenge(
+        props.contest.id,
+        challenge.id,
+      );
       const winningPatterns = challenge.config.winningPatterns.map((p) => ({
         ...p,
         claimsLeft: p.totalClaims - (winsClaimed[p.name] ?? 0),
       }));
 
-      return { ...challenge, winningPatterns, user: userChallenge };
+      getUserChallengeData(props.contest.id, challenge.id);
+
+      return { ...challenge, winningPatterns };
     },
     {
       immediate: true,
@@ -51,9 +57,9 @@ export function TambolaArena(props: TambolaArenaProps) {
   );
 
   const [markedItems, setMarkedItems] = usePersistedState<TicketItem[]>(
-    `contest:${props.contest.id}:challenge:${nextChallenge?.id}:ticket:markedItems`,
+    `contest:${props.contest.id}:challenge:${challengeData?.id}:ticket:markedItems`,
     [],
-    { noPersist: !nextChallenge },
+    { noPersist: !challengeData },
   );
 
   useServerEvent(
@@ -69,15 +75,16 @@ export function TambolaArena(props: TambolaArenaProps) {
     claimsLeft: number;
     claimedBy: string;
   }>(contestEvents.leaderboard(props.contest.id, "win_claimed"), (data) => {
-    const winningPatterns = nextChallenge?.winningPatterns.map((p) => {
-      if (p.name !== data.name) return p;
+    const winningPatterns = challengeData?.winningPatterns.map((p) => {
+      if (p.name !== data.name) return { ...p };
       return { ...p, claimsLeft: data.claimsLeft };
     })!;
 
-    setChallengeData({
-      ...nextChallenge!,
-      winningPatterns,
-    });
+    if (challengeData)
+      setChallengeData({
+        ...challengeData,
+        winningPatterns,
+      });
 
     toaster.info({
       title: `${data.title} win claimed!`,
@@ -94,18 +101,16 @@ export function TambolaArena(props: TambolaArenaProps) {
   }
 
   function updateClaimedItems(claimedItems: TicketItem[]) {
-    setChallengeData({
-      ...nextChallenge!,
-      user: {
-        ...nextChallenge!.user,
-        claimedItems: [...nextChallenge!.user.claimedItems, ...claimedItems],
-      },
-    });
+    if (userChallengeData)
+      setUserChallengeData({
+        ...userChallengeData,
+        claimedItems: [...userChallengeData.claimedItems, ...claimedItems],
+      });
   }
 
   return (
     <div className="mx-auto mb-20 flex min-h-screen max-w-[600px] flex-col items-center">
-      {nextChallenge ? (
+      {userChallengeData ? (
         <div>
           <div className="mt-8 text-center">
             <h4 className="text-slate-400">Last Drawn</h4>
@@ -114,10 +119,11 @@ export function TambolaArena(props: TambolaArenaProps) {
 
           <div className="mt-12 flex justify-center">
             <TambolaTicket
-              claimedItems={nextChallenge.user.claimedItems}
+              claimedItems={userChallengeData.claimedItems}
               markedItems={markedItems}
-              ticket={nextChallenge.user.ticket}
+              ticket={userChallengeData.ticket}
               toggleItem={toggleItem}
+              loading
             />
           </div>
 
@@ -128,16 +134,17 @@ export function TambolaArena(props: TambolaArenaProps) {
               someone else does.
             </p>
             <ul className="mt-6 flex flex-wrap items-center justify-center gap-6">
-              {nextChallenge.winningPatterns.map((pattern) => (
-                <li key={pattern.name}>
-                  <ClaimWinButton
-                    contestId={props.contest.id}
-                    markedItems={markedItems}
-                    pattern={pattern}
-                    onSuccessfulClaim={updateClaimedItems}
-                  />
-                </li>
-              ))}
+              {challengeData &&
+                challengeData.winningPatterns.map((pattern) => (
+                  <li key={pattern.name}>
+                    <ClaimWinButton
+                      contestId={props.contest.id}
+                      markedItems={markedItems}
+                      pattern={pattern}
+                      onSuccessfulClaim={updateClaimedItems}
+                    />
+                  </li>
+                ))}
             </ul>
           </div>
         </div>

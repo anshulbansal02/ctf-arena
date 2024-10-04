@@ -8,7 +8,7 @@ class AsyncActionError {
   }
 }
 
-type Event = "loading" | "success" | "error" | "reset";
+type Event = "loading" | "success" | "error" | "reset" | "set";
 
 type EventWithPayload = {
   type: Event;
@@ -48,7 +48,7 @@ function reducer<R>(
     case "success":
       return {
         success: true,
-        data: event.payload as Exclude<R, { error: string }>,
+        data: event.payload as R,
         error: null,
         loading: false,
       };
@@ -61,6 +61,13 @@ function reducer<R>(
       };
     case "reset":
       return { success: undefined, data: null, error: false, loading: false };
+    case "set":
+      return {
+        success: undefined,
+        data: event.payload as R,
+        error: false,
+        loading: false,
+      };
     default:
       return state;
   }
@@ -70,7 +77,9 @@ export function useAction<T extends (...args: any[]) => any>(
   action: T,
   opts?: Options<Parameters<T>>,
 ) {
-  const [actionState, dispatch] = useReducer(reducer<Awaited<ReturnType<T>>>, {
+  type ActionState = Awaited<ReturnType<T>>;
+
+  const [actionState, dispatch] = useReducer(reducer<ActionState>, {
     success: undefined,
     loading: Boolean(opts?.immediate),
     error: null,
@@ -79,14 +88,14 @@ export function useAction<T extends (...args: any[]) => any>(
 
   const toaster = useToaster();
 
-  const setState = useCallback((state: Awaited<ReturnType<T>>) => {
-    dispatch({ type: "success", payload: state });
+  const setState = useCallback((state: ActionState) => {
+    dispatch({ type: "set", payload: state });
   }, []);
 
   const execute = useCallback(
     async (
       ...args: Parameters<T>
-    ): Promise<Awaited<ReturnType<T>> | undefined | { error: string }> => {
+    ): Promise<ActionState | undefined | { error: string }> => {
       dispatch({ type: "loading", preserveData: opts?.preserveData });
       try {
         const result = await action(...args);
