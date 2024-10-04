@@ -1,7 +1,6 @@
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Toaster } from "@/shared/components";
-import { GlobalStoreProvider } from "@/shared/providers";
 import "@/styles/globals.scss";
 import type { Metadata } from "next";
 
@@ -24,11 +23,9 @@ export default async function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
-        <GlobalStoreProvider>
-          {children}
-          <div id="portal"></div>
-          <Toaster />
-        </GlobalStoreProvider>
+        {children}
+        <div id="portal"></div>
+        <Toaster />
       </body>
     </html>
   );

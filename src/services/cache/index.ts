@@ -12,7 +12,7 @@ const cacheClient = createClient({
 if (!cacheClient.isOpen) cacheClient.connect();
 
 cacheClient.on("error", (e) => {
-  console.log("cache error: ", e);
+  console.error("cache error: ", e);
 });
 
 export { cacheClient as cache };

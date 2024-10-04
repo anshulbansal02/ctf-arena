@@ -8,7 +8,7 @@ export function SignInWithMicrosoft() {
   const { execute, loading } = useAction(() => signIn("microsoft-entra-id"));
 
   return (
-    <Button type="submit" loading={loading} onClick={() => execute(null)}>
+    <Button type="submit" loading={loading} onClick={execute}>
       <svg
         width={16}
         viewBox="0 0 2499.6 2500"

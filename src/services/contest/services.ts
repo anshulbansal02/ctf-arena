@@ -1,15 +1,5 @@
 "use server";
-import {
-  and,
-  asc,
-  count,
-  countDistinct,
-  desc,
-  eq,
-  gt,
-  isNull,
-  lt,
-} from "drizzle-orm";
+import { and, asc, count, countDistinct, eq, gt, lt, or } from "drizzle-orm";
 import { db } from "../db";
 import {
   TB_contestChallenges,
@@ -18,19 +8,15 @@ import {
   TB_contests,
 } from "./entities";
 import { getAuthUser } from "../auth";
-import { getTeamIdByUserId, TB_teams } from "../team";
-import { scrambleText, submissionComparator } from "./utils";
+import { getTeamIdByUserId } from "../team";
 import { CONTEST_EVENTS } from "./helpers";
-import { contestQueue } from "../queue";
 import { getTeamRankAndScore } from "./leaderboard";
-import { TB_users } from "../user";
-import { getEmailService, renderTemplate } from "../email";
+import { TB_users } from "@/services/user";
+import { getEmailService } from "@/services/email";
 import { config } from "@/config";
 import { addHours } from "date-fns";
-
-export const contestChannelName = async (subChannel: "submission") => {
-  return `channel:contest:${subChannel}`;
-};
+import { scrambleText } from "@/lib/utils";
+import { contestQueue } from "../queue";
 
 /**
  * Join a contest by contest id
@@ -39,16 +25,25 @@ export const contestChannelName = async (subChannel: "submission") => {
 export async function joinContest(contestId: number) {
   const user = await getAuthUser();
 
-  const teamId = await getTeamIdByUserId(user.id);
+  const participationType = await getContestParticipationType(contestId);
 
-  if (!teamId)
-    return { error: "You need to be in a team to register for a contest" };
+  if (participationType === "team") {
+    const teamId = await getTeamIdByUserId(user.id);
+    if (!teamId)
+      return { error: "You need to be in a team to register for a contest" };
 
-  await db.insert(TB_contestEvents).values({
-    name: CONTEST_EVENTS.TEAM_ENTERED_CONTEST,
-    contestId,
-    teamId: teamId,
-  });
+    await db.insert(TB_contestEvents).values({
+      name: CONTEST_EVENTS.PARTICIPANT_REGISTERED,
+      contestId,
+      teamId: teamId,
+    });
+  } else {
+    await db.insert(TB_contestEvents).values({
+      name: CONTEST_EVENTS.PARTICIPANT_REGISTERED,
+      contestId,
+      userId: user.id,
+    });
+  }
 }
 
 /**
@@ -76,6 +71,17 @@ export async function getContests(type: "active" | "upcoming" | "ended") {
   }
 }
 
+export async function getContestParticipationType(contestId: number) {
+  const [contest] = await db
+    .select({
+      participationType: TB_contests.participationType,
+    })
+    .from(TB_contests)
+    .where(eq(TB_contests.id, contestId));
+
+  return contest.participationType;
+}
+
 /**
  * Get a contest's details by id
  * @param contestId
@@ -89,6 +95,8 @@ export async function getContest(contestId: number) {
     .select({
       id: TB_C.id,
       name: TB_C.name,
+      game: TB_C.game,
+      participation: TB_C.participationType,
       isUnranked: TB_C.unranked,
       description: TB_C.description,
       startsAt: TB_C.startsAt,
@@ -101,147 +109,6 @@ export async function getContest(contestId: number) {
     .groupBy(TB_C.id);
 
   return contest;
-}
-
-/**
- * Create a submission for correct solution to a contest challenge
- * @param contestId
- * @param challengeId
- * @param submission
- * @returns
- */
-export async function checkAndCreateSubmission(data: {
-  contestId: number;
-  challengeId: number;
-  submission: string;
-}) {
-  const { contestId, challengeId, submission } = data;
-  const now = new Date();
-  const user = await getAuthUser();
-  const teamId = await getTeamIdByUserId(user.id);
-
-  const [contest] = await db
-    .select({
-      isUnranked: TB_contests.unranked,
-      startsAt: TB_contests.startsAt,
-      endsAt: TB_contests.endsAt,
-    })
-    .from(TB_contests)
-    .where(eq(TB_contests.id, contestId));
-
-  if (!contest) return { error: "Contest not found." };
-  if (contest.startsAt > now) return { error: "Contest is yet to begin." };
-  if (contest.endsAt < now) return { error: "Contest has ended." };
-
-  // Get challenge info
-  const [challenge] = await db
-    .select({
-      answer: TB_contestChallenges.answer,
-      maxPoints: TB_contestChallenges.maxPoints,
-      minPoints: TB_contestChallenges.minPoints,
-      pointsDecayFactor: TB_contestChallenges.pointsDecayFactor,
-      order: TB_contestChallenges.order,
-    })
-    .from(TB_contestChallenges)
-    .where(eq(TB_contestChallenges.id, challengeId));
-
-  // If answer is not correct
-  if (!submissionComparator(submission, challenge.answer)) return false;
-
-  const [lastSubmission] = await db
-    .select({ createdAt: TB_contestSubmissions.createdAt })
-    .from(TB_contestSubmissions)
-    .where(eq(TB_contestSubmissions.contestId, contestId))
-    .orderBy(desc(TB_contestSubmissions.createdAt))
-    .limit(1);
-
-  const timeTaken = +now - +(lastSubmission?.createdAt ?? contest.startsAt);
-
-  const hintsTaken = (await db
-    .select({ data: TB_contestEvents.data })
-    .from(TB_contestEvents)
-    .where(
-      and(
-        eq(TB_contestEvents.teamId, teamId!),
-        eq(TB_contestEvents.name, CONTEST_EVENTS.HINT_TAKEN),
-      ),
-    )) as Array<{ data: { cost: number } }>;
-
-  // Score calculation
-  const hintsDeduction = hintsTaken.reduce((a, hint) => a + hint.data.cost, 0);
-  const pointsDecayFactor = challenge.pointsDecayFactor ?? 0;
-  const score = Math.round(
-    Math.max(
-      challenge.maxPoints - (timeTaken / 1000) * pointsDecayFactor,
-      challenge.minPoints ?? 0,
-    ) - hintsDeduction,
-  );
-
-  const [newSubmission] = await db
-    .insert(TB_contestSubmissions)
-    .values({
-      contestId,
-      challengeId,
-      score,
-      submittedByTeam: teamId!,
-      submittedByUser: user.id,
-      submission,
-      timeTaken,
-    })
-    .returning({
-      id: TB_contestSubmissions.id,
-      createdAt: TB_contestSubmissions.createdAt,
-    });
-
-  if (!contest.isUnranked)
-    contestQueue.add(await contestChannelName("submission"), {
-      submissionId: newSubmission.id,
-      contestId,
-      challengeId,
-      challengeOrder: challenge.order,
-      teamId,
-      score,
-      timeTaken,
-      createdAt: newSubmission.createdAt,
-    });
-
-  return true;
-}
-
-/**
- * Get the next challenge details to be solved by the contestant
- * @param contestId
- * @returns
- */
-export async function getNextContestChallenge(contestId: number) {
-  const [lastSubmission] = await db
-    .select({ order: TB_contestChallenges.order })
-    .from(TB_contestSubmissions)
-    .leftJoin(
-      TB_contestChallenges,
-      eq(TB_contestSubmissions.challengeId, TB_contestChallenges.id),
-    )
-    .where(eq(TB_contestSubmissions.contestId, contestId))
-    .orderBy(desc(TB_contestSubmissions.createdAt))
-    .limit(1);
-
-  const nextInOrder = (lastSubmission?.order ?? 0) + 1;
-
-  const [nextChallenge] = await db
-    .select()
-    .from(TB_contestChallenges)
-    .where(
-      and(
-        eq(TB_contestChallenges.contestId, contestId),
-        eq(TB_contestChallenges.order, nextInOrder),
-      ),
-    );
-
-  if (!nextChallenge) return;
-
-  const { answer, hints, ...redactedChallenge } = nextChallenge;
-
-  return redactedChallenge;
 }
 
 export async function getChallengeHints(challengeId: number) {
@@ -323,7 +190,7 @@ export async function revealHint(challengeId: number, hintId: number) {
     .from(cc)
     .where(eq(cc.id, challengeId));
 
-  if (!res) return { error: "Hint not found" };
+  if (!res) throw new Error("Hint not available");
 
   const hintTaken = (
     res.hints as Array<{
@@ -347,24 +214,28 @@ export async function revealHint(challengeId: number, hintId: number) {
   return hintTaken;
 }
 
-export async function getContestsStartingInOneHour() {
+export async function getUpcomingContestsOfHours(hours: number) {
   const now = new Date();
-  const after1Hour = addHours(now, 1);
+  const afterNHours = addHours(now, hours);
 
-  const contestsStartingInOneHour = await db
+  const contestsStartingInNHours = await db
     .select()
     .from(TB_contests)
     .where(
-      and(gt(TB_contests.startsAt, now), lt(TB_contests.startsAt, after1Hour)),
+      and(gt(TB_contests.startsAt, now), lt(TB_contests.startsAt, afterNHours)),
     );
 
-  return contestsStartingInOneHour;
+  return contestsStartingInNHours;
 }
 
 export async function createContest(data: {
   name: string;
   description: string;
   shortDescription: string;
+  participationType: "individual" | "team";
+  unranked: boolean;
+  game: string;
+  initialGameState: unknown;
   time: { start: Date; end: Date };
   challenges: Array<{
     name?: string;
@@ -378,19 +249,24 @@ export async function createContest(data: {
       afterSeconds: number;
       id: number;
     }>;
+    config: unknown;
   }>;
 }) {
-  return await db.transaction(async (tx) => {
+  const contest = await db.transaction(async (tx) => {
     const [contest] = await tx
       .insert(TB_contests)
       .values({
         name: data.name,
         description: data.description,
+        game: data.game,
+        unranked: data.unranked,
+        gameState: data.initialGameState,
         shortDescription: data.shortDescription,
+        participationType: data.participationType,
         startsAt: data.time.start,
         endsAt: data.time.end,
       })
-      .returning({ id: TB_contests.id });
+      .returning();
 
     await tx.insert(TB_contestChallenges).values(
       data.challenges.map((c, i) => ({
@@ -403,15 +279,22 @@ export async function createContest(data: {
         description: c.description,
         hints: c.hints,
         pointsDecayFactor: c.pointsDecayFactor,
+        config: c.config,
       })),
     );
 
-    return contest.id;
+    return contest;
   });
+
+  contestQueue.add("new_contest", contest);
+
+  return contest;
 }
 
-export async function hasTeamAlreadyJoinedContest(contestId: number) {
-  const teamId = await getTeamIdByUserId((await getAuthUser()).id);
+export async function isParticipantRegistered(contestId: number) {
+  const user = await getAuthUser();
+  const teamId = await getTeamIdByUserId(user.id);
+
   const ce = TB_contestEvents;
 
   const [contestJoinedEvent] = await db
@@ -419,9 +302,9 @@ export async function hasTeamAlreadyJoinedContest(contestId: number) {
     .from(ce)
     .where(
       and(
-        eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
-        eq(ce.teamId, teamId!),
+        eq(ce.name, CONTEST_EVENTS.PARTICIPANT_REGISTERED),
         eq(ce.contestId, contestId),
+        or(eq(ce.teamId, teamId!), eq(ce.userId, user.id)),
       ),
     );
 
@@ -436,7 +319,7 @@ export async function getTeamContestStats(contestId: number) {
   const lastSubmissionAt = await getTeamLastSubmissionAt(contestId, teamId);
 
   if (typeof lastSubmissionAt === "object" && "error" in lastSubmissionAt)
-    return lastSubmissionAt;
+    throw new Error(lastSubmissionAt.error);
 
   const p2 = db
     .select({ count: count() })
@@ -472,19 +355,27 @@ export async function batchSendContestReminder(contestId: number) {
     .select({ name: TB_users.name, email: TB_users.email })
     .from(TB_users);
 
-  users.forEach((user) => {
-    getEmailService().send({
-      address: { from: config.app.sourceEmailAddress, to: user.email },
-      body: renderTemplate("contest-reminder", {
+  const emailService = getEmailService();
+
+  const emails = await Promise.all(
+    users.map(async (user) => ({
+      subject: `Contest ${contest.name} is starting soon on CTF Arena`,
+      address: {
+        from: config.app.sourceEmailAddress.notifications,
+        to: user.email,
+      },
+      body: await emailService.renderTemplate("contest-reminder", {
+        participationType: contest.participationType,
         contestName: contest.name,
         contestURL: new URL(`contests/${contest.id}`, config.host).href,
         startsAt: contest.startsAt,
         userEmail: user.email,
         userName: user.name!,
       }),
-      subject: `Contest ${contest.name} is starting soon on CTF Arena`,
-    });
-  });
+    })),
+  );
+
+  emailService.batchSend(emails);
 }
 
 export async function getContestStats(contestId: number) {
@@ -492,13 +383,14 @@ export async function getContestStats(contestId: number) {
     cs = TB_contestSubmissions;
   const p1 = db
     .select({
-      count: countDistinct(ce.teamId),
+      teamsCount: countDistinct(ce.teamId),
+      usersCount: countDistinct(ce.userId),
     })
     .from(ce)
     .where(
       and(
         eq(ce.contestId, contestId),
-        eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
+        eq(ce.name, CONTEST_EVENTS.PARTICIPANT_REGISTERED),
       ),
     );
 
@@ -509,28 +401,11 @@ export async function getContestStats(contestId: number) {
     .from(cs)
     .where(and(eq(cs.contestId, contestId)));
 
-  const [[teams], [submissions]] = await Promise.all([p1, p2]);
+  const [[participants], [submissions]] = await Promise.all([p1, p2]);
 
   return {
-    teamsCount: teams.count,
+    teamsCount: participants.teamsCount,
+    usersCount: participants.usersCount,
     submissionsCount: submissions.count,
   };
-}
-
-export async function getContestParticipatingTeamIds(contestId: number) {
-  const ce = TB_contestEvents;
-
-  const participants = await db
-    .select({
-      teamId: ce.id,
-    })
-    .from(ce)
-    .where(
-      and(
-        eq(ce.contestId, contestId),
-        eq(ce.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
-      ),
-    );
-
-  return participants.map((p) => p.teamId);
 }

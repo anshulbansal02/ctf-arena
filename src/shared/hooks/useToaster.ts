@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
 import { defaultToastStyles } from "@/shared/components/Toaster";
+import { toastStore } from "@/shared/store";
 
-import { Toast, useToasterActions } from "../components/Toaster/store";
-
-interface ToastConfig extends Toast {
+interface ToastConfig extends toastStore.Toast {
   timeout?: number;
   persistent?: boolean;
   scoped?: boolean;
@@ -13,52 +12,45 @@ interface ToastConfig extends Toast {
 const DEFAULT_TIMEOUT = 2500; // 2.5 seconds
 
 export function useToaster() {
-  const { removeToast, addToast, getToast } = useToasterActions();
-
   const scopedToastsRef = useRef<Array<number>>([]);
 
   useEffect(() => {
     return () => {
       scopedToastsRef.current.forEach((toastId) => {
-        removeToast(toastId);
+        toastStore.removeToast(toastId);
       });
     };
   }, []);
 
-  const make = useCallback(
-    (defaultConfig: Partial<ToastConfig>) => {
-      return (toastProps: Omit<ToastConfig, "id"> | string) => {
-        let config = defaultConfig;
-        if (typeof toastProps === "string") config.title = toastProps;
-        else config = { ...config, ...toastProps };
+  const make = useCallback((defaultConfig: Partial<ToastConfig>) => {
+    return (toastProps: Omit<ToastConfig, "id"> | string) => {
+      let config = defaultConfig;
+      if (typeof toastProps === "string") config.title = toastProps;
+      else config = { ...config, ...toastProps };
 
-        const toastId = addToast(config as Toast);
+      const toastId = toastStore.addToast(config as toastStore.Toast);
 
-        if (config.scoped) scopedToastsRef.current.push(toastId);
+      if (config.scoped) scopedToastsRef.current.push(toastId);
 
-        if (!config.persistent) {
-          setTimeout(() => {
-            removeToast(toastId);
-          }, config.timeout ?? DEFAULT_TIMEOUT);
-        }
-
-        return toastId;
-      };
-    },
-    [addToast, removeToast],
-  );
-
-  const dismissToast = useCallback(
-    (toastId: Toast["id"]) => {
-      const toast = getToast(toastId);
-
-      if (toast) {
-        removeToast(toastId);
-        if (toast?.onDismiss) toast.onDismiss(toastId);
+      if (!config.persistent) {
+        setTimeout(() => {
+          toastStore.removeToast(toastId);
+        }, config.timeout ?? DEFAULT_TIMEOUT);
       }
-    },
-    [removeToast, getToast],
-  );
+
+      return toastId;
+    };
+  }, []);
+
+  const dismissToast = useCallback((toastId: toastStore.Toast["id"]) => {
+    const toasts = toastStore.getToastList();
+
+    const toast = toasts.find((t: toastStore.Toast) => t.id === toastId);
+    if (toast) {
+      toastStore.removeToast(toastId);
+      if (toast?.onDismiss) toast.onDismiss(toastId);
+    }
+  }, []);
 
   const methods = {
     toast: make({}),

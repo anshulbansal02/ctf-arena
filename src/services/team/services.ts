@@ -24,9 +24,9 @@ import {
   joinNamesWithConjunction,
   randomItem,
 } from "@/lib/utils";
-import teamNames from "./team_names.json";
+import staticData from "./data.json";
 import { cache } from "../cache";
-import { getEmailService, renderTemplate } from "../email";
+import { getEmailService } from "../email";
 import { config } from "@/config";
 import { TB_contestEvents, TB_contests } from "../contest";
 import { CONTEST_EVENTS } from "../contest/helpers";
@@ -54,7 +54,7 @@ async function preconditionIsTeamInContest(teamId: number) {
     .where(
       and(
         eq(TB_contestEvents.teamId, teamId),
-        eq(TB_contestEvents.name, CONTEST_EVENTS.TEAM_ENTERED_CONTEST),
+        eq(TB_contestEvents.name, CONTEST_EVENTS.PARTICIPANT_REGISTERED),
         lt(TB_contests.startsAt, new Date()),
         gt(TB_contests.endsAt, new Date()),
       ),
@@ -65,7 +65,7 @@ async function preconditionIsTeamInContest(teamId: number) {
 }
 
 export async function generateTeamName(): Promise<string> {
-  return randomItem(teamNames);
+  return randomItem(staticData.teamNames);
 }
 
 const CTE_currentTeamMembers = (teamId?: number) =>
@@ -130,7 +130,7 @@ export async function createTeamAndSendInvites(props: {
 
       notificationsQueue.addBulk(
         usersWithAccount.map((user) => ({
-          name: "new-notification",
+          name: "new_notification",
           data: {
             userId: user.id,
             content: `Received a team invite from <b>${props.name}</b>. View invite on the Team page.`,
@@ -212,7 +212,7 @@ export async function sendTeamInvites(inputEmails: Array<string>) {
 
     notificationsQueue.addBulk(
       usersWithAccount.map((user) => ({
-        name: "new-notification",
+        name: "new_notification",
         data: {
           userId: user.id,
           content: `Received a team invite from <b>${team.name}</b>. View invite on the Team page.`,
@@ -378,7 +378,7 @@ export async function sendTeamRequests(teamIds: Array<number>) {
 
     notificationsQueue.addBulk(
       teams.map((team) => ({
-        name: "new-notification",
+        name: "new_notification",
         data: {
           userId: team.leader,
           content: `Received a join request from <b>${user.name}</b>. View request on the Team page.`,
@@ -566,7 +566,7 @@ export async function respondToTeamRequest(
       const otherTeamMembers = teamMembers.filter((m) => m.userId !== user.id);
       notificationsQueue.addBulk(
         otherTeamMembers.map((member) => ({
-          name: "new-notification",
+          name: "new_notification",
           data: {
             content: `Team member <b>${user.name}</b> joined your team.`,
             userId: member.userId,
@@ -622,7 +622,7 @@ export async function leaveTeam() {
     const otherTeamMembers = team.members.filter((m) => m.id !== user.id);
     notificationsQueue.addBulk(
       otherTeamMembers.map((member) => ({
-        name: "new-notification",
+        name: "new_notification",
         data: {
           content: `Team member <b>${user.name}</b> left your team.`,
           userId: member.id,
@@ -714,10 +714,11 @@ export async function batchSendInvitations() {
   // Store which invites were sent successfully
   const invitesSent: Array<number> = [];
 
-  // Render template and send invite for each
-  await Promise.all(
+  const emailService = getEmailService();
+
+  const inviteEmails = await Promise.all(
     invites.map(async (invite) => {
-      const emailBody = renderTemplate("team-invite", {
+      const emailBody = await emailService.renderTemplate("team-invite", {
         inviteeEmail: invite.inviteeEmail!,
         inviterEmail: invite.inviter?.email!,
         inviteLink: new URL(
@@ -728,22 +729,18 @@ export async function batchSendInvitations() {
         teamName: invite.teamName!,
       });
 
-      try {
-        await getEmailService().send({
-          address: {
-            from: config.app.sourceEmailAddress,
-            to: invite.inviteeEmail!,
-          },
-          subject: `Invite to join ${invite.teamName} on CTF Arena`,
-          body: emailBody,
-        });
-
-        invitesSent.push(invite.id);
-      } catch (err) {
-        console.error("Error sending invite: ", err);
-      }
+      return {
+        address: {
+          from: config.app.sourceEmailAddress.notifications,
+          to: invite.inviteeEmail!,
+        },
+        subject: `Invite to join ${invite.teamName} on CTF Arena`,
+        body: emailBody,
+      };
     }),
   );
+
+  await emailService.batchSend(inviteEmails);
 
   if (invitesSent.length)
     // Update status

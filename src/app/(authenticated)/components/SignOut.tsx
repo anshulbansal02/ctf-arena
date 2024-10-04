@@ -11,7 +11,7 @@ export function SignOut() {
   );
 
   return (
-    <Button variant="outlined" loading={loading} onClick={() => execute(null)}>
+    <Button variant="outlined" loading={loading} onClick={execute}>
       <span className="hidden sm:block">Sign Out</span>
       <span className="sm:hidden">
         <SvgLogOut />

@@ -1,8 +1,7 @@
+import "next-auth/jwt";
 import { NextAuthConfig } from "next-auth";
-import EntraID from "next-auth/providers/microsoft-entra-id";
 
 import { config } from "@/config";
-import type { JWT } from "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
@@ -11,47 +10,54 @@ declare module "next-auth" {
       name: string;
       email: string;
       onboarded: boolean;
-      role?: string;
+      roles: string[];
     };
   }
 
   interface User {
-    metadata: { onboarded: boolean; role?: string };
+    metadata: { onboarded: boolean; roles: string[] };
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    onboarded: boolean;
-    role?: string;
-    userId: string;
+    user: {
+      onboarded: boolean;
+      roles: string[];
+      id: string;
+    };
   }
 }
 
 export const authConfig = {
-  providers: [
-    EntraID({
-      clientId: config.auth.azure.accountId,
-      clientSecret: config.auth.azure.secret,
-      tenantId: config.auth.azure.tenantId,
-    }),
-  ],
+  providers: [],
   session: { strategy: "jwt" },
   callbacks: {
-    async jwt({ token, user, session }) {
-      if (user) {
-        token.onboarded = Boolean(user.metadata.onboarded);
-        token.role = user.metadata.role;
-        token.userId = user.id!;
-      } else if (session?.user.onboarded) {
-        token.onboarded = true;
+    signIn({ user }) {
+      const isOrganizationProvidedEmail = config.app.org.domains.some((org) =>
+        user.email?.endsWith(`@${org}`),
+      );
+      return isOrganizationProvidedEmail;
+    },
+
+    async jwt({ token, user, session, trigger }) {
+      if (trigger === "update") {
+        token.user = { ...token.user, ...session.user };
       }
+
+      if (user) {
+        token.user = {
+          onboarded: Boolean(user.metadata.onboarded),
+          roles: user.metadata.roles ?? [],
+          id: user.id!,
+        };
+      }
+
       return token;
     },
     session({ session, token }) {
-      session.user.onboarded = token.onboarded;
-      session.user.role = token.role;
-      session.user.id = token.userId;
+      session.user = { ...session.user, ...token.user };
+
       return session;
     },
   },

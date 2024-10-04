@@ -1,5 +1,6 @@
 export const config = {
   stage: (process.env.STAGE ?? "dev") as "dev" | "prod",
+  appVersion: process.env.APP_VERSION,
   db: {
     name: process.env.DB_NAME!,
     host: process.env.DB_HOST!,
@@ -56,8 +57,19 @@ export const config = {
       INVITE_USER_DAY_LIMIT: 10,
     },
 
-    organizations: ["veersatech.com", "veersalabs.com"],
+    onboarding: {
+      skipTeamingStep: false,
+    },
 
-    sourceEmailAddress: "CTF Arena <notifications@ctf-arena.com>",
+    org: {
+      name: "Veersa",
+      domains: ["veersatech.com", "veersalabs.com"],
+    },
+
+    sourceEmailAddress: {
+      auth: "CTF Arena <auth@mail.ctf-arena.com>",
+      notifications: "CTF Arena <notifications@mail.ctf-arena.com>",
+      support: "support@ctf-arena.com",
+    },
   },
 };

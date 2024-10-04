@@ -3,10 +3,11 @@ import { JoinContestButton } from "../components/JoinContestButton";
 import {
   getContest,
   getContestStats,
-  hasTeamAlreadyJoinedContest,
+  isParticipantRegistered,
 } from "@/services/contest";
-import { format, formatDistanceStrict, formatDistanceToNow } from "date-fns";
-import { SvgCalendar, SvgTimer } from "@/assets/icons";
+import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
+import { SvgCalendar, SvgGameController, SvgTimer } from "@/assets/icons";
+import { getAuthUser } from "@/services/auth";
 
 function getEventStatus(start: Date, end: Date) {
   const now = new Date();
@@ -20,9 +21,10 @@ export default async function ContestPage({
 }: {
   params: { slug: number };
 }) {
-  const [contest, hasAlreadyJoined, contestStats] = await Promise.all([
+  const [user, contest, hasAlreadyJoined, contestStats] = await Promise.all([
+    getAuthUser(),
     getContest(params.slug),
-    hasTeamAlreadyJoinedContest(params.slug),
+    isParticipantRegistered(params.slug),
     getContestStats(params.slug),
   ]);
 
@@ -52,6 +54,12 @@ export default async function ContestPage({
       <div className="mt-8 flex flex-wrap justify-center gap-2">
         <div>
           <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
+            <SvgGameController /> {contest.game.toUpperCase()}
+          </p>
+        </div>
+
+        <div>
+          <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
             <SvgTimer />{" "}
             {formatDistanceStrict(contest.endsAt, contest.startsAt)}
           </p>
@@ -66,7 +74,10 @@ export default async function ContestPage({
 
         <div>
           <p className="rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
-            {contestStats.teamsCount} Teams{" "}
+            {contest.participation === "individual"
+              ? contestStats.usersCount
+              : contestStats.teamsCount}{" "}
+            {contest.participation === "individual" ? "User(s)" : "Team(s)"}{" "}
             {contestStatus === "ended" ? "Participated" : "Participating"}
           </p>
         </div>
@@ -80,6 +91,12 @@ export default async function ContestPage({
       </div>
 
       <div className="mt-8 flex justify-center gap-6">
+        {user.roles.includes("host") ? (
+          <Button as="link" href={`${contest.id}/host`}>
+            Host Options
+          </Button>
+        ) : null}
+
         {!hasAlreadyJoined &&
           ["in-progress", "yet-to-start"].includes(contestStatus) && (
             <JoinContestButton contestId={contest.id} />

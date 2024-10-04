@@ -3,10 +3,7 @@
 import { Button } from "@/shared/components";
 import clsx from "clsx";
 import { SvgBell, SvgBellActive, SvgEmptyBox } from "@/assets/icons";
-import {
-  getNotifications,
-  markAllNotificationsAsRead,
-} from "@/services/user/services";
+import { getNotifications, markAllNotificationsAsRead } from "@/services/user";
 import * as Popover from "@radix-ui/react-popover";
 import React, { useEffect } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -20,7 +17,7 @@ export function Notifications() {
   } = useAction(getNotifications, {
     immediate: true,
     preserveData: true,
-    args: null,
+    args: [],
   });
 
   const { execute: markRead } = useAction(markAllNotificationsAsRead);
@@ -29,14 +26,14 @@ export function Notifications() {
     notifications?.filter((n) => n.status !== "seen").length ?? 0;
 
   useEffect(() => {
-    const interval = setInterval(() => refetchNotifications(null), 5000);
+    const interval = setInterval(() => refetchNotifications(), 5000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <Popover.Root
       onOpenChange={(open) => {
-        if (!open) markRead(null);
+        if (!open) markRead();
       }}
     >
       <Popover.Trigger asChild>
@@ -49,7 +46,7 @@ export function Notifications() {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content className="z-20 mt-4 max-h-80 w-80 overflow-y-auto rounded-lg bg-zinc-800 px-4 py-3 shadow-lg">
-          <ul className="flex flex-col gap-3">
+          <ul className="-order-1 flex flex-col gap-3">
             {loading && !notifications?.length && (
               <p>Getting your notifications</p>
             )}
@@ -58,7 +55,7 @@ export function Notifications() {
               <li className="flex flex-col items-center gap-2">
                 <SvgEmptyBox width={24} height={24} />
                 <p className="text-center text-sm leading-tight text-gray-400">
-                  You don't have any notifications.
+                  You don&apos;t have any notifications.
                   <br />
                   Check back later.
                 </p>

@@ -1,0 +1,98 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-production:
+    name: Deploy Arena App To Production Environment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile --production
+
+      - name: Sync Database Schema
+        run: bun run db:generate && bun run db:migrate
+
+      - name: Build App
+        run: bun --bun run build
+
+      - name: Package Artifacts
+        run: tar czfv build.tar.gz ./.next/standalone
+
+      - name: Setup SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOSTNAME }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key_path: ${{ secrets.SERVER_SSH_KEY }}
+          script: whoami
+
+      - name: Deploy to EC2
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          # Define blue and green directories
+          BLUE_DIR="${DEPLOY_PATH}/blue"
+          GREEN_DIR="${DEPLOY_PATH}/green"
+
+          # Determine which environment is currently active
+          ACTIVE_ENV=$(ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "pm2 describe nextjs-app || echo 'none'")
+          if [ "$ACTIVE_ENV" == "none" ]; then
+            # If no active environment, default to blue
+            NEW_ENV="blue"
+          else
+            # Get current active environment from pm2
+            CURRENT_DIR=$(ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "pm2 show nextjs-app | grep 'cwd path' | awk '{print \$4}'")
+            if [[ "$CURRENT_DIR" == *"/blue" ]]; then
+              NEW_ENV="green"
+            else
+              NEW_ENV="blue"
+            fi
+          fi
+
+          echo "Deploying to $NEW_ENV environment."
+
+          # Define the target directory based on the new environment
+          TARGET_DIR="${DEPLOY_PATH}/${NEW_ENV}"
+
+          # Create target directory if it doesn't exist
+          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "mkdir -p ${TARGET_DIR}"
+
+          # Sync files to the target directory, excluding unnecessary files
+          rsync -avz --delete \
+            --exclude 'node_modules' \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'deploy.yml' \
+            ./ ${EC2_USER}@${EC2_HOST}:${TARGET_DIR}/
+
+          # Install dependencies and build on the EC2 instance using Bun
+          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "export PATH=\"\$HOME/.bun/bin:\$PATH\" && cd ${TARGET_DIR} && bun install && bun run build"
+
+          # Update pm2 to use the new build with zero downtime
+          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "
+            export PATH=\"\$HOME/.bun/bin:\$PATH\"
+            pm2 stop nextjs-app || true
+            pm2 start ${TARGET_DIR}/server.js --name nextjs-app --update-env --watch
+          "
+
+          # Reload Nginx to ensure it points to the new build if necessary
+          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "sudo systemctl reload nginx"
+
+      - name: Cleanup
+        if: always()
+        run: echo "Deployment process completed"

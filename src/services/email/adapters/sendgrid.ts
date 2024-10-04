@@ -40,4 +40,8 @@ export class SendGridProvider implements EmailProvider {
       }),
     });
   }
+
+  async batchSend(config: SendConfig[]) {
+    throw new Error("Method not implemented");
+  }
 }

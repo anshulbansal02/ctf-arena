@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Toast } from "../Toast/Toast";
-import { useToasterActions, useToasts } from "../store";
+import { toastStore } from "@/shared/store";
 import styles from "./toast-container.module.scss";
 
 const animationConfig = {
@@ -17,8 +17,7 @@ const animationConfig = {
 };
 
 export function ToastContainer() {
-  const toasts = useToasts();
-  const { removeToast } = useToasterActions();
+  const toasts = toastStore.useToastList();
 
   const [isClient, setIsClient] = useState(false);
 
@@ -40,7 +39,7 @@ export function ToastContainer() {
                 <Toast
                   {...toastConfig}
                   onDismiss={(id) => {
-                    removeToast(id);
+                    toastStore.removeToast(id);
                     toastConfig.onDismiss && toastConfig.onDismiss(id);
                   }}
                 />

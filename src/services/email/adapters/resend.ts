@@ -10,7 +10,7 @@ export class ResendProvider implements EmailProvider {
   ) {}
 
   async send(config: SendConfig) {
-    const res = await fetch(this.config.API_URL, {
+    await fetch(new URL("emails", this.config.API_URL), {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.config.AUTH_KEY}`,
@@ -23,6 +23,27 @@ export class ResendProvider implements EmailProvider {
         subject: config.subject,
         html: config.body,
       }),
+    });
+  }
+
+  async batchSend(configs: SendConfig[]) {
+    if (!configs.length) return;
+
+    await fetch(new URL("emails/batch", this.config.API_URL), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.config.AUTH_KEY}`,
+        "Content-Type": "application/json",
+        ...this.config.headers,
+      },
+      body: JSON.stringify(
+        configs.map((config) => ({
+          from: config.address.from,
+          to: config.address.to,
+          subject: config.subject,
+          html: config.body,
+        })),
+      ),
     });
   }
 }

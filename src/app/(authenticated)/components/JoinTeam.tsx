@@ -44,7 +44,7 @@ export function JoinTeamStep(props: Props) {
       return requests.map((r) => r.teamId);
     },
     {
-      args: null,
+      args: [],
       immediate: true,
       preserveData: true,
     },
@@ -70,7 +70,7 @@ export function JoinTeamStep(props: Props) {
   const { execute: sendRequests, loading: sendingRequests } = useAction(
     async () => {
       await sendTeamRequests(joinRequestsDraft);
-      await refetchRequestedTeams(null);
+      await refetchRequestedTeams();
       props.onNext("finish");
     },
   );

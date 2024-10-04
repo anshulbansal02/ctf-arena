@@ -2,8 +2,8 @@
 
 import { eq, inArray } from "drizzle-orm";
 import { db } from "../db";
-import { TB_userNotifications } from "./entities";
-import { getAuthUser } from "../auth";
+import { TB_userNotifications, TB_users } from "./entities";
+import { getAuthUser, updateSession } from "../auth";
 
 export async function createNotification(data: {
   userId: string;
@@ -46,4 +46,15 @@ export async function getNotifications() {
   });
 
   return notifications;
+}
+
+export async function updateUserName(newName: string) {
+  const user = await getAuthUser();
+
+  await db
+    .update(TB_users)
+    .set({ name: newName })
+    .where(eq(TB_users.id, user.id));
+
+  await updateSession({ user: { name: newName } });
 }

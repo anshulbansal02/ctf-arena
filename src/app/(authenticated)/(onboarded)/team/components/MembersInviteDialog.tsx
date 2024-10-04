@@ -56,7 +56,7 @@ export function MembersInviteDialog() {
     if (!emailsValid) return "Please enter valid email addresses";
 
     const orgsValid = emails.every((e) =>
-      config.app.organizations.includes(e.split("@")[1].toLowerCase()),
+      config.app.org.domains.includes(e.split("@")[1].toLowerCase()),
     );
     if (!orgsValid) return "Cannot invite users outside of organization";
 
@@ -101,7 +101,7 @@ export function MembersInviteDialog() {
                       type="email"
                       className="mt-6 w-full"
                       autoFocus
-                      placeholder="username@veersatech.com"
+                      placeholder="username@organization.com"
                     />
                   )}
                 />

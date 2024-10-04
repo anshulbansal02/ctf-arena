@@ -10,3 +10,4 @@ export * from "./Timer/Timer";
 export * from "./Confetti/Confetti";
 export * from "./ProgressBar/ProgressBar";
 export * from "./TimeFormatted/TimeFormatted";
+export * from "./Tooltip/Tooltip";

@@ -8,9 +8,7 @@ class AsyncActionError {
   }
 }
 
-type AsyncFunction<P, R> = (args: P) => Promise<R>;
-
-type Event = "loading" | "success" | "error" | "reset";
+type Event = "loading" | "success" | "error" | "reset" | "set";
 
 type EventWithPayload = {
   type: Event;
@@ -21,7 +19,7 @@ type EventWithPayload = {
 type ActionState<R> = {
   loading: boolean;
   error: unknown;
-  data: Exclude<R, { error: string }> | null;
+  data: R | null;
   success: boolean | undefined;
 };
 
@@ -33,7 +31,7 @@ type Options<T> = (
   | {
       immediate: false;
     }
-) & { preserveData?: boolean };
+) & { preserveData?: boolean; noError?: boolean };
 
 function reducer<R>(
   state: ActionState<R>,
@@ -50,7 +48,7 @@ function reducer<R>(
     case "success":
       return {
         success: true,
-        data: event.payload as Exclude<R, { error: string }>,
+        data: event.payload as R,
         error: null,
         loading: false,
       };
@@ -63,16 +61,25 @@ function reducer<R>(
       };
     case "reset":
       return { success: undefined, data: null, error: false, loading: false };
+    case "set":
+      return {
+        success: undefined,
+        data: event.payload as R,
+        error: false,
+        loading: false,
+      };
     default:
       return state;
   }
 }
 
-export function useAction<ParamsType, ReturnType>(
-  action: AsyncFunction<ParamsType, ReturnType>,
-  opts?: Options<ParamsType>,
+export function useAction<T extends (...args: any[]) => any>(
+  action: T,
+  opts?: Options<Parameters<T>>,
 ) {
-  const [actionState, dispatch] = useReducer(reducer<ReturnType>, {
+  type ActionState = Awaited<ReturnType<T>>;
+
+  const [actionState, dispatch] = useReducer(reducer<ActionState>, {
     success: undefined,
     loading: Boolean(opts?.immediate),
     error: null,
@@ -81,13 +88,17 @@ export function useAction<ParamsType, ReturnType>(
 
   const toaster = useToaster();
 
+  const setState = useCallback((state: ActionState) => {
+    dispatch({ type: "set", payload: state });
+  }, []);
+
   const execute = useCallback(
     async (
-      params: ParamsType,
-    ): Promise<ReturnType | undefined | { error: string }> => {
+      ...args: Parameters<T>
+    ): Promise<ActionState | undefined | { error: string }> => {
       dispatch({ type: "loading", preserveData: opts?.preserveData });
       try {
-        const result = await action(params);
+        const result = await action(...args);
 
         if (
           result &&
@@ -98,22 +109,13 @@ export function useAction<ParamsType, ReturnType>(
           throw new AsyncActionError(result.error);
 
         dispatch({ type: "success", payload: result });
-
         return result;
       } catch (error) {
-        dispatch({
-          type: "error",
-          payload: error,
-          preserveData: opts?.preserveData,
-        });
-
         let errorMessage = "Something went wrong. Please try again.";
 
-        if (error instanceof AsyncActionError) {
-          errorMessage = error.message;
-        } else if (error instanceof Error && "digest" in error) {
+        if (error instanceof AsyncActionError) errorMessage = error.message;
+        else if (error instanceof Error && "digest" in error)
           errorMessage += ` If the error persists please share this code (${error.digest}) with the support.`;
-        }
 
         const errorReadingTime = Math.max(
           2500,
@@ -121,6 +123,12 @@ export function useAction<ParamsType, ReturnType>(
         ); // Number of words * 350ms;
 
         toaster.error({ title: errorMessage, timeout: errorReadingTime });
+
+        dispatch({
+          type: "error",
+          payload: errorMessage,
+          preserveData: opts?.preserveData,
+        });
 
         return { error: errorMessage };
       }
@@ -130,7 +138,7 @@ export function useAction<ParamsType, ReturnType>(
 
   useEffect(() => {
     if (opts?.immediate) {
-      execute(opts.args);
+      execute(...opts.args);
     }
   }, []);
 
@@ -138,5 +146,5 @@ export function useAction<ParamsType, ReturnType>(
     dispatch({ type: "reset" });
   }, []);
 
-  return { ...actionState, execute, reset };
+  return { ...actionState, execute, reset, setState };
 }
