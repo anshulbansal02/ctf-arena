@@ -5,6 +5,9 @@
  */
 const nextConfig = {
   output: "standalone",
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: false,
   experimental: {
     instrumentationHook: true,

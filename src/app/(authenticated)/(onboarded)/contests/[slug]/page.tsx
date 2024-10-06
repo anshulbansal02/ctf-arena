@@ -93,7 +93,7 @@ export default async function ContestPage({
       <div className="mt-8 flex justify-center gap-6">
         {user.roles.includes("host") ? (
           <Button as="link" href={`${contest.id}/host`}>
-            Host Options
+            Host Game
           </Button>
         ) : null}
 

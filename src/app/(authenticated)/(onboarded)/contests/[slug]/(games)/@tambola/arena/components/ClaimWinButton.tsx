@@ -31,7 +31,7 @@ export function ClaimWinButton(props: {
     } else {
       toaster.success({
         title: "Win Claimed!",
-        content: `Yay! You have claimed your win for ${props.pattern.title}. Let's go for other wins.`,
+        content: `Yay! You have claimed a win for ${props.pattern.title}. Let's go for other wins.`,
         timeout: 5000,
       });
       // Trigger fireworks

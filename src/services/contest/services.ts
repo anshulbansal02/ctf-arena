@@ -409,3 +409,23 @@ export async function getContestStats(contestId: number) {
     submissionsCount: submissions.count,
   };
 }
+
+export async function getLeaderboardData<T>(
+  contestId: number,
+  name: string,
+): Promise<Array<T> | { error: string }> {
+  const [contest] = await db
+    .select({ game: TB_contests.game })
+    .from(TB_contests)
+    .where(eq(TB_contests.id, contestId));
+  try {
+    const { getLeaderboardByName } = await import(
+      `./games/${contest.game}/leaderboard`
+    );
+    console.log("Got function: ", getLeaderboardByName);
+    return getLeaderboardByName(contestId, name);
+  } catch (err) {
+    console.error(err);
+    return { error: "Cannot get leaderboard for the contest" };
+  }
+}

@@ -7,9 +7,13 @@ import { getNotifications, markAllNotificationsAsRead } from "@/services/user";
 import * as Popover from "@radix-ui/react-popover";
 import React, { useEffect } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
-import { useAction } from "@/shared/hooks";
+import { useAction, useConnectivityStatus } from "@/shared/hooks";
+import { useSearchParams } from "next/navigation";
 
 export function Notifications() {
+  const params = useSearchParams();
+  const shouldHide = params.get("mode") === "zen";
+
   const {
     data: notifications,
     execute: refetchNotifications,
@@ -20,17 +24,20 @@ export function Notifications() {
     args: [],
   });
 
+  const isOnline = useConnectivityStatus();
+
   const { execute: markRead } = useAction(markAllNotificationsAsRead);
 
   const unseenNotificationsCount =
     notifications?.filter((n) => n.status !== "seen").length ?? 0;
 
   useEffect(() => {
+    if (!isOnline) return;
     const interval = setInterval(() => refetchNotifications(), 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isOnline, refetchNotifications]);
 
-  return (
+  return !shouldHide ? (
     <Popover.Root
       onOpenChange={(open) => {
         if (!open) markRead();
@@ -96,5 +103,5 @@ export function Notifications() {
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
-  );
+  ) : null;
 }

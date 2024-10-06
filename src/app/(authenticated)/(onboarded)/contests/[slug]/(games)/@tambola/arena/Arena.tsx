@@ -87,8 +87,8 @@ export function TambolaArena(props: TambolaArenaProps) {
       });
 
     toaster.info({
-      title: `${data.title} win claimed!`,
-      content: `${data.claimedBy} claimed win for pattern "${data.title}". ${data.claimsLeft} wins are left for the ${data.title}."`,
+      title: `${data.claimedBy} claims ${data.title}!`,
+      content: `${data.claimsLeft} wins are left for the ${data.title}."`,
       timeout: 5000,
     });
   });
@@ -123,7 +123,6 @@ export function TambolaArena(props: TambolaArenaProps) {
               markedItems={markedItems}
               ticket={userChallengeData.ticket}
               toggleItem={toggleItem}
-              loading
             />
           </div>
 

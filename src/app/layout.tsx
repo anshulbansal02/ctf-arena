@@ -3,6 +3,7 @@ import { GeistMono } from "geist/font/mono";
 import { Toaster } from "@/shared/components";
 import "@/styles/globals.scss";
 import type { Metadata } from "next";
+import { ConnectivityStatus } from "@/shared/providers";
 
 export const metadata: Metadata = {
   title: "CTF Arena",
@@ -23,9 +24,11 @@ export default async function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
-        {children}
-        <div id="portal"></div>
-        <Toaster />
+        <ConnectivityStatus>
+          {children}
+          <div id="portal"></div>
+          <Toaster />
+        </ConnectivityStatus>
       </body>
     </html>
   );

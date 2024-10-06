@@ -18,7 +18,7 @@ export function SprintersLeaderboard(props: Props) {
   });
 
   const teamsOnLeaderboard = useMemo(
-    () => leaderboard.map((l) => l.teamId),
+    () => leaderboard?.map((l) => l.teamId) ?? [],
     [leaderboard],
   );
 
@@ -38,7 +38,7 @@ export function SprintersLeaderboard(props: Props) {
         </div>
       </div>
 
-      {!hasContestEnded && !leaderboard.length && (
+      {!hasContestEnded && !leaderboard?.length && (
         <div className="flex w-full flex-col items-center">
           {!lastUpdated && (
             <Spinner
@@ -56,14 +56,14 @@ export function SprintersLeaderboard(props: Props) {
         </div>
       )}
 
-      {hasContestEnded && !leaderboard.length && (
+      {hasContestEnded && !leaderboard?.length && (
         <div className="flex w-full flex-col items-center">
           <p className="py-40 text-gray-300">No data to show here</p>
         </div>
       )}
 
       <div className="no-scrollbar flex max-h-[360px] w-full flex-col gap-2 overflow-auto rounded-xl">
-        {leaderboard.map((entry) => (
+        {leaderboard?.map((entry) => (
           <div
             key={entry.teamId}
             role="row"

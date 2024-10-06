@@ -18,11 +18,7 @@ export function GameState(props: { contestId: number }) {
     return item;
   });
 
-  const {
-    execute: getUpdatedGameState,
-    data: gameState,
-    loading,
-  } = useAction(
+  const { execute: getUpdatedGameState, data: gameState } = useAction(
     async () => {
       const state = await getGameState(props.contestId);
       if (state.lastDrawnItem) setLastDrawn(state.lastDrawnItem);

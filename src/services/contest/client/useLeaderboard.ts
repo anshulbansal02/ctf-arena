@@ -1,23 +1,35 @@
 import { useState } from "react";
-import { Leaderboard } from "../leaderboard";
-import { useServerEvent } from "@/shared/hooks";
+import { useAction, useServerEvent } from "@/shared/hooks";
+import { getLeaderboardData } from "../services";
 
 interface Props {
-  name: Leaderboard;
+  name: string;
   contestId: number;
 }
 
 export function useLeaderboard<T>(props: Props) {
-  const [leaderboard, setLeaderboard] = useState<Array<T>>([]);
+  const { data: leaderboardData, setState: setLeaderboardData } = useAction(
+    async () => {
+      console.log("Getting Leaderboard.............");
+      const result = await getLeaderboardData<T>(props.contestId, props.name);
+      console.log("Got Leaderboard.............", result);
+
+      if ("error" in result) return null;
+      return result;
+    },
+    { immediate: true, args: [] },
+  );
+
   const [hasContestEnded, setContestEnded] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>();
 
   useServerEvent<T[]>(
     "leaderboard_update",
     (data) => {
-      setLeaderboard(data);
+      setLeaderboardData(data);
       setLastUpdated(new Date());
     },
+    { active: !hasContestEnded },
   );
 
   useServerEvent(
@@ -25,7 +37,8 @@ export function useLeaderboard<T>(props: Props) {
     () => {
       setContestEnded(true);
     },
+    { active: !hasContestEnded },
   );
 
-  return { leaderboard, hasContestEnded, lastUpdated };
+  return { leaderboard: leaderboardData, hasContestEnded, lastUpdated };
 }

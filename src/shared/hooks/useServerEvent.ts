@@ -5,6 +5,10 @@ import { subscribeWithSelector } from "zustand/middleware";
 type EventName = string;
 type EventHandler<T> = (data: T) => void;
 
+type Options = {
+  active?: boolean;
+};
+
 type ServerEventsState = {
   eventSubscribers: Record<EventName, number>;
   eventSource: EventSource | null;
@@ -59,11 +63,12 @@ const useEventSource = () => serverEventsStore().eventSource;
 export function useServerEvent<T>(
   eventName: EventName,
   handler: EventHandler<T>,
+  options: Options = { active: true },
 ) {
   const eventSource = useEventSource();
 
   useEffect(() => {
-    if (!eventSource) return;
+    if (!(eventSource && options.active)) return;
 
     function wrappedHandler(event: MessageEvent<any>) {
       const data = event.data;
@@ -74,7 +79,7 @@ export function useServerEvent<T>(
     eventSource.addEventListener(eventName, wrappedHandler);
 
     return () => eventSource.removeEventListener(eventName, wrappedHandler);
-  }, [eventName, eventSource]);
+  }, [eventName, eventSource, options?.active]);
 
   // On Event Name Change
   useEffect(() => {

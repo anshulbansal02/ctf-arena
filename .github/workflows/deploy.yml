@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy-production:
-    name: Deploy Arena App To Production Environment
+    name: Deploy Arena Production
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,10 @@ jobs:
         run: bun --bun run build
 
       - name: Package Artifacts
-        run: tar czfv build.tar.gz ./.next/standalone
+        run: |
+          cp -r .next/standalone ./build
+          cp -r .next/static ./build/.next/static
+          tar czfv build.tar.gz ./build
 
       - name: Setup SSH
         uses: appleboy/ssh-action@v1.0.3

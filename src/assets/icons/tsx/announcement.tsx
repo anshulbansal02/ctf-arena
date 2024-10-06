@@ -1,0 +1,3 @@
+import type { SVGProps } from "react";
+const SvgAnnouncement = (props: SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="#e8eaed" viewBox="0 -960 960 960" role="img" {...props}><path d="M640-440v-80h160v80zm48 280-128-96 48-64 128 96zm-80-480-48-64 128-96 48 64zM120-360v-240h160l200-200v640L280-360zm280-246-86 86H200v80h114l86 86zM300-480" /></svg>;
+export default SvgAnnouncement;

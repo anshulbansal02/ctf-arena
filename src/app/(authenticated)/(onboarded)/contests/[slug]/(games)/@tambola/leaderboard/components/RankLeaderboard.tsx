@@ -1,24 +1,18 @@
 "use client";
-import { Avatar, ProgressBar, Spinner } from "@/shared/components";
-import Image, { StaticImageData } from "next/image";
 
+import { useLeaderboard } from "@/services/contest/client";
+import { Avatar, ProgressBar, Spinner } from "@/shared/components";
 import GoldMedal from "@/assets/media/gold-medal.png";
 import SilverMedal from "@/assets/media/silver-medal.png";
 import BronzeMedal from "@/assets/media/bronze-medal.png";
 import { useMemo } from "react";
-import { useTeamsById } from "@/services/team/client";
-import { useLeaderboard } from "@/services/contest/client";
+import Image, { StaticImageData } from "next/image";
 
 const medalURIs: Record<number, StaticImageData> = {
   1: GoldMedal,
   2: SilverMedal,
   3: BronzeMedal,
 };
-
-interface Props {
-  contestId: number;
-  totalChallenges: number;
-}
 
 function Rank({ index }: { index: number }) {
   const rank = index + 1;
@@ -35,23 +29,61 @@ function Rank({ index }: { index: number }) {
   );
 }
 
-export function MainLeaderboard(props: Props) {
-  const { leaderboard, hasContestEnded, lastUpdated } = useLeaderboard<{
-    rank: number;
-    teamId: number;
-    score: number;
-    challengesSolved: number;
+export function RankLeaderboard(props: { contestId: number }) {
+  const { leaderboard: leaderboardItems, lastUpdated } = useLeaderboard<{
+    userId: string;
+    userName: string;
+    claim: string;
+    createdAt: Date;
+    points: number;
   }>({
     contestId: props.contestId,
-    name: "sum_of_scores",
+    name: "main",
   });
 
-  const teamsOnLeaderboard = useMemo(
-    () => leaderboard.map((l) => l.teamId),
-    [leaderboard],
-  );
+  const leaderboardByRank = useMemo(() => {
+    if (!leaderboardItems) return [];
+    const board = Object.values(
+      leaderboardItems.reduce<
+        Record<
+          string,
+          {
+            name: string;
+            id: string;
+            points: number;
+            wins: Array<{ claim: string; at: Date }>;
+          }
+        >
+      >((board, item) => {
+        if (!board[item.userId])
+          board[item.userId] = {
+            name: item.userName,
+            id: item.userId,
+            points: item.points,
+            wins: [],
+          };
 
-  const { teamsById } = useTeamsById({ teamIds: teamsOnLeaderboard });
+        board[item.userId].points += item.points;
+        board[item.userId].wins.push({ at: item.createdAt, claim: item.claim });
+
+        return board;
+      }, {}),
+    ).toSorted((a, b) => b.points - a.points);
+
+    // Sort each win of user by their time
+    board.forEach((user) => {
+      user.wins.sort((a, b) => +b.at - +a.at);
+    });
+
+    // Assign ranks
+    let rank = 0,
+      lastUserPoints = Infinity;
+    return board.map((user) => {
+      const newRank = user.points < lastUserPoints ? ++rank : rank;
+      lastUserPoints = user.points;
+      return { ...user, rank: newRank };
+    });
+  }, [leaderboardItems]);
 
   return (
     <div role="table" className="relative flex w-full flex-col gap-2">
@@ -66,14 +98,14 @@ export function MainLeaderboard(props: Props) {
           Team
         </div>
         <div role="cell" className="flex-[4]">
-          Challenges Solved
+          Wins Claimed
         </div>
         <div role="cell" className="flex-1">
           Points
         </div>
       </div>
 
-      {!hasContestEnded && !leaderboard.length && (
+      {!leaderboardByRank.length && (
         <div className="flex w-full flex-col items-center">
           {!lastUpdated && (
             <Spinner
@@ -91,16 +123,16 @@ export function MainLeaderboard(props: Props) {
         </div>
       )}
 
-      {hasContestEnded && !leaderboard.length && (
+      {!leaderboardByRank.length && (
         <div className="flex w-full flex-col items-center">
           <p className="py-40 text-gray-300">No data to show here</p>
         </div>
       )}
 
       <div className="no-scrollbar flex max-h-[560px] w-full flex-col gap-2 overflow-auto rounded-xl">
-        {leaderboard.map((entry, i) => (
+        {leaderboardByRank.map((entry, i) => (
           <div
-            key={entry.teamId}
+            key={entry.id}
             role="row"
             className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-950 p-3"
           >
@@ -109,34 +141,28 @@ export function MainLeaderboard(props: Props) {
             </div>
             <div role="cell" className="flex flex-[4] items-center gap-2">
               <div className="flex items-center">
-                {teamsById[entry.teamId]?.members?.map((member) => (
-                  <Avatar
-                    key={member.id}
-                    rounded
-                    username={member.email}
-                    title={member.name}
-                    size={20}
-                    className="-ml-2 rounded-full border border-zinc-950 bg-slate-400 first:ml-0"
-                  />
-                ))}
+                <Avatar
+                  rounded
+                  username={entry.id}
+                  title={entry.name}
+                  size={20}
+                  className="-ml-2 rounded-full border border-zinc-950 bg-slate-400 first:ml-0"
+                />
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap text-nowrap">
-                {teamsById[entry.teamId]?.name}
+                {entry.name}
               </div>
             </div>
             <div role="cell" className="flex flex-[4] items-center gap-2">
               <div className="w-36">
-                <ProgressBar
-                  total={props.totalChallenges}
-                  value={entry.challengesSolved}
-                />
+                <ProgressBar total={5} value={entry.wins.length} />
               </div>
               <span className="text-sm text-zinc-400">
-                {entry.challengesSolved}/{props.totalChallenges}
+                {entry.wins.length}/{5}
               </span>
             </div>
             <div role="cell" className="flex-1 text-lg">
-              {entry.score}
+              {entry.points}
             </div>
           </div>
         ))}

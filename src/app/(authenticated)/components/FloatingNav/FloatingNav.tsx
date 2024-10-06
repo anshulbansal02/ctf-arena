@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import styles from "./floating-nav.module.scss";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 
 export function FloatingNav() {
@@ -21,13 +21,15 @@ export function FloatingNav() {
   ];
 
   const pathname = usePathname();
+  const params = useSearchParams();
+  const shouldHide = params.get("mode") === "zen";
 
   const isActivePath = (path: string) => {
     return pathname.startsWith(path);
   };
 
   return (
-    <nav className={styles.nav}>
+    <nav className={clsx(styles.nav, { hidden: shouldHide })}>
       <ul>
         {navItems.map((item) => (
           <li

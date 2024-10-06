@@ -1,9 +1,9 @@
 import { getContest } from "@/services/contest";
-import { MainLeaderboard } from "./components/MainLeaderboard";
 import { QuickestAtLeaderboard } from "./components/QuickestAtLeaderboard";
 import { SprintersLeaderboard } from "./components/SprintersLeaderboard";
 import { redirect } from "next/navigation";
 import { Timer } from "@/shared/components";
+import { RankLeaderboard } from "./components/RankLeaderboard";
 
 export default async function LeaderboardPage({
   params,
@@ -41,7 +41,7 @@ export default async function LeaderboardPage({
             <span className="text-xl font-medium">{contest.name}</span>
           </h1>
           <div className="mt-8">
-            <MainLeaderboard
+            <RankLeaderboard
               contestId={+params.slug}
               totalChallenges={contest.noOfChallenges}
             />

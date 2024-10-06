@@ -1,0 +1,3 @@
+import type { SVGProps } from "react";
+const SvgSignalConnected = (props: SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="#e8eaed" viewBox="0 -960 960 960" role="img" {...props}><path d="M198-278q-57-57-87.5-129.5T80-560t30.5-152.5T198-842l48 48q-47 47-72.5 107.5T148-560t25.5 126.5T246-326zm92-92q-38-38-58-87t-20-103 20-103 58-87l48 48q-29 29-43.5 65.5T280-560t14.5 76.5T338-418zm150 250v-348q-27-12-43.5-37T380-560q0-42 29-71t71-29 71 29 29 71q0 30-16.5 55T520-468v348zm230-250-48-48q29-29 43.5-65.5T680-560t-14.5-76.5T622-702l48-48q38 38 58 87t20 103-20 103-58 87m92 92-48-48q47-47 72.5-107.5T812-560t-25.5-126.5T714-794l48-48q57 57 87.5 129.5T880-560t-30.5 152.5T762-278" /></svg>;
+export default SvgSignalConnected;

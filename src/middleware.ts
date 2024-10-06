@@ -1,3 +1,4 @@
+"use server";
 import { config as appConfig } from "@/config";
 import {
   attachSession,
@@ -30,7 +31,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(
         new URL(appConfig.routes.default.NO_AUTH, request.url),
       );
-    else return authenticatedUserRedirectionRules(request);
+    else return authenticatedUserRedirectionRules(request, session);
   } else if (isRouteType(routesType.public, route)) {
     if (session && session.user) {
       return NextResponse.redirect(

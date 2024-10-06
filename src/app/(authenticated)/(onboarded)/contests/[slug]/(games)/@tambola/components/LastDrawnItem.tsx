@@ -1,3 +1,4 @@
+"use client";
 import { getLastDrawnItem, TicketItem } from "@/services/contest/games/tambola";
 import { useAction, useServerEvent } from "@/shared/hooks";
 import contestEvents from "@/services/contest/events";

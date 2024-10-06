@@ -15,7 +15,7 @@ declare module "next-auth" {
   }
 
   interface User {
-    metadata: { onboarded: boolean; roles: string[] };
+    metadata?: { onboarded: boolean; roles: string[] };
   }
 }
 
@@ -47,8 +47,8 @@ export const authConfig = {
 
       if (user) {
         token.user = {
-          onboarded: Boolean(user.metadata.onboarded),
-          roles: user.metadata.roles ?? [],
+          onboarded: Boolean(user.metadata?.onboarded),
+          roles: user.metadata?.roles ?? [],
           id: user.id!,
         };
       }
