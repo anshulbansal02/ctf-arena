@@ -291,11 +291,13 @@ export async function drawItem(contestId: number) {
     },
   ];
 
-  const nextDraw = randomItem(
-    contest.gameState.drawSequence.filter(
-      (item) => !contest.gameState.itemsDrawn.includes(item),
-    ),
+  const itemsLeft = contest.gameState.drawSequence.filter(
+    (item) => !contest.gameState.itemsDrawn.includes(item),
   );
+
+  if (!itemsLeft.length) return { error: "All items are already drawn." };
+
+  const nextDraw = randomItem(itemsLeft);
 
   await db
     .update(TB_contests)

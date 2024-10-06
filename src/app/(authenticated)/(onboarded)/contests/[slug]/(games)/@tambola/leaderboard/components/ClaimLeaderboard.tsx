@@ -1,13 +1,22 @@
 "use client";
 
 import { useLeaderboard } from "@/services/contest/client";
+import { Avatar } from "@/shared/components";
 import { useMemo } from "react";
+
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
 
 export function ClaimLeaderboard(props: { contestId: number }) {
   const { leaderboard: leaderboardItems, lastUpdated } = useLeaderboard<{
-    userId: string;
-    userName: string;
-    claim: string;
+    user: User;
+    claim: {
+      title: string;
+      name: string;
+    };
     createdAt: Date;
     points: number;
   }>({
@@ -23,20 +32,23 @@ export function ClaimLeaderboard(props: { contestId: number }) {
           string,
           {
             name: string;
+            title: string;
             winners: Array<{
-              userId: string;
-              name: string;
+              user: User;
               claimedAt: Date;
             }>;
           }
         >
       >((board, item) => {
-        if (!board[item.claim])
-          board[item.claim] = { name: item.claim, winners: [] };
+        if (!board[item.claim.name])
+          board[item.claim.name] = {
+            name: item.claim.name,
+            title: item.claim.title,
+            winners: [],
+          };
 
-        board[item.claim].winners.push({
-          userId: item.userId,
-          name: item.userName,
+        board[item.claim.name].winners.push({
+          user: item.user,
           claimedAt: item.createdAt,
         });
 
@@ -57,5 +69,48 @@ export function ClaimLeaderboard(props: { contestId: number }) {
     return board;
   }, [leaderboardItems]);
 
-  return <section>By Claim</section>;
+  return (
+    <div role="table" className="flex w-full flex-col gap-2">
+      <div
+        role="rowheader"
+        className="flex gap-4 px-3 py-1 text-left text-base text-zinc-400"
+      >
+        <div role="cell" className="flex-[2]">
+          Claim
+        </div>
+        <div role="cell" className="flex-[6]">
+          Winners
+        </div>
+      </div>
+
+      <div className="no-scrollbar flex max-h-[360px] w-full flex-col gap-2 overflow-auto rounded-xl">
+        {leaderboardByClaim?.map((entry) => (
+          <div
+            key={entry.name}
+            role="row"
+            className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-950 p-3"
+          >
+            <div role="cell" className="flex-[2]">
+              {entry.title}
+            </div>
+            <div role="cell" className="flex-[6]">
+              <ul className="flex flex-wrap items-center gap-3">
+                {entry.winners.map((winner) => (
+                  <li key={winner.user.id} className="flex items-center gap-1">
+                    <Avatar
+                      username={winner.user.email}
+                      title={winner.user.name}
+                      size={24}
+                      className="-ml-2 rounded-full border border-zinc-950 bg-slate-400 first:ml-0"
+                    />
+                    <span>{winner.user.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

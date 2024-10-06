@@ -64,7 +64,10 @@ export async function Contests() {
             </Link>
           ))
         ) : (
-          <p className="mt-4 text-slate-400">No upcoming contests</p>
+          <p className="mt-4 text-slate-400">
+            No active contests going on.<br></br> Checkout the upcoming
+            contests.
+          </p>
         )}
       </div>
 
@@ -110,9 +113,7 @@ export async function Contests() {
           </Link>
         ))
       ) : (
-        <p className="mt-4 text-slate-400">
-          No active contests going on.<br></br> Checkout the upcoming contests.
-        </p>
+        <p className="mt-4 text-slate-400">No upcoming contests</p>
       )}
     </section>
   );

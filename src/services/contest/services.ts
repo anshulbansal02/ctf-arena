@@ -1,5 +1,15 @@
 "use server";
-import { and, asc, count, countDistinct, eq, gt, lt, or } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  countDistinct,
+  desc,
+  eq,
+  gt,
+  lt,
+  or,
+} from "drizzle-orm";
 import { db } from "../db";
 import {
   TB_contestChallenges,
@@ -55,7 +65,7 @@ export async function getContests(type: "active" | "upcoming" | "ended") {
   const contests = db
     .select()
     .from(TB_contests)
-    .orderBy(asc(TB_contests.startsAt));
+    .orderBy(desc(TB_contests.startsAt));
 
   if (type === "active") {
     return await contests.where(
@@ -422,7 +432,6 @@ export async function getLeaderboardData<T>(
     const { getLeaderboardByName } = await import(
       `./games/${contest.game}/leaderboard`
     );
-    console.log("Got function: ", getLeaderboardByName);
     return getLeaderboardByName(contestId, name);
   } catch (err) {
     console.error(err);

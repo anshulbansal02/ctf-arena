@@ -29,11 +29,19 @@ function Rank({ index }: { index: number }) {
   );
 }
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 export function RankLeaderboard(props: { contestId: number }) {
   const { leaderboard: leaderboardItems, lastUpdated } = useLeaderboard<{
-    userId: string;
-    userName: string;
-    claim: string;
+    user: User;
+    claim: {
+      title: string;
+      name: string;
+    };
     createdAt: Date;
     points: number;
   }>({
@@ -48,23 +56,24 @@ export function RankLeaderboard(props: { contestId: number }) {
         Record<
           string,
           {
-            name: string;
-            id: string;
+            user: User;
             points: number;
-            wins: Array<{ claim: string; at: Date }>;
+            wins: Array<{ claim: { name: string; title: string }; at: Date }>;
           }
         >
       >((board, item) => {
-        if (!board[item.userId])
-          board[item.userId] = {
-            name: item.userName,
-            id: item.userId,
+        if (!board[item.user.id])
+          board[item.user.id] = {
+            user: item.user,
             points: item.points,
             wins: [],
           };
 
-        board[item.userId].points += item.points;
-        board[item.userId].wins.push({ at: item.createdAt, claim: item.claim });
+        board[item.user.id].points += item.points;
+        board[item.user.id].wins.push({
+          at: item.createdAt,
+          claim: item.claim,
+        });
 
         return board;
       }, {}),
@@ -132,7 +141,7 @@ export function RankLeaderboard(props: { contestId: number }) {
       <div className="no-scrollbar flex max-h-[560px] w-full flex-col gap-2 overflow-auto rounded-xl">
         {leaderboardByRank.map((entry, i) => (
           <div
-            key={entry.id}
+            key={entry.user.id}
             role="row"
             className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-950 p-3"
           >
@@ -143,14 +152,14 @@ export function RankLeaderboard(props: { contestId: number }) {
               <div className="flex items-center">
                 <Avatar
                   rounded
-                  username={entry.id}
-                  title={entry.name}
-                  size={20}
+                  username={entry.user.email}
+                  title={entry.user.name}
+                  size={24}
                   className="-ml-2 rounded-full border border-zinc-950 bg-slate-400 first:ml-0"
                 />
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap text-nowrap">
-                {entry.name}
+                {entry.user.name}
               </div>
             </div>
             <div role="cell" className="flex flex-[4] items-center gap-2">

@@ -19,7 +19,7 @@ export default function LeaderboardPage({
         <Announcements contestId={params.slug} />
       </div>
 
-      <section className="mt-8 grid w-full grid-cols-2 gap-8">
+      <section className="mt-16 grid w-full grid-cols-2 gap-16">
         <RankLeaderboard contestId={params.slug} />
         <ClaimLeaderboard contestId={params.slug} />
       </section>

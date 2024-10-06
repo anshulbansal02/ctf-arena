@@ -10,9 +10,7 @@ interface Props {
 export function useLeaderboard<T>(props: Props) {
   const { data: leaderboardData, setState: setLeaderboardData } = useAction(
     async () => {
-      console.log("Getting Leaderboard.............");
       const result = await getLeaderboardData<T>(props.contestId, props.name);
-      console.log("Got Leaderboard.............", result);
 
       if ("error" in result) return null;
       return result;

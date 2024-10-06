@@ -14,6 +14,7 @@ export async function getLeaderboardByName(contestId: number, name: string) {
   const submissions = await db
     .select({
       userId: cc.submittedByUser,
+      userEmail: u.email,
       userName: u.name,
       claim: cc.submission,
       createdAt: cc.createdAt,
@@ -23,5 +24,21 @@ export async function getLeaderboardByName(contestId: number, name: string) {
     .leftJoin(u, eq(u.id, cc.submittedByUser))
     .where(eq(cc.contestId, contestId));
 
-  return submissions;
+    console.log({submissions})
+
+  const leaderboardItems = submissions.map((s) => ({
+    user: {
+      id: s.userId,
+      email: s.userEmail,
+      name: s.userName,
+    },
+    claim: {
+      title: s.claim,
+      name: s.claim,
+    },
+    createdAt: s.createdAt,
+    points: s.points,
+  }));
+
+  return leaderboardItems;
 }

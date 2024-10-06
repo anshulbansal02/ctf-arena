@@ -56,10 +56,6 @@ export function GameState(props: { contestId: number }) {
       >
         <SvgDrawItem fill="currentColor" /> Draw Item
       </Button>
-
-      <div className="mt-8">
-        <h4 className="text-lg">Statistics</h4>
-      </div>
     </section>
   );
 }

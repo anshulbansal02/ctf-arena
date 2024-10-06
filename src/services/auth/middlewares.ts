@@ -1,9 +1,10 @@
 "use server";
 import NextAuth, { Session } from "next-auth";
+import { VerificationToken } from "next-auth/adapters";
 import { NextRequest, NextResponse } from "next/server";
+
 import { config } from "@/config";
 import { authConfig } from "./config";
-import { VerificationToken } from "next-auth/adapters";
 
 const { auth: getSession } = NextAuth({
   ...authConfig,
