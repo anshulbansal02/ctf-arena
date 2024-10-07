@@ -132,12 +132,6 @@ export function RankLeaderboard(props: { contestId: number }) {
         </div>
       )}
 
-      {!leaderboardByRank.length && (
-        <div className="flex w-full flex-col items-center">
-          <p className="py-40 text-gray-300">No data to show here</p>
-        </div>
-      )}
-
       <div className="no-scrollbar flex max-h-[560px] w-full flex-col gap-2 overflow-auto rounded-xl">
         {leaderboardByRank.map((entry, i) => (
           <div

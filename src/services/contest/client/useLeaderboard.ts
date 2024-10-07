@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAction, useServerEvent } from "@/shared/hooks";
 import { getLeaderboardData } from "../services";
+import { randomInt } from "@/lib/utils";
 
 interface Props {
   name: string;
@@ -8,7 +9,11 @@ interface Props {
 }
 
 export function useLeaderboard<T>(props: Props) {
-  const { data: leaderboardData, setState: setLeaderboardData } = useAction(
+  const {
+    data: leaderboardData,
+    setState: setLeaderboardData,
+    execute: getUpdate,
+  } = useAction(
     async () => {
       const result = await getLeaderboardData<T>(props.contestId, props.name);
 
@@ -24,7 +29,8 @@ export function useLeaderboard<T>(props: Props) {
   useServerEvent<T[]>(
     "leaderboard_update",
     (data) => {
-      setLeaderboardData(data);
+      setTimeout(getUpdate, randomInt(0, 500));
+      // setLeaderboardData(data);
       setLastUpdated(new Date());
     },
     { active: !hasContestEnded },

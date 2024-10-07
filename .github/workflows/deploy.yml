@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+env:
+  DB_HOST: ${{ secrets.DB_HOST }}
+  DB_PORT: ${{ secrets.DB_PORT }}
+  DB_NAME: ${{ secrets.DB_NAME }}
+  DB_USER: ${{ secrets.DB_USER }}
+  DB_PASS: ${{ secrets.DB_PASS }}
 
 jobs:
   deploy-production:
@@ -23,7 +29,9 @@ jobs:
         run: bun install --frozen-lockfile --production
 
       - name: Sync Database Schema
-        run: bun run db:generate && bun run db:migrate
+        run: |
+          bun run db:generate
+          bun run db:migrate
 
       - name: Build App
         run: bun --bun run build
@@ -39,14 +47,10 @@ jobs:
         with:
           host: ${{ secrets.SERVER_HOSTNAME }}
           username: ${{ secrets.SERVER_SSH_USER }}
-          key_path: ${{ secrets.SERVER_SSH_KEY }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: whoami
 
       - name: Deploy to EC2
-        env:
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
           # Define blue and green directories
           BLUE_DIR="${DEPLOY_PATH}/blue"

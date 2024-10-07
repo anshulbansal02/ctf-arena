@@ -11,7 +11,7 @@ import {
   text,
   boolean,
 } from "drizzle-orm/pg-core";
-import { TB_users } from "../user";
+import { TB_users } from "@/services/user/entities";
 import { eq, isNull } from "drizzle-orm";
 
 export const Enum_teamRequestStatus = pgEnum("team_request_status", [
