@@ -140,8 +140,6 @@ jobs:
             source shared/deployment.env
             set +a
 
-            echo $PATH
-
             echo "Starting new app"
             if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
               APP_PORT=$BLUE_UPSTREAM
