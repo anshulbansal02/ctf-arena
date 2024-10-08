@@ -1,19 +1,17 @@
 upstream blue {
-    server $BLUE_UPSTREAM;
+    server localhost:$BLUE_UPSTREAM;
 }
 
 upstream green {
-    server $GREEN_UPSTREAM;
+    server localhost:$GREEN_UPSTREAM;
 }
-
-set $active_deployment $ACTIVE_DEPLOYMENT
 
 server {
     listen 80;
-    server_name $APP_HOST
+    server_name $APP_HOST;
 
     location / {
-        proxy_pass http://$active_deployment;
+        proxy_pass http://$ACTIVE_DEPLOYMENT;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';

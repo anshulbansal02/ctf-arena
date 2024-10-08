@@ -31,7 +31,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.1.29
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
@@ -52,9 +52,20 @@ jobs:
           bun run db:generate
           bun run db:migrate
 
+      - name: Setup Build Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .next/cache
+            .next/standalone
+          key: app-build-${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            app-build-${{ runner.os }}-
+
       - name: Build App
         env:
           DB_HOST: localhost
+          NEXT_TELEMETRY_DISABLED: 1
         run: bun --bun run build
 
       - name: Package Artifacts
@@ -98,11 +109,12 @@ jobs:
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
             echo "Setting up script"
-            APP_DIR="~/app"
+            APP_DIR=~/app
             DEFAULT_ACTIVE_DEPLOYMENT=green
             DEFAULT_INACTIVE_DEPLOYMENT=blue
 
             cd $APP_DIR
+            source ~/.bashrc
 
             echo "Determining active deployment"
             if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
@@ -118,7 +130,7 @@ jobs:
             echo "Deploying to new environment: $ACTIVE_DEPLOYMENT"
 
             echo "Unarchiving new app build"
-            tar -xzf tmp/build.tar.gz -C tmp/build && rm -f tmp/build.tar.gz
+            tar -xzf tmp/build.tar.gz -C tmp/ && rm -f tmp/build.tar.gz
             rsync -a --delete tmp/build/ "$ACTIVE_DEPLOYMENT/"
             rm -rf tmp/build
 
@@ -129,18 +141,21 @@ jobs:
             set +a
 
             echo "Starting new app"
-            cd "$APP_DIR/$ACTIVE_DEPLOYMENT" 
-            pm2 start bun --name "arena-app-$ACTIVE_DEPLOYMENT" -- start
+            if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
+              APP_PORT=$BLUE_UPSTREAM
+            else
+              APP_PORT=$GREEN_UPSTREAM
+            fi
+            cd "$APP_DIR/$ACTIVE_DEPLOYMENT"
+            PORT=$APP_PORT pm2 start --name "arena-$ACTIVE_DEPLOYMENT" "bun" -- server.js
 
             echo "Waiting for the app to start"
-            while ! nc -z localhost 3000; do   
-              sleep 0.5
-            done
+            sleep 1
 
             echo "Updating proxy upstream and reloading"
             cd "$APP_DIR/shared"
-            envsubst < nginx.conf.template > arena.conf
-            sudo ln -sf arena.conf /etc/nginx/arena.conf
+            envsubst \$APP_HOST,\$ACTIVE_DEPLOYMENT,\$BLUE_UPSTREAM,\$GREEN_UPSTREAM,\$APP_STATIC_PATH < nginx.conf.template > arena.conf
+            sudo ln -sf $(pwd)/arena.conf /etc/nginx/sites-enabled/arena.conf
             sudo nginx -t
             sudo nginx -s reload
 
