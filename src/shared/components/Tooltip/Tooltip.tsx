@@ -16,7 +16,11 @@ export function Tooltip(props: TooltipProps) {
   return (
     <Tip.Provider>
       <Tip.Root delayDuration={400}>
-        <Tip.Trigger asChild={props.asChild} className={clsx(props.className)}>
+        <Tip.Trigger
+          asChild={props.asChild}
+          className={clsx(props.className)}
+          type="button"
+        >
           {props.children}
         </Tip.Trigger>
         <Tip.Portal>
