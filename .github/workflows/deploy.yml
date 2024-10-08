@@ -116,6 +116,8 @@ jobs:
             cd $APP_DIR
             source ~/.bashrc
 
+            echo $PATH
+
             echo "Determining active deployment"
             if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
               export ACTIVE_DEPLOYMENT=green
