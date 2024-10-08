@@ -4,12 +4,17 @@ on:
   push:
     branches:
       - main
+
 env:
   DB_HOST: ${{ secrets.DB_HOST }}
   DB_PORT: ${{ secrets.DB_PORT }}
   DB_NAME: ${{ secrets.DB_NAME }}
   DB_USER: ${{ secrets.DB_USER }}
   DB_PASS: ${{ secrets.DB_PASS }}
+  REDIS_HOST: ${{ secrets.REDIS_HOST }}
+  REDIS_PORT: ${{ secrets.REDIS_PORT }}
+  EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   deploy-production:
@@ -29,6 +34,15 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
+      - name: Setup SSH Agent
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+
+      - name: Create SSH Tunnel
+        run: |
+          ssh -o StrictHostKeyChecking=no -L $DB_PORT:$DB_HOST:$DB_PORT ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }} -N
+
       - name: Sync Database Schema
         run: |
           bun run db:generate
@@ -44,15 +58,15 @@ jobs:
 
           cd build
           cat <<EOF > app.env
-          DB_NAME=${{ secrets.DB_NAME }}
-          DB_HOST=${{ secrets.DB_HOST }}
-          DB_PORT=${{ secrets.DB_PORT }}
-          DB_USER=${{ secrets.DB_USER }}
-          DB_PASS=${{ secrets.DB_PASS }}
-          REDIS_HOST=${{ secrets.REDIS_HOST }}
-          REDIS_PORT=${{ secrets.REDIS_PORT }}
-          EMAIL_PROVIDER=${{ secrets.EMAIL_PROVIDER }}
-          AWS_REGION=${{ secrets.AWS_REGION }}
+          DB_NAME=$DB_NAME
+          DB_HOST=$DB_HOST
+          DB_PORT=$DB_PORT
+          DB_USER=$DB_USER
+          DB_PASS=$DB_PASS
+          REDIS_HOST=$REDIS_HOST
+          REDIS_PORT=$REDIS_PORT
+          EMAIL_PROVIDER=$EMAIL_PROVIDER
+          AWS_REGION=$AWS_REGION
           EOF
           cd ..
 
@@ -61,7 +75,7 @@ jobs:
       - name: Deploy To Server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SERVER_HOSTNAME }}
+          host: ${{ secrets.SERVER_HOST_NAME }}
           username: ${{ secrets.SERVER_SSH_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
@@ -71,7 +85,7 @@ jobs:
       - name: Startup New Deployment
         uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.SERVER_HOSTNAME }}
+          host: ${{ secrets.SERVER_HOST_NAME }}
           username: ${{ secrets.SERVER_SSH_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
@@ -84,10 +98,10 @@ jobs:
             cd $APP_DIR
 
             echo "Determining active deployment"
-            if [[ "$ACTIVE_DEPLOYMENT" == blue ]] then
+            if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
               export ACTIVE_DEPLOYMENT=green
               export INACTIVE_DEPLOYMENT=blue
-            elif [[ "$ACTIVE_DEPLOYMENT" == green ]] then
+            elif [[ "$ACTIVE_DEPLOYMENT" == green ]]; then
               export ACTIVE_DEPLOYMENT=blue
               export INACTIVE_DEPLOYMENT=green
             else
@@ -97,13 +111,13 @@ jobs:
             echo "Deploying to new environment: $ACTIVE_DEPLOYMENT"
 
             echo "Unarchiving new app build"
-            tar -xzf build.tar.gz && rm -f build.tar.gz
-            rsync -a --delete tmp/build $ACTIVE_DEPLOYMENT
-            rm -rf ./build
+            tar -xzf tmp/build.tar.gz -C tmp/build && rm -f tmp/build.tar.gz
+            rsync -a --delete tmp/build/ "$ACTIVE_DEPLOYMENT/"
+            rm -rf tmp/build
 
             echo "Setting up environment"
             set -a
-            source $ACTIVE_DEPLOYMENT/app.env
+            source "$ACTIVE_DEPLOYMENT/app.env"
             source shared/deployment.env
             set +a
 
@@ -119,7 +133,7 @@ jobs:
             echo "Updating proxy upstream and reloading"
             cd "$APP_DIR/shared"
             envsubst < nginx.conf.template > arena.conf
-            sudo ln -s arena.conf /etc/nginx/arena.conf
+            sudo ln -sf arena.conf /etc/nginx/arena.conf
             sudo nginx -t
             sudo nginx -s reload
 
