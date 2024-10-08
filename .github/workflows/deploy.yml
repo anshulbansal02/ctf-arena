@@ -28,10 +28,10 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      # - name: Sync Database Schema
-      #   run: |
-      #     bun run db:generate
-      #     bun run db:migrate
+      - name: Sync Database Schema
+        run: |
+          bun run db:generate
+          bun run db:migrate
 
       - name: Build App
         run: bun --bun run build
