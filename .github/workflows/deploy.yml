@@ -97,6 +97,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
+            pwd
             echo "Setting up script"
             APP_DIR="~/app"
             DEFAULT_ACTIVE_DEPLOYMENT=green
@@ -118,7 +119,7 @@ jobs:
             echo "Deploying to new environment: $ACTIVE_DEPLOYMENT"
 
             echo "Unarchiving new app build"
-            tar -xzf tmp/build.tar.gz -C tmp/build && rm -f tmp/build.tar.gz
+            tar -xzf tmp/build.tar.gz -C tmp/ && rm -f tmp/build.tar.gz
             rsync -a --delete tmp/build/ "$ACTIVE_DEPLOYMENT/"
             rm -rf tmp/build
 
@@ -139,7 +140,7 @@ jobs:
 
             echo "Updating proxy upstream and reloading"
             cd "$APP_DIR/shared"
-            envsubst < nginx.conf.template > arena.conf
+            envsubst \$APP_HOST,\$ACTIVE_DEPLOYMENT,\$BLUE_UPSTREAM,\$GREEN_UPSTREAM,\$APP_STATIC_PATH < nginx.conf.template > arena.conf
             sudo ln -sf arena.conf /etc/nginx/arena.conf
             sudo nginx -t
             sudo nginx -s reload
