@@ -15,6 +15,7 @@ jobs:
   deploy-production:
     name: Deploy Arena Production
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout Code
@@ -50,7 +51,7 @@ jobs:
           DB_PASS=${{ secrets.DB_PASS }}
           REDIS_HOST=${{ secrets.REDIS_HOST }}
           REDIS_PORT=${{ secrets.REDIS_PORT }}
-          EMAIL_PROVIDER=${{ secrets.REDIS_PORT }}
+          EMAIL_PROVIDER=${{ secrets.EMAIL_PROVIDER }}
           AWS_REGION=${{ secrets.AWS_REGION }}
           EOF
           cd ..
@@ -58,7 +59,7 @@ jobs:
           tar czf build.tar.gz ./build
 
       - name: Deploy To Server
-        uses: appleboy/scp-action@v0.1.2
+        uses: appleboy/scp-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_HOSTNAME }}
           username: ${{ secrets.SERVER_SSH_USER }}
@@ -68,7 +69,7 @@ jobs:
           target: "~/app/tmp"
 
       - name: Startup New Deployment
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.SERVER_HOSTNAME }}
           username: ${{ secrets.SERVER_SSH_USER }}
@@ -92,6 +93,7 @@ jobs:
             else
               export ACTIVE_DEPLOYMENT=$DEFAULT_ACTIVE_DEPLOYMENT
               export INACTIVE_DEPLOYMENT=$DEFAULT_INACTIVE_DEPLOYMENT
+            fi
             echo "Deploying to new environment: $ACTIVE_DEPLOYMENT"
 
             echo "Unarchiving new app build"
