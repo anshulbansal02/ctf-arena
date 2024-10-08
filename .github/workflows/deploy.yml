@@ -108,28 +108,40 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
+            echo "Updating system packages"
+            export DEBIAN_FRONTEND=noninteractive
+            sudo apt update -y && sudo apt upgrade -y
+
+            echo "Installing Nginx if not present"
+            if ! command -v nginx &> /dev/null; then
+              sudo apt install nginx -y
+            fi
+
+            # Install Bun
+            if ! command -v bun &> /dev/null; then
+              sudo apt install unzip -y
+              curl -fsSL https://bun.sh/install | bash
+              export PATH="$HOME/.bun/bin:$PATH"
+              source ~/.bashrc
+            fi
+
+            # Install NVM
+            if ! command -v node &> /dev/null; then 
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              nvm install 20
+            fi
+
+            # Install PM2
+            if ! command -v pm2 &> /dev/null; then
+              bun install -g pm2
+            fi
+
             echo "Setting up script"
             APP_DIR=~/app
             DEFAULT_ACTIVE_DEPLOYMENT=green
             DEFAULT_INACTIVE_DEPLOYMENT=blue
-
-            sudo apt update -y && sudo apt upgrade -y
-            if ! command -v nginx &> /dev/null; then
-              sudo apt install nginx -y
-            fi
-            if ! command -v bun &> /dev/null; then
-              sudo apt install unzip -y
-              curl -fsSL https://bun.sh/install | bash
-              source ~/.bashrc
-            fi
-            if ! command -v node &> /dev/null; then 
-              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
-              source ~/.bashrc
-              nvm install 20
-            fi
-            if ! command -v pm2 &> /dev/null; then
-              bun install -g pm2
-            fi
 
             cd $APP_DIR
 
