@@ -59,7 +59,7 @@ jobs:
           tar czf build.tar.gz ./build
 
       - name: Deploy To Server
-        uses: appleboy/scp-action@v0.1.8
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOSTNAME }}
           username: ${{ secrets.SERVER_SSH_USER }}
