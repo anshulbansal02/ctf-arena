@@ -2,8 +2,6 @@ import { config } from "@/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-console.log(config);
-
 export const connection = new Pool({
   ssl: config.stage === "prod" ? { rejectUnauthorized: false } : false,
   database: config.db.name,
