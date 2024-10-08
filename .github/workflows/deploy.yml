@@ -129,9 +129,7 @@ jobs:
             source shared/deployment.env
             set +a
 
-            echo "REMOVE THIS"
-            echo $(ls /home/ubuntu/.bun)
-            echo $(ls /home/ubuntu/.bun/bin)
+            echo $PATH
 
             echo "Starting new app"
             if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
@@ -148,7 +146,7 @@ jobs:
             echo "Updating proxy upstream and reloading"
             cd "$APP_DIR/shared"
             envsubst \$APP_HOST,\$ACTIVE_DEPLOYMENT,\$BLUE_UPSTREAM,\$GREEN_UPSTREAM,\$APP_STATIC_PATH < nginx.conf.template > arena.conf
-            sudo ln -sf arena.conf /etc/nginx/sites-enabled/arena.conf
+            sudo ln -sf $(pwd)/arena.conf /etc/nginx/sites-enabled/arena.conf
             sudo nginx -t
             sudo nginx -s reload
 
