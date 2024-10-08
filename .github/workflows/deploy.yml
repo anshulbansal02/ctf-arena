@@ -97,7 +97,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            ech $(ls)
+            echo $(ls)
             echo "Setting up script"
             APP_DIR=~/app
             DEFAULT_ACTIVE_DEPLOYMENT=green
