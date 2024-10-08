@@ -45,11 +45,13 @@ jobs:
           ssh -o StrictHostKeyChecking=no -L "$DB_PORT":"$DB_HOST":"$DB_PORT" ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }}
 
       - name: Sync Database Schema
+        env: DB_HOST=localhost
         run: |
           bun run db:generate
           bun run db:migrate
 
       - name: Build App
+        env: DB_HOST=localhost
         run: bun --bun run build
 
       - name: Package Artifacts
