@@ -34,10 +34,17 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
+      - name: Setup SSH Agent
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+
+      - name: Create SSH Tunnel
+        run: |
+          ssh -o StrictHostKeyChecking=no -L $DB_PORT:$DB_HOST:$DB_PORT ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }} -N
+
       - name: Sync Database Schema
         run: |
-          ssh -o StrictHostKeyChecking=no -L $DB_PORT:$DB_HOST:$DB_PORT ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }} -N &
-          sleep 5  # Wait for SSH tunnel to establish
           bun run db:generate
           bun run db:migrate
 
@@ -128,3 +135,10 @@ jobs:
             envsubst < nginx.conf.template > arena.conf
             sudo ln -sf arena.conf /etc/nginx/arena.conf
             sudo nginx -t
+            sudo nginx -s reload
+
+            echo "Cleaning up"
+            pm2 stop "arena-app-$INACTIVE_DEPLOYMENT"
+            pm2 save
+
+            echo "New Active Deployment: $ACTIVE_DEPLOYMENT"
