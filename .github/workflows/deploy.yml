@@ -42,7 +42,7 @@ jobs:
 
       - name: Create SSH Tunnel
         run: |
-          ssh -o StrictHostKeyChecking=no -L $DB_PORT:$DB_HOST:$DB_PORT ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }} -N
+          ssh -o StrictHostKeyChecking=no -L "$DB_PORT":"$DB_HOST":"$DB_PORT" ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }} -N
 
       - name: Sync Database Schema
         run: |
