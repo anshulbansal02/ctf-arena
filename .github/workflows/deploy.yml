@@ -52,6 +52,16 @@ jobs:
           bun run db:generate
           bun run db:migrate
 
+      - name: Setup Build Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .next/cache
+            .next/standalone
+          key: app-build-${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            app-build-${{ runner.os }}-
+
       - name: Build App
         env:
           DB_HOST: localhost
