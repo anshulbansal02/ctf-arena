@@ -97,9 +97,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            pwd
+            ech $(ls)
             echo "Setting up script"
-            APP_DIR="~/app"
+            APP_DIR=~/app
             DEFAULT_ACTIVE_DEPLOYMENT=green
             DEFAULT_INACTIVE_DEPLOYMENT=blue
 
@@ -134,9 +134,7 @@ jobs:
             pm2 start bun --name "arena-app-$ACTIVE_DEPLOYMENT" -- start
 
             echo "Waiting for the app to start"
-            while ! nc -z localhost 3000; do   
-              sleep 0.5
-            done
+            sleep 1
 
             echo "Updating proxy upstream and reloading"
             cd "$APP_DIR/shared"
