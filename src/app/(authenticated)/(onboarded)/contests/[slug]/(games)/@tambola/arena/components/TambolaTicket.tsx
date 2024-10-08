@@ -28,7 +28,9 @@ export function TambolaTicket(props: TambolaTicketProps) {
               key={`cell-${i}-${j}`}
               className={clsx(styles.item, {
                 [styles.empty]: item === 0,
-                [styles.marked]: props.markedItems.includes(item),
+                [styles.marked]:
+                  props.markedItems.includes(item) ||
+                  props.claimedItems.includes(item),
                 [styles.claimed]: props.claimedItems.includes(item),
               })}
             >

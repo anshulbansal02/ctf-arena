@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAction, useServerEvent } from "@/shared/hooks";
 import { getLeaderboardData } from "../services";
 import { randomInt } from "@/lib/utils";
+import contestEvents from "@/services/contest/events";
 
 interface Props {
   name: string;
@@ -20,14 +21,14 @@ export function useLeaderboard<T>(props: Props) {
       if ("error" in result) return null;
       return result;
     },
-    { immediate: true, args: [] },
+    { immediate: true, args: [], preserveData: true },
   );
 
   const [hasContestEnded, setContestEnded] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>();
 
   useServerEvent<T[]>(
-    "leaderboard_update",
+    contestEvents.leaderboard(props.contestId, "update"),
     (data) => {
       setTimeout(getUpdate, randomInt(0, 500));
       // setLeaderboardData(data);
@@ -37,7 +38,7 @@ export function useLeaderboard<T>(props: Props) {
   );
 
   useServerEvent(
-    "contest_ended",
+    contestEvents.game(props.contestId, "ended"),
     () => {
       setContestEnded(true);
     },
