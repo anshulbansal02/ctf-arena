@@ -15,11 +15,11 @@ export default function LeaderboardPage({
         <LastDrawnItem contestId={params.slug} />
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 w-[480px]">
         <Announcements contestId={params.slug} />
       </div>
 
-      <section className="mt-16 grid w-full grid-cols-2 gap-16">
+      <section className="mt-16 grid w-full grid-cols-1 gap-16 lg:grid-cols-2">
         <RankLeaderboard contestId={params.slug} />
         <ClaimLeaderboard contestId={params.slug} />
       </section>

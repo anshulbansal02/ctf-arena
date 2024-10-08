@@ -1,8 +1,34 @@
 "use client";
-import { SvgAnnouncement } from "@/assets/icons";
 import { useServerEvent } from "@/shared/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import contestEvents from "@/services/contest/events";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { randomInt, randomItem } from "@/lib/utils";
+
+const variants = {
+  enter: () => {
+    return {
+      y: -40,
+      scale: 0.8,
+      opacity: 0.7,
+    };
+  },
+  center: {
+    y: 0,
+    zIndex: 1,
+    scale: 1,
+    opacity: 1,
+  },
+  exit: () => {
+    return {
+      y: 50,
+      zIndex: 0,
+      scale: 0.6,
+      opacity: 0,
+    };
+  },
+};
 
 export function Announcements(props: { contestId: number }) {
   const [latestAnnouncement, setLatestAnnouncement] = useState<{
@@ -23,9 +49,24 @@ export function Announcements(props: { contestId: number }) {
   });
 
   return (
-    <div className="flex items-center gap-3 rounded-md bg-slate-800 px-5 py-3">
-      <SvgAnnouncement fill="#fed7aa" width={20} height={20} />
-      <p>{latestAnnouncement?.text}</p>
+    <div className="relative flex h-16 w-full items-center overflow-hidden rounded-md bg-slate-800 px-5 py-3">
+      <AnimatePresence>
+        <motion.p
+          className="absolute left-0 w-full text-center"
+          key={+latestAnnouncement.time}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{
+            y: { duration: 0.3 },
+            opacity: { duration: 0.4 },
+          }}
+          suppressHydrationWarning
+        >
+          {latestAnnouncement.text}
+        </motion.p>
+      </AnimatePresence>
     </div>
   );
 }

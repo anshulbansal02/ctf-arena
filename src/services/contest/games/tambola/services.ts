@@ -188,12 +188,17 @@ export async function checkAndClaimWin(
       })
       .returning();
 
+    cache.del(`contest:${contestId}:leaderboard:main`);
+
     eventChannel.publish(contestEvents.leaderboard(contestId, "win_claimed"), {
       name: patternConfig.name,
       title: patternConfig.title,
       claimsLeft: patternConfig.totalClaims - submissions.count - 1,
       claimedBy: participationType === "team" ? team?.name : user.name,
     });
+
+    eventChannel.publish(contestEvents.leaderboard(contestId, "update"), {});
+
     contestQueue.add("submission", submission);
 
     return result;

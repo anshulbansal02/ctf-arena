@@ -9,8 +9,8 @@ import {
   boolean,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import { TB_users } from "../user";
-import { TB_teams } from "../team";
+import { TB_users } from "@/services/user/entities";
+import { TB_teams } from "@/services/team/entities";
 
 export const Enum_contestParticipationType = pgEnum(
   "contest_participation_type",

@@ -39,7 +39,7 @@ export const WinningPatterns: Record<string, RuleChecker> = {
     ];
     if (!(isSubset(corners, marked) && isSubset(corners, drawn)))
       return Result.N();
-    return Result.Y(bottomRow);
+    return Result.Y(corners);
   },
 
   corners_with_star: (ticket, marked, drawn) => {
@@ -55,7 +55,7 @@ export const WinningPatterns: Record<string, RuleChecker> = {
     const patternNums = [...corners, centerNumber];
     if (!(isSubset(patternNums, marked) && isSubset(patternNums, drawn)))
       return Result.N();
-    return Result.Y(bottomRow);
+    return Result.Y(patternNums);
   },
 
   full_house: (ticket, marked, drawn) => {

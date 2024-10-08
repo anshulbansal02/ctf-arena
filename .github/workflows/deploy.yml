@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+env:
+  DB_HOST: ${{ secrets.DB_HOST }}
+  DB_PORT: ${{ secrets.DB_PORT }}
+  DB_NAME: ${{ secrets.DB_NAME }}
+  DB_USER: ${{ secrets.DB_USER }}
+  DB_PASS: ${{ secrets.DB_PASS }}
 
 jobs:
   deploy-production:
@@ -20,10 +26,12 @@ jobs:
           bun-version: latest
 
       - name: Install Dependencies
-        run: bun install --frozen-lockfile --production
+        run: bun install --frozen-lockfile
 
-      - name: Sync Database Schema
-        run: bun run db:generate && bun run db:migrate
+      # - name: Sync Database Schema
+      #   run: |
+      #     bun run db:generate
+      #     bun run db:migrate
 
       - name: Build App
         run: bun --bun run build
@@ -32,70 +40,89 @@ jobs:
         run: |
           cp -r .next/standalone ./build
           cp -r .next/static ./build/.next/static
+
+          cd build
+          cat <<EOF > app.env
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_PORT=${{ secrets.DB_PORT }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASS=${{ secrets.DB_PASS }}
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=${{ secrets.REDIS_PORT }}
+          EMAIL_PROVIDER=${{ secrets.REDIS_PORT }}
+          AWS_REGION=${{ secrets.AWS_REGION }}
+          EOF
+          cd ..
+
           tar czf build.tar.gz ./build
 
-      - name: Setup SSH
+      - name: Deploy To Server
+        uses: appleboy/scp-action@v0.1.2
+        with:
+          host: ${{ secrets.SERVER_HOSTNAME }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          source: "./build.tar.gz"
+          target: "~/app/tmp"
+
+      - name: Startup New Deployment
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOSTNAME }}
           username: ${{ secrets.SERVER_SSH_USER }}
-          key_path: ${{ secrets.SERVER_SSH_KEY }}
-          script: whoami
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            echo "Setting up script"
+            APP_DIR="~/app"
+            DEFAULT_ACTIVE_DEPLOYMENT=green
+            DEFAULT_INACTIVE_DEPLOYMENT=blue
 
-      - name: Deploy to EC2
-        env:
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          # Define blue and green directories
-          BLUE_DIR="${DEPLOY_PATH}/blue"
-          GREEN_DIR="${DEPLOY_PATH}/green"
+            cd $APP_DIR
 
-          # Determine which environment is currently active
-          ACTIVE_ENV=$(ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "pm2 describe nextjs-app || echo 'none'")
-          if [ "$ACTIVE_ENV" == "none" ]; then
-            # If no active environment, default to blue
-            NEW_ENV="blue"
-          else
-            # Get current active environment from pm2
-            CURRENT_DIR=$(ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "pm2 show nextjs-app | grep 'cwd path' | awk '{print \$4}'")
-            if [[ "$CURRENT_DIR" == *"/blue" ]]; then
-              NEW_ENV="green"
+            echo "Determining active deployment"
+            if [[ "$ACTIVE_DEPLOYMENT" == blue ]] then
+              export ACTIVE_DEPLOYMENT=green
+              export INACTIVE_DEPLOYMENT=blue
+            elif [[ "$ACTIVE_DEPLOYMENT" == green ]] then
+              export ACTIVE_DEPLOYMENT=blue
+              export INACTIVE_DEPLOYMENT=green
             else
-              NEW_ENV="blue"
-            fi
-          fi
+              export ACTIVE_DEPLOYMENT=$DEFAULT_ACTIVE_DEPLOYMENT
+              export INACTIVE_DEPLOYMENT=$DEFAULT_INACTIVE_DEPLOYMENT
+            echo "Deploying to new environment: $ACTIVE_DEPLOYMENT"
 
-          echo "Deploying to $NEW_ENV environment."
+            echo "Unarchiving new app build"
+            tar -xzf build.tar.gz && rm -f build.tar.gz
+            rsync -a --delete tmp/build $ACTIVE_DEPLOYMENT
+            rm -rf ./build
 
-          # Define the target directory based on the new environment
-          TARGET_DIR="${DEPLOY_PATH}/${NEW_ENV}"
+            echo "Setting up environment"
+            set -a
+            source $ACTIVE_DEPLOYMENT/app.env
+            source shared/deployment.env
+            set +a
 
-          # Create target directory if it doesn't exist
-          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "mkdir -p ${TARGET_DIR}"
+            echo "Starting new app"
+            cd "$APP_DIR/$ACTIVE_DEPLOYMENT" 
+            pm2 start bun --name "arena-app-$ACTIVE_DEPLOYMENT" -- start
 
-          # Sync files to the target directory, excluding unnecessary files
-          rsync -avz --delete \
-            --exclude 'node_modules' \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude 'deploy.yml' \
-            ./ ${EC2_USER}@${EC2_HOST}:${TARGET_DIR}/
+            echo "Waiting for the app to start"
+            while ! nc -z localhost 3000; do   
+              sleep 0.5
+            done
 
-          # Install dependencies and build on the EC2 instance using Bun
-          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "export PATH=\"\$HOME/.bun/bin:\$PATH\" && cd ${TARGET_DIR} && bun install && bun run build"
+            echo "Updating proxy upstream and reloading"
+            cd "$APP_DIR/shared"
+            envsubst < nginx.conf.template > arena.conf
+            sudo ln -s arena.conf /etc/nginx/arena.conf
+            sudo nginx -t
+            sudo nginx -s reload
 
-          # Update pm2 to use the new build with zero downtime
-          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "
-            export PATH=\"\$HOME/.bun/bin:\$PATH\"
-            pm2 stop nextjs-app || true
-            pm2 start ${TARGET_DIR}/server.js --name nextjs-app --update-env --watch
-          "
+            echo "Cleaning up"
+            pm2 stop "arena-app-$INACTIVE_DEPLOYMENT"
+            pm2 save
 
-          # Reload Nginx to ensure it points to the new build if necessary
-          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "sudo systemctl reload nginx"
-
-      - name: Cleanup
-        if: always()
-        run: echo "Deployment process completed"
+            echo "New Active Deployment: $ACTIVE_DEPLOYMENT"

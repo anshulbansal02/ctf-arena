@@ -1,30 +1,49 @@
-import { jsonSafeParse } from "@/lib/utils";
+import { arrayToMap, jsonSafeParse } from "@/lib/utils";
 import { cache } from "@/services/cache";
 import { db } from "@/services/db";
-import { TB_contestSubmissions } from "../../entities";
+import { TB_contestChallenges, TB_contestSubmissions } from "../../entities";
 import { eq } from "drizzle-orm";
 import { TB_users } from "@/services/user";
+import { TambolaChallengeConfig } from "./types";
 
 export async function getLeaderboardByName(contestId: number, name: string) {
-  const cached = await cache.get(`contest:${contestId}:leaderboard:${name}`);
+  const cacheKey = `contest:${contestId}:leaderboard:main`;
+  const cached = await cache.get(cacheKey);
+
   if (cached) return jsonSafeParse(cached);
 
-  const cc = TB_contestSubmissions,
+  const cs = TB_contestSubmissions,
+    cc = TB_contestChallenges,
     u = TB_users;
   const submissions = await db
     .select({
-      userId: cc.submittedByUser,
+      challengeId: cs.challengeId,
+      userId: cs.submittedByUser,
       userEmail: u.email,
       userName: u.name,
-      claim: cc.submission,
-      createdAt: cc.createdAt,
-      points: cc.score,
+      claim: cs.submission,
+      createdAt: cs.createdAt,
+      points: cs.score,
     })
-    .from(cc)
-    .leftJoin(u, eq(u.id, cc.submittedByUser))
-    .where(eq(cc.contestId, contestId));
+    .from(cs)
+    .leftJoin(u, eq(u.id, cs.submittedByUser))
+    .where(eq(cs.contestId, contestId));
 
-    console.log({submissions})
+  const challenges = (await db
+    .select({ id: cc.id, config: cc.config })
+    .from(cc)
+    .where(eq(cc.contestId, contestId))) as Array<{
+    config: TambolaChallengeConfig;
+    id: number;
+  }>;
+
+  const challengesById = arrayToMap(
+    challenges.map((c) => ({
+      ...c,
+      patterns: arrayToMap(c.config.winningPatterns, (p) => p.name),
+    })),
+    (c) => c.id,
+  );
 
   const leaderboardItems = submissions.map((s) => ({
     user: {
@@ -33,12 +52,14 @@ export async function getLeaderboardByName(contestId: number, name: string) {
       name: s.userName,
     },
     claim: {
-      title: s.claim,
+      title: challengesById[s.challengeId]!.patterns[s.claim!]!.title,
       name: s.claim,
     },
     createdAt: s.createdAt,
     points: s.points,
   }));
+
+  cache.set(cacheKey, JSON.stringify(leaderboardItems));
 
   return leaderboardItems;
 }
