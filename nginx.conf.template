@@ -1,9 +1,9 @@
 upstream blue {
-    server $BLUE_UPSTREAM;
+    server localhost:$BLUE_UPSTREAM;
 }
 
 upstream green {
-    server $GREEN_UPSTREAM;
+    server localhost:$GREEN_UPSTREAM;
 }
 
 set $active_upstream $ACTIVE_DEPLOYMENT;

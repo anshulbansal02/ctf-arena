@@ -96,8 +96,8 @@ jobs:
           username: ${{ secrets.SERVER_SSH_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
+          script_stop: true
           script: |
-            echo $(ls)
             echo "Setting up script"
             APP_DIR=~/app
             DEFAULT_ACTIVE_DEPLOYMENT=green
@@ -129,9 +129,18 @@ jobs:
             source shared/deployment.env
             set +a
 
+            echo "REMOVE THIS"
+            echo $(ls /home/ubuntu/.bun)
+            echo $(ls /home/ubuntu/.bun/bin)
+
             echo "Starting new app"
-            cd "$APP_DIR/$ACTIVE_DEPLOYMENT" 
-            pm2 start bun --name "arena-app-$ACTIVE_DEPLOYMENT" -- start
+            if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
+              APP_PORT=$BLUE_UPSTREAM
+            else
+              APP_PORT=$GREEN_UPSTREAM
+            fi
+            cd "$APP_DIR/$ACTIVE_DEPLOYMENT"
+            PORT=$APP_PORT pm2 start --name "arena-$ACTIVE_DEPLOYMENT" "bun" -- server.js
 
             echo "Waiting for the app to start"
             sleep 1
@@ -139,7 +148,7 @@ jobs:
             echo "Updating proxy upstream and reloading"
             cd "$APP_DIR/shared"
             envsubst \$APP_HOST,\$ACTIVE_DEPLOYMENT,\$BLUE_UPSTREAM,\$GREEN_UPSTREAM,\$APP_STATIC_PATH < nginx.conf.template > arena.conf
-            sudo ln -sf arena.conf /etc/nginx/arena.conf
+            sudo ln -sf arena.conf /etc/nginx/sites-enabled/arena.conf
             sudo nginx -t
             sudo nginx -s reload
 
