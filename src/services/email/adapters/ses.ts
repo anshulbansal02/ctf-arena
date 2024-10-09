@@ -17,14 +17,17 @@ export class SESProvider implements EmailProvider {
       SECRET_ACCESS_KEY: string;
     },
   ) {
-    this.ses = new SESv2Client({
+    const config = {
       region: sesConfig.AWS_REGION,
       apiVersion: "2010-12-01",
-      credentials: {
+    } as Record<string, any>;
+    if (sesConfig.ACCESS_KEY_ID && sesConfig.SECRET_ACCESS_KEY)
+      config.credentials = {
         accessKeyId: sesConfig.ACCESS_KEY_ID,
         secretAccessKey: sesConfig.SECRET_ACCESS_KEY,
-      },
-    });
+      };
+
+    this.ses = new SESv2Client(config);
   }
 
   async send(config: SendConfig) {
