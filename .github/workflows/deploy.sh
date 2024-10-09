@@ -33,41 +33,54 @@ echo "Setting up script"
 APP_DIR=~/app
 DEFAULT_ACTIVE_DEPLOYMENT=green
 DEFAULT_INACTIVE_DEPLOYMENT=blue
+STATE_FILE=$APP_DIR/shared/state
 
 cd $APP_DIR || exit
 
+get_active_deployment() {
+    if [[ -f $STATE_FILE ]]; then
+        cat "$STATE_FILE" | grep 'active:' | cut -d':' -f2 | xargs
+    else
+        echo $DEFAULT_ACTIVE_DEPLOYMENT
+    fi
+}
+
+update_deployment_state() {
+    echo "active: $1" > "$STATE_FILE"
+    echo "inactive: $2" >> "$STATE_FILE"
+}
+
 echo "Determining active deployment"
-if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
-  export ACTIVE_DEPLOYMENT=green
-  export INACTIVE_DEPLOYMENT=blue
-elif [[ "$ACTIVE_DEPLOYMENT" == green ]]; then
-  export ACTIVE_DEPLOYMENT=blue
-  export INACTIVE_DEPLOYMENT=green
+ACTIVE_DEPLOYMENT=$(get_active_deployment)
+if [[ $ACTIVE_DEPLOYMENT == "blue" ]]; then
+    NEW_ACTIVE="green"
+    NEW_INACTIVE="blue"
 else
-  export ACTIVE_DEPLOYMENT=$DEFAULT_ACTIVE_DEPLOYMENT
-  export INACTIVE_DEPLOYMENT=$DEFAULT_INACTIVE_DEPLOYMENT
+    NEW_ACTIVE="blue"
+    NEW_INACTIVE="green"
 fi
-echo "Deploying to new environment: $ACTIVE_DEPLOYMENT"
+
+echo "Deploying to new environment: $NEW_ACTIVE"
 
 echo "Unarchiving new app build"
 tar -xzf tmp/build.tar.gz -C tmp/ && rm -f tmp/build.tar.gz
-rsync -a --delete tmp/build/ "$ACTIVE_DEPLOYMENT/"
+rsync -a --delete tmp/build/ "$NEW_ACTIVE/"
 rm -rf tmp/build
 
 echo "Setting up environment"
 set -a
-source "$ACTIVE_DEPLOYMENT/app.env"
+source "$NEW_ACTIVE/app.env"
 source shared/deployment.env
 set +a
 
 echo "Starting new app"
-if [[ "$ACTIVE_DEPLOYMENT" == blue ]]; then
+if [[ $NEW_ACTIVE == "blue" ]]; then
   APP_PORT=$BLUE_UPSTREAM
 else
   APP_PORT=$GREEN_UPSTREAM
 fi
-cd "$APP_DIR/$ACTIVE_DEPLOYMENT" || exit
-PORT=$APP_PORT pm2 start --name "arena-$ACTIVE_DEPLOYMENT" "bun" -- server.js
+cd "$APP_DIR/$NEW_ACTIVE" || exit
+PORT=$APP_PORT pm2 start --name "arena-$NEW_ACTIVE" "bun" -- server.js
 
 echo "Waiting for the app to start"
 sleep 1
@@ -80,7 +93,9 @@ sudo nginx -t
 sudo nginx -s reload
 
 echo "Cleaning up"
-pm2 stop "arena-$INACTIVE_DEPLOYMENT"
+pm2 stop "arena-$NEW_INACTIVE"
+pm2 delete "arena-$NEW_INACTIVE"
 pm2 save
 
-echo "New Active Deployment: $ACTIVE_DEPLOYMENT"
+echo "New Active Deployment: $NEW_ACTIVE"
+update_deployment_state "$NEW_ACTIVE" "$NEW_INACTIVE"
