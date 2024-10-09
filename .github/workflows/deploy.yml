@@ -104,4 +104,4 @@ jobs:
 
       - name: Startup New Deployment
         run: |
-          ssh -t -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }} '. ~/app/deploy.sh'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }} 'bash -l -c ". ~/app/deploy.sh"'
