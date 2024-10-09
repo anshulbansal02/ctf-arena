@@ -40,7 +40,7 @@ export const config = {
       },
     },
   },
-  host: process.env.APP_HOST,
+  host: `http${process.env.STAGE === "prod" ? "s" : ""}://${process.env.APP_HOST}`,
   routes: {
     default: {
       NO_AUTH: "/",
