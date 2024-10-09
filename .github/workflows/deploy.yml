@@ -63,6 +63,7 @@ jobs:
         run: |
           cp -r .next/standalone ./build
           cp -r .next/static ./build/.next/static
+          cp -r public/* ./build/.next/static
 
           cd build
           cat <<EOF > app.env
