@@ -27,12 +27,12 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.1.29
+          bun-version: latest
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
@@ -103,10 +103,5 @@ jobs:
           target: "~/app/tmp"
 
       - name: Startup New Deployment
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.SERVER_HOST_NAME }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
-          script: . ~/app/deploy.sh
+        run: |
+          ssh -t -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USER }}@${{ secrets.SERVER_HOST_NAME }} '. ~/app/deploy.sh'

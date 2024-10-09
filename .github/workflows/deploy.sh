@@ -53,8 +53,6 @@ echo "Unarchiving new app build"
 tar -xzf tmp/build.tar.gz -C tmp/ && rm -f tmp/build.tar.gz
 rsync -a --delete tmp/build/ "$ACTIVE_DEPLOYMENT/"
 rm -rf tmp/build
-sudo setfacl -R -d -m u:www-data:r "$ACTIVE_DEPLOYMENT/.next/static"
-
 
 echo "Setting up environment"
 set -a
