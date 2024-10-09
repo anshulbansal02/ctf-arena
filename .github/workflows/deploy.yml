@@ -63,7 +63,7 @@ jobs:
         run: |
           cp -r .next/standalone ./build
           cp -r .next/static ./build/.next/static
-          cp -r public/* ./build/.next/static
+          cp -r public/static/* ./build/.next/static
 
           cd build
           cat <<EOF > app.env
@@ -78,6 +78,7 @@ jobs:
           EMAIL_PROVIDER=$EMAIL_PROVIDER
           AWS_REGION=$AWS_REGION
           STAGE=$STAGE
+          APP_VERSION=${{ github.sha }}
           EOF
           cd ..
 
