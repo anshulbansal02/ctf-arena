@@ -38,7 +38,7 @@ cd $APP_DIR || exit
 
 get_active_deployment() {
     if [[ -f $STATE_FILE ]]; then
-        cat "$STATE_FILE" | grep 'active:' | cut -d':' -f2 | xargs
+        grep -oP '^active: \K.*' "$STATE_FILE"
     else
         echo $DEFAULT_ACTIVE_DEPLOYMENT
     fi
