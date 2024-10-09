@@ -32,7 +32,6 @@ fi
 echo "Setting up script"
 APP_DIR=~/app
 DEFAULT_ACTIVE_DEPLOYMENT=green
-DEFAULT_INACTIVE_DEPLOYMENT=blue
 STATE_FILE=$APP_DIR/shared/state
 
 cd $APP_DIR || exit
@@ -53,11 +52,11 @@ update_deployment_state() {
 echo "Determining active deployment"
 ACTIVE_DEPLOYMENT=$(get_active_deployment)
 if [[ $ACTIVE_DEPLOYMENT == "blue" ]]; then
-    NEW_ACTIVE="green"
-    NEW_INACTIVE="blue"
+    export NEW_ACTIVE="green"
+    export NEW_INACTIVE="blue"
 else
-    NEW_ACTIVE="blue"
-    NEW_INACTIVE="green"
+    export NEW_ACTIVE="blue"
+    export NEW_INACTIVE="green"
 fi
 
 echo "Deploying to new environment: $NEW_ACTIVE"
@@ -87,7 +86,7 @@ sleep 1
 
 echo "Updating proxy upstream and reloading"
 cd "$APP_DIR/shared" || exit
-envsubst \$APP_HOST,\$ACTIVE_DEPLOYMENT,\$BLUE_UPSTREAM,\$GREEN_UPSTREAM,\$APP_STATIC_PATH < nginx.conf.template > arena.conf
+envsubst \$APP_HOST,\$NEW_ACTIVE,\$BLUE_UPSTREAM,\$GREEN_UPSTREAM,\$APP_STATIC_PATH < nginx.conf.template > arena.conf
 sudo ln -sf "$(pwd)/arena.conf" /etc/nginx/sites-enabled/arena.conf
 sudo nginx -t
 sudo nginx -s reload
