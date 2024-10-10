@@ -1,5 +1,4 @@
 import { config } from "@/config";
-import { Logger } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
@@ -12,10 +11,4 @@ export const connection = new Pool({
   password: config.db.password,
 });
 
-class MyLogger implements Logger {
-  logQuery(query: string, params: unknown[]): void {
-    console.log({ query, params });
-  }
-}
-
-export const db = drizzle(connection, { logger: new MyLogger() });
+export const db = drizzle(connection);
