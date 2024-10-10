@@ -18,7 +18,7 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
     const emailService = getEmailService();
 
     const magicLink = new URL(
-      `/api/auth/callback/magic-link?${new URLSearchParams({ token: params.token, email: params.identifier })}`,
+      `/letmein?${new URLSearchParams({ token: params.token, identifier: params.identifier })}`,
       config.host,
     ).toString();
 
