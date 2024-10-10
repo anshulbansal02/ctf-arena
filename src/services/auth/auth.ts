@@ -46,6 +46,8 @@ const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
     verificationTokensTable: TB_userVerificationTokens,
   }),
 
+  debug: true,
+
   trustHost: true,
   ...authConfig,
   providers: [
