@@ -1,6 +1,7 @@
 export const config = {
   stage: (process.env.STAGE ?? "dev") as "dev" | "prod",
   appVersion: process.env.APP_VERSION,
+
   db: {
     name: process.env.DB_NAME!,
     host: process.env.DB_HOST!,
@@ -19,6 +20,7 @@ export const config = {
       accountId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
       secret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
     },
+    secret: process.env.AUTH_SECRET!,
   },
   email: {
     activeProvider: process.env.EMAIL_PROVIDER,

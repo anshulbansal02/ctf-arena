@@ -4,6 +4,7 @@ import {
   attachSession,
   authenticatedUserRedirectionRules,
 } from "@/services/auth/middlewares";
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 const routesType = {
@@ -20,6 +21,9 @@ function isRouteType(patterns: Array<RegExp>, route: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  headers().forEach((value, key) => {
+    console.log(`${key}=${value}`);
+  });
   const session = await attachSession();
 
   const route = request.nextUrl.pathname;

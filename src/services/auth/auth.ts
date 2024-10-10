@@ -23,7 +23,13 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
       config.host,
     ).toString();
 
-    if (config.stage === "dev") return console.info({ magicLink });
+    if (config.stage === "dev")
+      return console.info({
+        magicLink,
+        token: params.token,
+        email: params.identifier,
+        rawLink: params.url,
+      });
 
     emailService.send({
       address: {
@@ -45,9 +51,7 @@ const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
     accountsTable: TB_userAccounts,
     verificationTokensTable: TB_userVerificationTokens,
   }),
-
-  debug: true,
-
+  secret: config.auth.secret,
   trustHost: true,
   ...authConfig,
   providers: [
@@ -60,6 +64,7 @@ const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
       id: "magic-link",
       name: "Email",
       type: "email",
+      secret: config.auth.secret,
       maxAge: 60 * 60 * 4,
       from: config.app.sourceEmailAddress.auth,
       options: {},
