@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/shared/components";
 import { redirect } from "next/navigation";
 import { useEffect, useRef } from "react";
 
@@ -8,12 +7,15 @@ export default function LetMeIn({
 }: {
   searchParams: { token: string; identifier: string };
 }) {
+  console.log("[DEBUG] Landed on Let Me In Page");
+
   const { token, identifier } = searchParams;
   if (!(identifier && token)) redirect("/");
 
   const ref = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
+    console.log("[DEBUG] Auto submitting authentication form");
     ref.current?.submit();
   }, []);
 
