@@ -7,7 +7,8 @@ import { ConnectivityStatus } from "@/shared/providers";
 
 export const metadata: Metadata = {
   title: "CTF Arena",
-  description: "A platform challenging users to show their technical prowess",
+  description:
+    "A platform challenging users to show their ability in exciting games.",
   icons: [
     {
       rel: "icon",
