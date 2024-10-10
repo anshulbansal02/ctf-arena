@@ -12,7 +12,6 @@ import {
   Text,
 } from "@react-email/components";
 import { Tailwind } from "@react-email/tailwind";
-import { format } from "date-fns";
 import { assetURI } from "./helpers";
 import { formatInUTC } from "@/lib/utils";
 
@@ -70,7 +69,7 @@ export const ContestReminderEmail = ({
               <Text className="text-center text-[16px]">
                 Hey! {userName}, The contest is starting in less than an hour at{" "}
                 <span className="font-semibold">
-                  {formatInUTC(startsAt, "HH:mm a")}
+                  {formatInUTC(startsAt, "HH:mm a '(UTC)'")}
                 </span>
                 . Be sure{" "}
                 {participationType === "individual"

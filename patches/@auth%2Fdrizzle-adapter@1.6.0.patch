@@ -1,0 +1,28 @@
+diff --git a/lib/pg.js b/lib/pg.js
+index 3256254fd2b18a9a1ca8efe6794c14ebd298e67b..d80812498db1e5a83d58e4e61cf0ca95de7440e4 100644
+--- a/lib/pg.js
++++ b/lib/pg.js
+@@ -75,6 +75,7 @@ export function defineTables(schema = {}) {
+     };
+ }
+ export function PostgresDrizzleAdapter(client, schema) {
++    console.log("POSTGRES ADAPTER DEFINITION")
+     const { usersTable, accountsTable, sessionsTable, verificationTokensTable, authenticatorsTable, } = defineTables(schema);
+     return {
+         async createUser(data) {
+@@ -169,11 +170,14 @@ export function PostgresDrizzleAdapter(client, schema) {
+                 .then((res) => res[0]);
+         },
+         async useVerificationToken(params) {
+-            return client
++            console.log("PARAMS: ", {params});
++            const result = await client
+                 .delete(verificationTokensTable)
+                 .where(and(eq(verificationTokensTable.identifier, params.identifier), eq(verificationTokensTable.token, params.token)))
+                 .returning()
+                 .then((res) => (res.length > 0 ? res[0] : null));
++            console.log("RESULT: ", {result});
++            return result;
+         },
+         async deleteUser(id) {
+             await client.delete(usersTable).where(eq(usersTable.id, id));

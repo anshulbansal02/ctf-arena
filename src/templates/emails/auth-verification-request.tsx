@@ -14,7 +14,6 @@ import {
   Text,
 } from "@react-email/components";
 import { Tailwind } from "@react-email/tailwind";
-import { format } from "date-fns";
 import { assetURI } from "./helpers";
 import { formatInUTC } from "@/lib/utils";
 
@@ -67,7 +66,7 @@ export const AuthVerificationRequestEmail = ({
             <Text className="text-[16px] text-black">
               Use the below button to access your account ({userEmail}) on CTF
               Arena. This link is valid until{" "}
-              {formatInUTC(expires, "hh:mm a 'on' dd/MM/yy")}
+              {formatInUTC(expires, "hh:mm a 'on' dd/MM/yy '(UTC)'")}
             </Text>
 
             <Section className="mb-[32px] mt-[32px] text-center">

@@ -2,7 +2,6 @@
 import NextAuth from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { EmailConfig } from "next-auth/providers";
-import EntraID from "next-auth/providers/microsoft-entra-id";
 
 import { config } from "@/config";
 import { getEmailService } from "@/services/email";
@@ -55,11 +54,6 @@ const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
   trustHost: true,
   ...authConfig,
   providers: [
-    EntraID({
-      clientId: config.auth.azure.accountId,
-      clientSecret: config.auth.azure.secret,
-      tenantId: config.auth.azure.tenantId,
-    }),
     {
       id: "magic-link",
       name: "Email",
