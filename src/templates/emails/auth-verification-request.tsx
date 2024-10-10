@@ -16,6 +16,7 @@ import {
 import { Tailwind } from "@react-email/tailwind";
 import { format } from "date-fns";
 import { assetURI } from "./helpers";
+import { formatInUTC } from "@/lib/utils";
 
 interface AuthVerificationRequestEmailProps {
   magicLink: string;
@@ -66,7 +67,7 @@ export const AuthVerificationRequestEmail = ({
             <Text className="text-[16px] text-black">
               Use the below button to access your account ({userEmail}) on CTF
               Arena. This link is valid until{" "}
-              {format(expires, "hh:mm a 'on' dd/MM/yy")}
+              {formatInUTC(expires, "hh:mm a 'on' dd/MM/yy")}
             </Text>
 
             <Section className="mb-[32px] mt-[32px] text-center">
@@ -87,12 +88,7 @@ export const AuthVerificationRequestEmail = ({
             <Text className="text-center text-[16px] leading-[24px] text-black">
               or copy and paste this URL into your browser:
               <br />
-              <Link
-                href={magicLink}
-                className="break-all text-[#489FA4] no-underline"
-              >
-                {magicLink}
-              </Link>
+              <Text className="break-all no-underline">{magicLink}</Text>
             </Text>
             <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
 

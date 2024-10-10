@@ -14,6 +14,7 @@ import {
 import { Tailwind } from "@react-email/tailwind";
 import { format } from "date-fns";
 import { assetURI } from "./helpers";
+import { formatInUTC } from "@/lib/utils";
 
 interface ContestReminderEmailProps {
   userEmail: string;
@@ -69,7 +70,7 @@ export const ContestReminderEmail = ({
               <Text className="text-center text-[16px]">
                 Hey! {userName}, The contest is starting in less than an hour at{" "}
                 <span className="font-semibold">
-                  {format(startsAt, "HH:mm a")}
+                  {formatInUTC(startsAt, "HH:mm a")}
                 </span>
                 . Be sure{" "}
                 {participationType === "individual"
@@ -97,12 +98,7 @@ export const ContestReminderEmail = ({
                 or copy and paste this URL into your browser to know more about
                 the contest:
                 <br />
-                <Link
-                  href={contestURL}
-                  className="break-all text-[#489FA4] no-underline"
-                >
-                  {contestURL}
-                </Link>
+                <Text className="break-all no-underline">{contestURL}</Text>
               </Text>
 
               <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />

@@ -1,3 +1,5 @@
+import { addMinutes, format } from "date-fns";
+
 export function joinNamesWithConjunction(
   items: Array<string>,
   conjunction: string = "and",
@@ -97,4 +99,8 @@ export function arrayToMap<K extends PropertyKey, T>(
     map[key] = item;
   });
   return map;
+}
+
+export function formatInUTC(time: Date, formatStr: string) {
+  return format(addMinutes(time, time.getTimezoneOffset()), formatStr);
 }

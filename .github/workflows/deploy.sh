@@ -11,7 +11,7 @@ fi
 # Install Bun
 if ! command -v bun &> /dev/null; then
   sudo apt install unzip -y
-  curl -fsSL https://bun.sh/install | bash
+  curl -fsSl https://bun.sh/install | bash -s "bun-v1.1.29"
   export PATH="$HOME/.bun/bin:$PATH"
   source ~/.bashrc
 fi

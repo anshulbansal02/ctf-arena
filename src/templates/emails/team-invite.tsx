@@ -82,12 +82,7 @@ export const TeamInviteEmail = ({
             <Text className="text-center text-[16px] leading-[24px] text-black">
               or copy and paste this URL into your browser:
               <br />
-              <Link
-                href={inviteLink}
-                className="break-all text-[#489FA4] no-underline"
-              >
-                {inviteLink}
-              </Link>
+              <Text className="break-all no-underline">{inviteLink}</Text>
             </Text>
             <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
 
