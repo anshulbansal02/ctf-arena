@@ -1,6 +1,4 @@
-"use client";
-import { redirect } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { Button } from "@/shared/components";
 
 export default function LetMeIn({
   searchParams,
@@ -8,25 +6,18 @@ export default function LetMeIn({
   searchParams: { token: string; identifier: string };
 }) {
   const { token, identifier } = searchParams;
-  if (!(identifier && token)) redirect("/");
-
-  const ref = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    ref.current?.submit();
-  }, []);
 
   return (
     <form
-      ref={ref}
       className="grid h-screen w-screen place-items-center"
       method="GET"
       action="/api/auth/callback/magic-link"
     >
-      <div>
-        <h1>Authenticating as {identifier}</h1>
+      <div className="flex flex-col items-center">
+        <h1 className="text-lg">Authenticate as {identifier}?</h1>
         <input name="token" value={token} readOnly hidden></input>
         <input name="email" value={identifier} readOnly hidden></input>
+        <Button className="mt-8">Yes, let me in</Button>
       </div>
     </form>
   );
