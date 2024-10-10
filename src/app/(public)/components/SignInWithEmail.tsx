@@ -12,7 +12,8 @@ export function SignInWithEmail() {
 
   const { execute, loading } = useAction(
     async ({ email }: { email: string }) => {
-      await signIn("magic-link", { email, redirect: false });
+      const result = await signIn("magic-link", { email, redirect: false });
+      if (typeof result === "object" && "error" in result) return result;
       toaster.success({
         icon: <SvgEmailSent fill="currentColor" />,
         title: "Check your email",

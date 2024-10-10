@@ -1,10 +1,10 @@
 {
-  "name": "Festive Housie",
-  "time": { "start": "2024-10-06", "end": "2024-10-09" },
-  "description": "",
-  "shortDescription": "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.",
+  "name": "Festive Housie (Test)",
+  "time": { "start": "2024-10-10", "end": "2024-10-11" },
+  "description": "<h2>About Tambola</h2><p>Tambola, also known as Bingo in some countries, is a popular game of chance. Players are given tickets with random numbers, and the goal is to mark off the numbers as they are called out. The player who first completes a winning pattern is declared the winner.</p><h3>How to Play Tambola</h3><ol><li>Each player receives a ticket with a set of random numbers.</li><li>Numbers are called out randomly by the caller or generated through a random system.</li><li>Players mark the numbers on their tickets as they are called out.</li><li>The first player to mark off all numbers in a specific pattern wins.</li></ol><h3>Winning Patterns</h3><p>In Tambola, there are various winning patterns. Here are some common ones:</p><ul><li><strong>Full House:</strong> All numbers on the ticket are marked off.</li><li><strong>Top Line:</strong> All numbers in the top row are marked off.</li><li><strong>Middle Line:</strong> All numbers in the middle row are marked off.</li><li><strong>Bottom Line:</strong> All numbers in the bottom row are marked off.</li><li><strong>Four Corners:</strong> The four corner numbers on the ticket are marked off.</li></ul><h3>Why Participate?</h3><p>Tambola is an exciting and fast-paced game, perfect for all ages! Whether you're playing for fun or competing for prizes, this game is bound to keep you on the edge of your seat. Here are a few reasons why you should join:</p><ul><li>Easy to learn and play.</li><li>Suitable for players of all ages.</li><li>Chance to win exciting prizes.</li><li>A fun way to socialize and meet new people.</li></ul><p>So, grab your ticket, mark your numbers, and get ready to shout \"Tambola!\"</p>",
+  "shortDescription": "Tambola, an exciting game of chance where players receive tickets with random numbers. The objective is to mark off these numbers as they are called out. The first player to complete a winning pattern, such as a Full House or a line, wins the game.",
   "participationType": "individual",
-  "unranked": false,
+  "unranked": true,
   "game": "tambola",
   "challenges": [
     {
@@ -17,31 +17,31 @@
       "config": {
         "winningPatterns": [
           {
-            "totalClaims": 3,
+            "totalClaims": 2,
             "name": "full_house",
             "points": 10,
-            "title": "Fully Housie"
+            "title": "Full House"
           },
           {
-            "totalClaims": 5,
+            "totalClaims": 4,
             "name": "top_line",
             "points": 5,
             "title": "Top Line"
           },
           {
-            "totalClaims": 5,
+            "totalClaims": 4,
             "name": "middle_line",
             "points": 5,
             "title": "Mid Lane"
           },
           {
-            "totalClaims": 5,
+            "totalClaims": 4,
             "name": "bottom_line",
             "points": 5,
             "title": "Bottom Row"
           },
           {
-            "totalClaims": 5,
+            "totalClaims": 3,
             "name": "corners_with_star",
             "points": 8,
             "title": "Starry Corners"

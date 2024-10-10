@@ -12,6 +12,11 @@ import {
   TB_userVerificationTokens,
 } from "@/services/user";
 import { authConfig } from "./config";
+import { RateLimiter } from "@/lib/rate-limiter";
+import { headers } from "next/headers";
+
+RateLimiter.new("auth:sign_in:ip", { windowMs: 10_000, maxRequests: 100 });
+RateLimiter.new("auth:sign_in:email", { windowMs: 30_000, maxRequests: 2 });
 
 const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
   async (params) => {
@@ -44,7 +49,13 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
     });
   };
 
-const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
+const {
+  handlers,
+  signIn: authSignIn,
+  signOut,
+  auth,
+  unstable_update,
+} = NextAuth({
   adapter: DrizzleAdapter(db, {
     usersTable: TB_users,
     accountsTable: TB_userAccounts,
@@ -69,6 +80,24 @@ const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 
 async function getHandlers() {
   return handlers;
+}
+
+async function signIn(
+  ...args: Parameters<typeof authSignIn>
+): ReturnType<typeof authSignIn> {
+  const requestor = headers().get("x-forwarded-for") ?? "global";
+
+  const isAllowed =
+    (await RateLimiter.of("auth:sign_in:ip")!.allows(requestor)) &&
+    (await RateLimiter.of("auth:sign_in:email")!.allows(
+      (args[1] as Record<string, string>)["email"],
+    ));
+  if (!isAllowed)
+    return {
+      error: `Your request to sign in was not processed. Please wait for a while to use this action again. If you think it's an error please contact ${config.app.sourceEmailAddress.support}`,
+    };
+
+  return authSignIn(...args);
 }
 
 export {

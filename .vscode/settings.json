@@ -3,10 +3,13 @@
     "elif",
     "letmein",
     "nums",
+    "ratelimit",
+    "ratelimiter",
     "sendgrid",
     "tambola",
     "tmpls",
     "Unarchiving",
-    "unranked"
+    "unranked",
+    "upstash"
   ]
 }
