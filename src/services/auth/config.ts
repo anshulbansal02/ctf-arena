@@ -34,6 +34,7 @@ export const authConfig = {
   session: { strategy: "jwt" },
   callbacks: {
     signIn({ user }) {
+      console.log("Sign In Callback: ", { user });
       const isOrganizationProvidedEmail = config.app.org.domains.some((org) =>
         user.email?.endsWith(`@${org}`),
       );
@@ -41,6 +42,8 @@ export const authConfig = {
     },
 
     async jwt({ token, user, session, trigger }) {
+      console.log("JWT Callback: ", { token, user, session, trigger });
+
       if (trigger === "update") {
         token.user = { ...token.user, ...session.user };
       }
@@ -56,6 +59,8 @@ export const authConfig = {
       return token;
     },
     session({ session, token }) {
+      console.log("Session Callback: ", { session, token });
+
       session.user = { ...session.user, ...token.user };
 
       return session;
