@@ -63,8 +63,5 @@
     "sass": "^1.79.4",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.6.2"
-  },
-  "patchedDependencies": {
-    "@auth/drizzle-adapter@1.6.0": "patches/@auth%2Fdrizzle-adapter@1.6.0.patch"
   }
 }
