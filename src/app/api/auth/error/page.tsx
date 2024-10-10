@@ -1,5 +1,16 @@
 import Image from "next/image";
 import AuthErrorImage from "@/assets/media/auth-error.png";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "CTF Arena — Authentication Error",
+  icons: [
+    {
+      rel: "icon",
+      url: "/static/favicon/icon-amber.svg",
+    },
+  ],
+};
 
 export default function ErrorPage({
   searchParams,

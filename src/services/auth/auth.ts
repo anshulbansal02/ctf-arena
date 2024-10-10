@@ -18,10 +18,12 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
   async (params) => {
     const emailService = getEmailService();
 
-    if (config.stage === "dev") {
-      const { request, provider, theme, ...rest } = params;
-      return console.info(rest);
-    }
+    const magicLink = new URL(
+      `/api/auth/callback/magic-link?${new URLSearchParams({ token: params.token, email: params.identifier })}`,
+      config.host,
+    ).toString();
+
+    if (config.stage === "dev") return console.info({ magicLink });
 
     emailService.send({
       address: {
@@ -29,10 +31,7 @@ const sendVerificationRequestEmail: EmailConfig["sendVerificationRequest"] =
         to: params.identifier,
       },
       body: await emailService.renderTemplate("auth-verification-request", {
-        magicLink: new URL(
-          `/api/auth/callback/magic-link?${new URLSearchParams({ token: params.token, email: params.identifier })}`,
-          config.host,
-        ).toString(),
+        magicLink,
         expires: params.expires,
         userEmail: params.identifier,
       }),
