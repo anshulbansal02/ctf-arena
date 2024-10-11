@@ -108,4 +108,4 @@ jobs:
 
       - name: Invalidate CF Cache
         run: |
-          aws cloudfront create-invalidation --distribution-id {{ secrets.CF_DISTRIBUTION_ID }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} --paths "/*"
