@@ -1,7 +1,7 @@
 import { Logo } from "@/shared/components";
 import { SignInWithEmail } from "./components/SignInWithEmail";
 import { AnimatedNames } from "./components/AnimatedNames";
-import { SvgAttribution } from "@/assets/icons";
+import { SvgAttribution, SvgGithub } from "@/assets/icons";
 import Link from "next/link";
 
 export default async function Home() {
@@ -29,6 +29,15 @@ export default async function Home() {
         </Link>
 
         <Link href="/support">Support</Link>
+
+        <Link
+          href="https://github.com/anshulbansal02/ctf-arena"
+          target="_blank"
+          className="flex items-center gap-1"
+        >
+          <SvgGithub fill="currentColor" />
+          Contribute
+        </Link>
       </div>
     </main>
   );

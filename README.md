@@ -1,2 +1,2 @@
 ## CTF Arena
-> A Platform for hosting CTF Contests in an organization.
+> A Platform for hosting Contests in an organization.

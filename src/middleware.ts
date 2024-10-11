@@ -13,6 +13,7 @@ const routesType = {
   public: [/^\/$/, /^\/letmein/],
   // Can be viewed by all users irrespective of authentication
   common: [/^\/team\/invite\/\w+/],
+  // All other routes router which are not specified will fall in common type.
 };
 
 function isRouteType(patterns: Array<RegExp>, route: string): boolean {

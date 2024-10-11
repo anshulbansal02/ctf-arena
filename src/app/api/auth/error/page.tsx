@@ -21,6 +21,7 @@ export default function ErrorPage({
     <div className="grid h-dvh place-items-center">
       <div className="max-w-[640px] text-center">
         <Image
+          priority
           src={AuthErrorImage}
           alt="Lock Error Icon"
           width={140}
