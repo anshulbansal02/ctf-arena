@@ -23,12 +23,14 @@ export default async function Home() {
       </div>
 
       <div className="fixed bottom-3 left-4 flex items-center gap-5 text-sm leading-none text-slate-400">
+        <Link href="/privacy">Privacy Policy</Link>
+
+        <Link href="/support">Support</Link>
+
         <Link href="/attributions" className="flex items-center gap-1">
           <SvgAttribution fill="currentColor" />
           See Attributions
         </Link>
-
-        <Link href="/support">Support</Link>
 
         <Link
           href="https://github.com/anshulbansal02/ctf-arena"
