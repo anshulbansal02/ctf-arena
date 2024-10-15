@@ -704,15 +704,13 @@ export async function batchSendInvitations() {
           ? notInArray(TB_TR.id, invitationsAlreadyUnderProcessing)
           : sql`true`,
       ),
-    );
+    )
+    .limit(10);
 
   // Lock invites
   const invitationsToProcess = invites.map((i) => i.id.toString());
   if (invitationsToProcess.length)
     await cache.sAdd("lock:invitation:processing", invitationsToProcess);
-
-  // Store which invites were sent successfully
-  const invitesSent: Array<number> = [];
 
   const emailService = getEmailService();
 
@@ -741,6 +739,9 @@ export async function batchSendInvitations() {
   );
 
   await emailService.batchSend(inviteEmails);
+
+  // Store which invites were sent successfully
+  const invitesSent: Array<number> = invites.map((i) => i.id);
 
   if (invitesSent.length)
     // Update status

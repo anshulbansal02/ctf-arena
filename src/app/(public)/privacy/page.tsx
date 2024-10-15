@@ -3,7 +3,7 @@ import { Logo } from "@/shared/components";
 
 export default function PrivacyPolicyPage() {
   return (
-    <section className="prose prose-invert mx-auto max-w-[720px] py-24 prose-headings:font-medium">
+    <section className="prose prose-invert mx-auto max-w-[720px] px-4 py-16 prose-headings:font-medium">
       <Logo className="!inline-block" />
       <h1 className="mt-8">Privacy Policy</h1>
       <p>Last updated: October 12, 2024</p>

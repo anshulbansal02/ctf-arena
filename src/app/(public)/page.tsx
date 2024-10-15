@@ -22,7 +22,7 @@ export default async function Home() {
         <SignInWithEmail />
       </div>
 
-      <div className="fixed bottom-3 left-4 flex items-center gap-5 text-sm leading-none text-slate-400">
+      <div className="fixed bottom-3 left-4 flex flex-wrap items-center gap-5 text-sm leading-none text-slate-400">
         <Link href="/privacy">Privacy Policy</Link>
 
         <Link href="/support">Support</Link>

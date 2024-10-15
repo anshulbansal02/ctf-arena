@@ -9,7 +9,7 @@ export default function LetMeIn({
 
   return (
     <form
-      className="grid h-screen w-screen place-items-center"
+      className="grid h-screen w-screen place-items-center px-4 py-16"
       method="GET"
       action="/api/auth/callback/magic-link"
     >
