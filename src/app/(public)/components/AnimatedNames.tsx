@@ -88,4 +88,11 @@ const alternateNames = [
   "Clever Tricks Fest",
   "Cosmic Team Fun",
   "Curiosity Treasure Fun",
+  "Challenge The Fantastic",
+  "Chase The Fragments",
+  "Crack The Formula",
+  "Chase The Fireworks",
+  "Complete The Frenzy",
+  "Curious Thinker's Forum",
+  "Courageous Talent Fest",
 ];
