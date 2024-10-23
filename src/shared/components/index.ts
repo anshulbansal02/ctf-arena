@@ -11,3 +11,5 @@ export * from "./Confetti/Confetti";
 export * from "./ProgressBar/ProgressBar";
 export * from "./TimeFormatted/TimeFormatted";
 export * from "./Tooltip/Tooltip";
+export * from "./Fireworks/Fireworks";
+export * from "./Fireworks/hook/useFireworks";
