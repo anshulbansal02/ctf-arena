@@ -60,7 +60,7 @@ export const config = {
     },
 
     onboarding: {
-      skipTeamingStep: false,
+      skipTeamingStep: true,
     },
 
     org: {
