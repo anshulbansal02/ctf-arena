@@ -3,7 +3,7 @@ import { eventChannel } from "@/services/queue";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PING_INTERVAL = 30_000; // 30 seconds
+const PING_INTERVAL = 5_000; // 5 seconds
 
 export async function GET(request: Request): Promise<Response> {
   const responseStream = new TransformStream();
@@ -29,6 +29,7 @@ export async function GET(request: Request): Promise<Response> {
   eventChannel.subscribe("arena:*", allChannelsListener);
 
   // Ping client to keep alive
+  sendEvent("ping", {});
   const pingInterval = setInterval(() => {
     sendEvent("ping", {});
   }, PING_INTERVAL);
