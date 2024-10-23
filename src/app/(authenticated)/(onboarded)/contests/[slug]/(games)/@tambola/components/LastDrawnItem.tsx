@@ -25,7 +25,11 @@ const variants = {
   },
 };
 
-export function LastDrawnItem(props: { contestId: number }) {
+export function LastDrawnItem(props: {
+  contestId: number;
+  lastDrawn?: TicketItem;
+  controlled?: boolean;
+}) {
   const { data: lastDrawnItem, setState: setLastDrawn } = useAction(
     getLastDrawnItem,
     {
@@ -39,6 +43,7 @@ export function LastDrawnItem(props: { contestId: number }) {
     (drawnItem) => {
       setLastDrawn(drawnItem);
     },
+    { active: props.controlled },
   );
 
   return (
@@ -46,7 +51,7 @@ export function LastDrawnItem(props: { contestId: number }) {
       <AnimatePresence>
         <motion.h3
           className="absolute left-0 w-full"
-          key={lastDrawnItem}
+          key={props.lastDrawn ?? lastDrawnItem}
           variants={variants}
           initial="enter"
           animate="center"
@@ -57,7 +62,7 @@ export function LastDrawnItem(props: { contestId: number }) {
           }}
           suppressHydrationWarning
         >
-          {lastDrawnItem ?? "-"}
+          {props.lastDrawn ?? lastDrawnItem ?? "—"}
         </motion.h3>
       </AnimatePresence>
     </div>

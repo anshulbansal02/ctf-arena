@@ -21,6 +21,7 @@ export function GameState(props: { contestId: number }) {
   const { execute: getUpdatedGameState, data: gameState } = useAction(
     async () => {
       const state = await getGameState(props.contestId);
+      state.drawSequence = state.drawSequence.toSorted((a, b) => a - b);
       if (state.lastDrawnItem) setLastDrawn(state.lastDrawnItem);
       return state;
     },
