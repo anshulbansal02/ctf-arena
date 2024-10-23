@@ -43,7 +43,7 @@ export function LastDrawnItem(props: {
     (drawnItem) => {
       setLastDrawn(drawnItem);
     },
-    { active: props.controlled },
+    { active: !props.controlled },
   );
 
   return (
