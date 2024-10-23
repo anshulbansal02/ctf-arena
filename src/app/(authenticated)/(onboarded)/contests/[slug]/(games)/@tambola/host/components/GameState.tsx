@@ -12,11 +12,15 @@ export function GameState(props: { contestId: number }) {
     execute: drawNext,
     loading: loadingNextDraw,
     setState: setLastDrawn,
-  } = useAction(async () => {
-    const item = await drawItem(props.contestId);
-    getUpdatedGameState();
-    return item;
-  });
+    data: lastDrawnItem,
+  } = useAction(
+    async () => {
+      const item = await drawItem(props.contestId);
+      getUpdatedGameState();
+      return item;
+    },
+    { preserveData: true, immediate: false },
+  );
 
   const { execute: getUpdatedGameState, data: gameState } = useAction(
     async () => {
@@ -35,7 +39,13 @@ export function GameState(props: { contestId: number }) {
   return (
     <section className="mx-auto mb-10 flex min-h-screen max-w-[600px] flex-col items-center px-4">
       <h4 className="mt-8 text-slate-400">Last Drawn</h4>
-      <LastDrawnItem contestId={props.contestId} />
+      <LastDrawnItem
+        contestId={props.contestId}
+        controlled
+        lastDrawn={
+          typeof lastDrawnItem === "number" ? lastDrawnItem : undefined
+        }
+      />
 
       <ul className={styles.gridItems}>
         {gameState?.drawSequence.map((item) => (
