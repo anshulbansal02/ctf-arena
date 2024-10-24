@@ -118,14 +118,8 @@ export class Shell {
     let sparkLifeVariation = 0.25;
 
     let onDeath: (star: Star) => void;
-    if (this.crossette)
-      onDeath = (star) => {
-        crossetteEffect(star);
-      };
-    if (this.crackle)
-      onDeath = (star) => {
-        crackleEffect(star);
-      };
+    if (this.crossette) onDeath = crossetteEffect;
+    if (this.crackle) onDeath = crackleEffect;
     if (this.floral) onDeath = floralEffect;
     if (this.fallingLeaves) onDeath = fallingLeavesEffect;
 
@@ -214,11 +208,8 @@ export class Shell {
     };
 
     if (typeof this.color === "string") {
-      if (this.color === "random") {
-        color = null;
-      } else {
-        color = this.color;
-      }
+      if (this.color === "random") color = null;
+      else color = this.color;
 
       // Rings have positional randomness, but are rotated randomly
       if (this.ring) {

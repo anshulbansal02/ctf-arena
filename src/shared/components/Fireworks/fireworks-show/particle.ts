@@ -110,9 +110,16 @@ export class Star {
     speedOffX?: number,
     speedOffY?: number,
   ) {
-    const instance =
-      this.pool.pop() ||
-      new Star({ x, y, color, angle, speed, life, speedOffX, speedOffY });
+    const instance = new Star({
+      x,
+      y,
+      color,
+      angle,
+      speed,
+      life,
+      speedOffX,
+      speedOffY,
+    });
 
     this.active[color].push(instance);
     return instance;
@@ -129,7 +136,7 @@ export class Star {
 }
 
 export class Spark {
-  static drawWidth = 0;
+  static drawWidth = 0.75;
   static airDrag = 0.9;
 
   static active = createParticleCollection<Spark>();
@@ -154,18 +161,16 @@ export class Spark {
     speed: number,
     life: number,
   ) {
-    const instance =
-      this.pool.pop() ||
-      new Spark(
-        x,
-        y,
-        x,
-        y,
-        color,
-        Math.sin(angle) * speed,
-        Math.cos(angle) * speed,
-        life,
-      );
+    const instance = new Spark(
+      x,
+      y,
+      x,
+      y,
+      color,
+      Math.sin(angle) * speed,
+      Math.cos(angle) * speed,
+      life,
+    );
     this.active[color].push(instance);
     return instance;
   }
@@ -186,7 +191,7 @@ export class BurstFlash {
   ) {}
 
   static add(x: number, y: number, radius: number) {
-    const instance = this.pool.pop() || new BurstFlash(x, y, radius);
+    const instance = new BurstFlash(x, y, radius);
     this.active.push(instance);
     return instance;
   }

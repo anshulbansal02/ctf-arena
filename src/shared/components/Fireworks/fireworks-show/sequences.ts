@@ -4,7 +4,7 @@ import type { Dimensions } from "./types";
 
 function seqRandomShell(stage: Dimensions) {
   const size = getRandomShellSize();
-  const shell = ShellFactory.getShell("chrysanthemum", size.size);
+  const shell = ShellFactory.getShell("random", size.size);
   shell.launch(size.x, size.height, stage);
 
   let extraDelay = shell.starLife;

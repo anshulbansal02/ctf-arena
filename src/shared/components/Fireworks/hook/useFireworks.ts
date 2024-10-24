@@ -25,7 +25,7 @@ function getOrCreateShow(name: string) {
 }
 
 export function useFireworks(opts: { name: string; auto?: boolean }) {
-  const [show, setShow] = useState(() => getOrCreateShow(opts.name));
+  const [show] = useState(() => getOrCreateShow(opts.name));
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -36,7 +36,10 @@ export function useFireworks(opts: { name: string; auto?: boolean }) {
     using: "pointer" | "sequence",
     sequenceName?: "celebration" | "short" | "showdown",
   ) => {
-    if (using === "pointer") return (event: PointerEvent) => {};
+    if (using === "pointer")
+      return (event: PointerEvent) => {
+        show?.launchRandomShell(event);
+      };
     else if (using === "sequence") {
       // launch sequence
     }

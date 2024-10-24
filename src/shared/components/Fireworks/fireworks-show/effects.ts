@@ -6,7 +6,7 @@ export function createBurst(
   count: number,
   particleFactory: (angle: number, ringSize: number) => void,
   startAngle = 0,
-  arcLength = Math.PI * 2
+  arcLength = Math.PI * 2,
 ) {
   const R = 0.5 * Math.sqrt(count / Math.PI);
   const C = 2 * R * Math.PI;
@@ -41,7 +41,7 @@ export function crossetteEffect(star: Star) {
       star.color,
       angle,
       Math.random() * 0.6 + 0.75,
-      600
+      600,
     );
   });
 }
@@ -57,7 +57,7 @@ export function floralEffect(star: Star) {
       speedMult * 2.4,
       1000 + Math.random() * 300,
       star.speedX,
-      star.speedY
+      star.speedY,
     );
   });
   BurstFlash.add(star.x, star.y, 46);
@@ -73,7 +73,7 @@ export function fallingLeavesEffect(star: Star) {
       speedMult * 2.4,
       2400 + Math.random() * 600,
       star.speedX,
-      star.speedY
+      star.speedY,
     );
 
     newStar.sparkColor = COLOR.Gold;
@@ -96,7 +96,7 @@ export function crackleEffect(star: Star) {
       COLOR.Gold,
       angle,
       Math.pow(Math.random(), 0.45) * 2.4,
-      300 + Math.random() * 200
+      300 + Math.random() * 200,
     );
   });
 }

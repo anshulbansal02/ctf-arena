@@ -40,8 +40,6 @@ export class FireworksShow {
 
   resume() {
     this.paused = false;
-
-    this.launchSequence("random");
   }
 
   private handleResize() {
@@ -192,7 +190,7 @@ export class FireworksShow {
     const trailsCtx = this.trailsStage.ctx;
     const mainCtx = this.mainStage.ctx;
 
-    // colorSky(this.stageContainer, speed);
+    colorSky(this.stageContainer, speed);
 
     // Account for high DPI screens, and custom scale factor.
     const scaleFactor = config.scaleFactor;

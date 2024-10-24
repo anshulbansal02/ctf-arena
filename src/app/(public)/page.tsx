@@ -10,7 +10,7 @@ export default async function Home() {
     <main className="flex min-h-dvh flex-col items-center px-4">
       <FireworksCanvas />
 
-      {/* <header className="mt-16 flex w-full flex-col items-center">
+      <header className="mt-16 flex w-full flex-col items-center">
         <Logo size={1.5} />
         <AnimatedNames />
       </header>
@@ -43,7 +43,7 @@ export default async function Home() {
           <SvgGithub fill="currentColor" />
           Contribute
         </Link>
-      </div> */}
+      </div>
     </main>
   );
 }
