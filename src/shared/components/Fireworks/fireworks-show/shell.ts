@@ -7,8 +7,9 @@ import {
   fallingLeavesEffect,
   floralEffect,
 } from "./effects";
-import { BurstFlash, createParticleArc, Star } from "./flash";
-import { pointAngle, pointDistance, randomReal } from "./utils";
+import { BurstFlash, createParticleArc, Star } from "./particle";
+import type { Dimensions } from "./types";
+import { pointAngle, pointDistance, randomChance, randomReal } from "./utils";
 
 export class Shell {
   starLifeVariation: number;
@@ -31,27 +32,25 @@ export class Shell {
   pistil?: boolean;
   streamers?: boolean;
   pistilColor?: string;
-
   comet?: Star;
 
-  constructor(
-    options: {
-      starLifeVariation?: number;
-      color?: string;
-      glitterColor?: string;
-      starCount?: number;
-      starDensity?: number;
-      spreadSize: number;
-      starLife: number;
-      glitter: string;
-    },
-    private readonly stage: { W: number; H: number }
-  ) {
+  constructor(options: {
+    starLifeVariation?: number;
+    color?: string;
+    glitterColor?: string;
+    starCount?: number;
+    starDensity?: number;
+    spreadSize: number;
+    starLife: number;
+    glitter?: string;
+  }) {
     this.starLifeVariation = options.starLifeVariation || 0.125;
     this.color = options.color || randomColor();
     this.glitterColor = options.glitterColor || this.color;
     this.starLife = options.starLife;
     this.spreadSize = options.spreadSize;
+
+    Object.assign(this, options);
 
     if (!options.starCount) {
       const density = options.starDensity || 1;
@@ -60,9 +59,9 @@ export class Shell {
     } else this.starCount = options.starCount;
   }
 
-  launch(position: number, launchHeight: number) {
-    const width = this.stage.W;
-    const height = this.stage.H;
+  launch(position: number, launchHeight: number, stage: Dimensions) {
+    const width = stage.w;
+    const height = stage.h;
     const hpad = 60;
     const vpad = 50;
     const minHeightPercent = 0.45;
@@ -83,8 +82,7 @@ export class Shell {
         : COLOR.White,
       Math.PI,
       launchVelocity * (this.horsetail ? 1.2 : 1),
-      // Hang time is derived linearly from Vi; exact number came from testing
-      launchVelocity * (this.horsetail ? 100 : 400)
+      launchVelocity * (this.horsetail ? 100 : 400),
     ));
 
     // making comet "heavy" limits air drag
@@ -106,7 +104,7 @@ export class Shell {
 
     // Randomly make comet "burn out" a bit early.
     // This is disabled for horsetail shells, due to their very short airtime.
-    if (Math.random() > 0.4 && !this.horsetail) {
+    if (randomChance(0.4) && !this.horsetail) {
       comet.secondColor = INVISIBLE;
       comet.transitionTime = Math.pow(Math.random(), 1.5) * 700 + 500;
     }
@@ -115,7 +113,6 @@ export class Shell {
   }
 
   burst(x: number, y: number) {
-    // Set burst speed so overall burst grows to set size. This specific formula was derived from testing, and is affected by simulated air drag.
     const speed = this.spreadSize / 96;
 
     let sparkLifeVariation = 0.25;
@@ -183,7 +180,9 @@ export class Shell {
         // add minor variation to star life
         this.starLife + Math.random() * this.starLife * this.starLifeVariation,
         this.horsetail ? this.comet && this.comet.speedX : 0,
-        this.horsetail ? this.comet && this.comet.speedY : -standardInitialSpeed
+        this.horsetail
+          ? this.comet && this.comet.speedY
+          : -standardInitialSpeed,
       );
 
       if (this.secondColor) {
@@ -243,7 +242,7 @@ export class Shell {
             newSpeed, //speed,
             // add minor variation to star life
             this.starLife +
-              Math.random() * this.starLife * this.starLifeVariation
+              Math.random() * this.starLife * this.starLifeVariation,
           );
 
           if (this.glitter) {
@@ -278,39 +277,33 @@ export class Shell {
     } else {
       throw new Error(
         "Invalid shell color. Expected string or array of strings, but got: " +
-          this.color
+          this.color,
       );
     }
 
     if (this.pistil) {
-      const innerShell = new Shell(
-        {
-          spreadSize: this.spreadSize * 0.5,
-          starLife: this.starLife * 0.6,
-          starLifeVariation: this.starLifeVariation,
-          starDensity: 1.4,
-          color: this.pistilColor,
-          glitter: "light",
-          glitterColor:
-            this.pistilColor === COLOR.Gold ? COLOR.Gold : COLOR.White,
-        },
-        this.stage
-      );
+      const innerShell = new Shell({
+        spreadSize: this.spreadSize * 0.5,
+        starLife: this.starLife * 0.6,
+        starLifeVariation: this.starLifeVariation,
+        starDensity: 1.4,
+        color: this.pistilColor,
+        glitter: "light",
+        glitterColor:
+          this.pistilColor === COLOR.Gold ? COLOR.Gold : COLOR.White,
+      });
       innerShell.burst(x, y);
     }
 
     if (this.streamers) {
-      const innerShell = new Shell(
-        {
-          spreadSize: this.spreadSize * 0.9,
-          starLife: this.starLife * 0.8,
-          starLifeVariation: this.starLifeVariation,
-          starCount: Math.floor(Math.max(6, this.spreadSize / 45)),
-          color: COLOR.White,
-          glitter: "streamer",
-        },
-        this.stage
-      );
+      const innerShell = new Shell({
+        spreadSize: this.spreadSize * 0.9,
+        starLife: this.starLife * 0.8,
+        starLifeVariation: this.starLifeVariation,
+        starCount: Math.floor(Math.max(6, this.spreadSize / 45)),
+        color: COLOR.White,
+        glitter: "streamer",
+      });
       innerShell.burst(x, y);
     }
 

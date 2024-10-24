@@ -4,17 +4,20 @@ import {
   COLOR,
   whiteOrGold,
   INVISIBLE,
-} from "./colors.ts";
-import { config } from "./config.ts";
-import { randomChance } from "./utils.ts";
+} from "./colors";
+import { config } from "./config";
+import { Shell } from "./shell";
+import { randomChance, randomItem } from "./utils";
 
 export class ShellFactory {
-  chrysanthemumShell = (size = 1) => {
+  static chrysanthemumShell = (size = 1) => {
     const glitter = randomChance(0.25);
     const singleColor = randomChance(0.72);
     const color = singleColor
       ? randomColor({ limitWhite: true })
-      : [randomColor(), randomColor({ notSame: true })];
+      : ([randomColor(), randomColor({ notSame: true })] as
+          | string
+          | Array<string>);
 
     const pistil = singleColor && randomChance(0.42);
     const pistilColor = pistil && makePistilColor(color as string);
@@ -35,7 +38,7 @@ export class ShellFactory {
       spreadSize: 300 + size * 100,
       starLife: 900 + size * 200,
       starDensity,
-      color,
+      color: color as string,
       secondColor,
       glitter: glitter ? "light" : "",
       glitterColor: whiteOrGold(),
@@ -45,7 +48,7 @@ export class ShellFactory {
     };
   };
 
-  ghostShell = (size = 1) => {
+  static ghostShell = (size = 1) => {
     const shell = this.chrysanthemumShell(size);
     shell.starLife *= 1.5;
     let ghostColor = randomColor({ notColor: COLOR.White });
@@ -57,7 +60,7 @@ export class ShellFactory {
     return shell;
   };
 
-  strobeShell = (size = 1) => {
+  static strobeShell = (size = 1) => {
     const color = randomColor({ limitWhite: true });
     return {
       shellSize: size,
@@ -75,7 +78,7 @@ export class ShellFactory {
     };
   };
 
-  palmShell = (size = 1) => {
+  static palmShell = (size = 1) => {
     const color = randomColor();
     const thick = Math.random() < 0.5;
     return {
@@ -88,7 +91,7 @@ export class ShellFactory {
     };
   };
 
-  ringShell = (size = 1) => {
+  static ringShell = (size = 1) => {
     const color = randomColor();
     const pistil = Math.random() < 0.75;
     return {
@@ -106,7 +109,7 @@ export class ShellFactory {
     };
   };
 
-  crossetteShell = (size = 1) => {
+  static crossetteShell = (size = 1) => {
     const color = randomColor({ limitWhite: true });
     return {
       shellSize: size,
@@ -121,22 +124,21 @@ export class ShellFactory {
     };
   };
 
-  floralShell = (size = 1) => ({
+  static floralShell = (size = 1) => ({
     shellSize: size,
     spreadSize: 300 + size * 120,
     starDensity: 0.12,
     starLife: 500 + size * 50,
     starLifeVariation: 0.5,
-    color:
-      Math.random() < 0.65
-        ? "random"
-        : Math.random() < 0.15
+    color: (Math.random() < 0.65
+      ? "random"
+      : Math.random() < 0.15
         ? randomColor()
-        : [randomColor(), randomColor({ notSame: true })],
+        : [randomColor(), randomColor({ notSame: true })]) as string,
     floral: true,
   });
 
-  fallingLeavesShell = (size = 1) => ({
+  static fallingLeavesShell = (size = 1) => ({
     shellSize: size,
     color: INVISIBLE,
     spreadSize: 300 + size * 120,
@@ -148,7 +150,7 @@ export class ShellFactory {
     fallingLeaves: true,
   });
 
-  willowShell = (size = 1) => ({
+  static willowShell = (size = 1) => ({
     shellSize: size,
     spreadSize: 300 + size * 100,
     starDensity: 0.6,
@@ -158,7 +160,7 @@ export class ShellFactory {
     color: INVISIBLE,
   });
 
-  crackleShell = (size = 1) => {
+  static crackleShell = (size = 1) => {
     const color = Math.random() < 0.75 ? COLOR.Gold : randomColor();
     return {
       shellSize: size,
@@ -175,7 +177,7 @@ export class ShellFactory {
     };
   };
 
-  horsetailShell = (size = 1) => {
+  static horsetailShell = (size = 1) => {
     const color = randomColor();
     return {
       shellSize: size,
@@ -188,5 +190,79 @@ export class ShellFactory {
       glitterColor: Math.random() < 0.5 ? whiteOrGold() : color,
       strobe: color === COLOR.White,
     };
+  };
+
+  static variants = {
+    chrysanthemum: this.chrysanthemumShell,
+    crackle: this.crackleShell,
+    crossette: this.crossetteShell,
+    fallingLeaves: this.fallingLeavesShell,
+    floral: this.floralShell,
+    ghost: this.ghostShell,
+    horsetail: this.horsetailShell,
+    palm: this.palmShell,
+    ring: this.ringShell,
+    strobe: this.strobeShell,
+    willow: this.willowShell,
+  };
+
+  static getShell(
+    variant: keyof typeof this.variants | "random" | "fastShell",
+    size?: number,
+  ) {
+    const fastShells = [
+      "chrysanthemum",
+      "crackle",
+      "crossette",
+      "ghost",
+      "horsetail",
+      "palm",
+      "ring",
+      "strobe",
+    ];
+    const shells = Object.values(this.variants);
+
+    let shellConfig;
+
+    if (variant === "fastShell") {
+      const randomFastShellName = randomItem(
+        fastShells,
+      ) as keyof typeof this.variants;
+      shellConfig = this.variants[randomFastShellName];
+    } else if (variant === "random") shellConfig = randomItem(shells);
+    else shellConfig = this.variants[variant];
+
+    return new Shell(shellConfig(size));
+  }
+}
+
+export function fitShellPositionInBoundsH(position: number) {
+  const edge = 0.18;
+  return (1 - edge * 2) * position + edge;
+}
+
+export function fitShellPositionInBoundsV(position: number) {
+  return position * 0.75;
+}
+
+export function getRandomShellPosition() {
+  return {
+    x: fitShellPositionInBoundsH(Math.random()),
+    y: fitShellPositionInBoundsV(Math.random()),
+  };
+}
+
+export function getRandomShellSize() {
+  const baseSize = config.shellBaseSize;
+  const maxVariance = Math.min(2.5, baseSize);
+  const variance = Math.random() * maxVariance;
+  const size = baseSize - variance;
+  const height = maxVariance === 0 ? Math.random() : 1 - variance / maxVariance;
+  const centerOffset = Math.random() * (1 - height * 0.65) * 0.5;
+  const x = Math.random() < 0.5 ? 0.5 - centerOffset : 0.5 + centerOffset;
+  return {
+    size,
+    x: fitShellPositionInBoundsH(x),
+    height: fitShellPositionInBoundsV(height),
   };
 }

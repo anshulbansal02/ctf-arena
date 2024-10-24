@@ -5,7 +5,7 @@ export function createParticleArc(
   arcLength: number,
   count: number,
   randomness: number,
-  particleFactory: (angle: number) => void
+  particleFactory: (angle: number) => void,
 ) {
   const angleDelta = arcLength / count;
   const end = start + arcLength - angleDelta * 0.5;
@@ -33,6 +33,8 @@ export class Star {
   static drawWidth = 3;
   static airDrag = 0.98;
   static airDragHeavy = 0.992;
+
+  updateFrame?: number;
 
   visible: boolean;
   heavy: boolean;
@@ -106,7 +108,7 @@ export class Star {
     speed: number,
     life: number,
     speedOffX?: number,
-    speedOffY?: number
+    speedOffY?: number,
   ) {
     const instance =
       this.pool.pop() ||
@@ -141,7 +143,7 @@ export class Spark {
     public color: string,
     public speedX: number,
     public speedY: number,
-    public life: number
+    public life: number,
   ) {}
 
   static add(
@@ -150,7 +152,7 @@ export class Spark {
     color: string,
     angle: number,
     speed: number,
-    life: number
+    life: number,
   ) {
     const instance =
       this.pool.pop() ||
@@ -162,7 +164,7 @@ export class Spark {
         color,
         Math.sin(angle) * speed,
         Math.cos(angle) * speed,
-        life
+        life,
       );
     this.active[color].push(instance);
     return instance;
@@ -180,7 +182,7 @@ export class BurstFlash {
   private constructor(
     public readonly x: number,
     public readonly y: number,
-    public readonly radius: number
+    public readonly radius: number,
   ) {}
 
   static add(x: number, y: number, radius: number) {

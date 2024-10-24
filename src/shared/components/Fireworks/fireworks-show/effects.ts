@@ -1,8 +1,6 @@
 import { COLOR, INVISIBLE } from "./colors";
-import { BurstFlash, createParticleArc, Spark, Star } from "./flash";
-
-let quality = 1;
-const q: "low" | "medium" | "high" = "high";
+import { config } from "./config";
+import { BurstFlash, createParticleArc, Spark, Star } from "./particle";
 
 export function createBurst(
   count: number,
@@ -49,7 +47,7 @@ export function crossetteEffect(star: Star) {
 }
 
 export function floralEffect(star: Star) {
-  const count = 12 + 6 * quality;
+  const count = 12 + 6 * config.qualityMagnitude;
   createBurst(count, (angle, speedMult) => {
     Star.add(
       star.x,
@@ -79,7 +77,7 @@ export function fallingLeavesEffect(star: Star) {
     );
 
     newStar.sparkColor = COLOR.Gold;
-    newStar.sparkFreq = 144 / quality;
+    newStar.sparkFreq = 144 / config.qualityMagnitude;
     newStar.sparkSpeed = 0.28;
     newStar.sparkLife = 750;
     newStar.sparkLifeVariation = 3.2;
@@ -90,7 +88,7 @@ export function fallingLeavesEffect(star: Star) {
 
 // Crackle pops into a small cloud of golden sparks.
 export function crackleEffect(star: Star) {
-  const count = q === "high" ? 32 : 16;
+  const count = config.quality === "high" ? 32 : 16;
   createParticleArc(0, Math.PI * 2, count, 1.8, (angle) => {
     Spark.add(
       star.x,

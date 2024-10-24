@@ -1,0 +1,11 @@
+.fireworks {
+  width: 100vw;
+  height: 100vh;
+  transition: filter 0.3s;
+
+  canvas {
+    position: absolute;
+    mix-blend-mode: lighten;
+    transform: translateZ(0);
+  }
+}

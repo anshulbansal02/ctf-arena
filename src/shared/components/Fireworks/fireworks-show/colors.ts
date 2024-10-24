@@ -1,19 +1,18 @@
-import { randomItem } from "./utils";
+import { randomChance, randomItem } from "./utils";
 
 type RGB = { r: number; g: number; b: number };
 
-export const COLOR: Record<string, string> = {
+export const COLOR = {
   Red: "#ff0043",
   Green: "#14fc56",
   Blue: "#1e7fff",
   Purple: "#e60aff",
   Gold: "#ffbf36",
   White: "#ffffff",
-};
-
+} as const;
 export const INVISIBLE = "_INVISIBLE_";
 
-const COLOR_NAMES = Object.keys(COLOR);
+const COLOR_NAMES = Object.keys(COLOR) as Array<keyof typeof COLOR>;
 export const COLOR_CODES = COLOR_NAMES.map((colorName) => COLOR[colorName]);
 export const COLOR_CODES_W_INVISIBLE = [...COLOR_CODES, INVISIBLE];
 
@@ -39,7 +38,7 @@ export function randomColor(options?: {
   let color = randomColorSimple();
 
   // limit the amount of white chosen randomly
-  if (options?.limitWhite && color === COLOR.White && Math.random() < 0.6) {
+  if (options?.limitWhite && color === COLOR.White && randomChance(0.6)) {
     color = randomColorSimple();
   }
 
@@ -58,7 +57,7 @@ export function randomColor(options?: {
 }
 
 export function whiteOrGold() {
-  return Math.random() < 0.5 ? COLOR.Gold : COLOR.White;
+  return randomChance(0.5) ? COLOR.Gold : COLOR.White;
 }
 
 export function makePistilColor(shellColor: string) {

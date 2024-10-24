@@ -1,8 +1,10 @@
+import "./fireworks.scss";
+
 export function FireworksStage(props: { name: string }) {
   return (
-    <div className="fireworks-canvas-container">
-      <canvas id={`trails-canvas__${props.name}`}></canvas>
-      <canvas id={`main-canvas__${props.name}`}></canvas>
+    <div className="fireworks" data-name={props.name}>
+      <canvas data-stage="main"></canvas>
+      <canvas data-stage="trails"></canvas>
     </div>
   );
 }

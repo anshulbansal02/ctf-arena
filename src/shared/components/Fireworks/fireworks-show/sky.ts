@@ -1,5 +1,5 @@
 import { COLOR_CODES, COLOR_TUPLES } from "./colors";
-import { Star } from "./flash";
+import { Star } from "./particle";
 
 const currentSkyColor = { r: 0, g: 0, b: 0 };
 const targetSkyColor = { r: 0, g: 0, b: 0 };
