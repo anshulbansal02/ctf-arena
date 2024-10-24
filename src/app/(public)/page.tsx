@@ -11,7 +11,7 @@ export default async function Home() {
         <Logo size={1.5} />
         <AnimatedNames />
       </header>
-      <div className="mt-32 text-center">
+      <div className="mt-28 text-center">
         <h2 className="text-4xl font-medium">Enter the Digital Crucible</h2>
         <h4 className="mt-2 text-xl">
           The arena is set, the challenges are exciting and the competition is

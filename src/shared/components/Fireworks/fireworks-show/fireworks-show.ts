@@ -50,9 +50,8 @@ export class FireworksShow {
 
     const getNextSequence = () => {
       const randomness = Math.random();
-      if (randomness < 0.6) return sequences.random;
-      if (randomness < 0.9) return sequences.randomTwo;
-      return sequences.randomTriple;
+      if (randomness < 0.8) return sequences.random;
+      return sequences.randomTwo;
     };
 
     const infiniteSequence = () => {
