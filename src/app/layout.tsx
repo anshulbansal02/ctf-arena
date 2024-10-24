@@ -31,6 +31,12 @@ export default async function RootLayout({ children }: LayoutProps) {
           <Toaster />
         </ConnectivityStatus>
       </body>
+
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon='{"token": "5aa7b5f4f6ae419fb889a45264382a12"}'
+      ></script>
     </html>
   );
 }
