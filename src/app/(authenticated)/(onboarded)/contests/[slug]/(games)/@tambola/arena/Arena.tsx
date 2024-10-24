@@ -11,6 +11,8 @@ import { ClaimWinButton } from "./components/ClaimWinButton";
 import usePersistedState from "@/shared/hooks/usePersistedState";
 import contestEvents from "@/services/contest/events";
 import { LastDrawnItem } from "../components/LastDrawnItem";
+import { FireworksStage } from "@/shared/components";
+import { useFireworks } from "@/shared/components/Fireworks/hook";
 
 interface TambolaArenaProps {
   contest: {
@@ -23,6 +25,7 @@ interface TambolaArenaProps {
 
 export function TambolaArena(props: TambolaArenaProps) {
   const toaster = useToaster();
+  const fireworks = useFireworks({ name: "tambola", auto: true });
 
   const {
     execute: getUserChallengeData,
@@ -86,6 +89,7 @@ export function TambolaArena(props: TambolaArenaProps) {
         winningPatterns,
       });
 
+    fireworks.launch("sequence", "short");
     toaster.info({
       title: `${data.claimedBy} claims ${data.title}!`,
       content: `${data.claimsLeft} wins are left for the ${data.title}."`,
@@ -100,7 +104,9 @@ export function TambolaArena(props: TambolaArenaProps) {
     });
   }
 
-  function updateClaimedItems(claimedItems: TicketItem[]) {
+  function handleClaimWin(claimedItems: TicketItem[]) {
+    fireworks.launch("sequence", "celebration");
+
     if (userChallengeData)
       setUserChallengeData({
         ...userChallengeData,
@@ -110,6 +116,7 @@ export function TambolaArena(props: TambolaArenaProps) {
 
   return (
     <div className="mx-auto mb-20 flex min-h-screen max-w-[600px] flex-col items-center">
+      <FireworksStage name="tambola" />
       {userChallengeData ? (
         <div>
           <div className="mt-8 text-center">
@@ -140,7 +147,7 @@ export function TambolaArena(props: TambolaArenaProps) {
                       contestId={props.contest.id}
                       markedItems={markedItems}
                       pattern={pattern}
-                      onSuccessfulClaim={updateClaimedItems}
+                      onSuccessfulClaim={handleClaimWin}
                     />
                   </li>
                 ))}

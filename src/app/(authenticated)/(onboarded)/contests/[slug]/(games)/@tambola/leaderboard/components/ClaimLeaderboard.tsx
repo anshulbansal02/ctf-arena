@@ -88,9 +88,9 @@ export function ClaimLeaderboard(props: { contestId: number }) {
           <div
             key={entry.name}
             role="row"
-            className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-950 p-3"
+            className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-900 p-3 pl-4"
           >
-            <div role="cell" className="flex-[2]">
+            <div role="cell" className="flex-[2] font-medium">
               {entry.title}
             </div>
             <div role="cell" className="flex-[6]">
@@ -101,9 +101,9 @@ export function ClaimLeaderboard(props: { contestId: number }) {
                       username={winner.user.email}
                       title={winner.user.name}
                       size={24}
-                      className="-ml-2 rounded-full border border-zinc-950 bg-slate-400 first:ml-0"
+                      className="-ml-2 rounded-full border border-zinc-900 bg-slate-400 first:ml-0"
                     />
-                    <span>{winner.user.name}</span>
+                    <span className="text-sm">{winner.user.name}</span>
                   </li>
                 ))}
               </ul>

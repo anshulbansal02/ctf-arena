@@ -5,6 +5,7 @@ import contestEvents from "@/services/contest/events";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { randomInt, randomItem } from "@/lib/utils";
+import { useFireworks } from "@/shared/components/Fireworks/hook";
 
 const variants = {
   enter: () => {
@@ -31,6 +32,8 @@ const variants = {
 };
 
 export function Announcements(props: { contestId: number }) {
+  const fireworks = useFireworks({ name: "tambola", auto: true });
+
   const [latestAnnouncement, setLatestAnnouncement] = useState<{
     text: string;
     time: Date;
@@ -46,10 +49,11 @@ export function Announcements(props: { contestId: number }) {
       text: `${data.claimedBy} claims win for ${data.title}. ${data.claimsLeft} claims left for ${data.title}.`,
       time: new Date(),
     });
+    fireworks.launch("sequence", "short");
   });
 
   return (
-    <div className="relative flex h-16 w-full items-center overflow-hidden rounded-md bg-slate-800 px-5 py-3">
+    <div className="relative flex h-16 w-full items-center overflow-hidden rounded-md bg-slate-700 bg-opacity-45 px-5 py-3 backdrop-blur-lg">
       <AnimatePresence>
         <motion.p
           className="absolute left-0 w-full text-center"
