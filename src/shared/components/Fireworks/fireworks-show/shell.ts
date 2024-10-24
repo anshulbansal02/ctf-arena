@@ -9,7 +9,12 @@ import {
 } from "./effects";
 import { BurstFlash, createParticleArc, Star } from "./particle";
 import type { Dimensions } from "./types";
-import { pointAngle, pointDistance, randomChance, randomReal } from "./utils";
+import {
+  pointAngle,
+  pointDistance,
+  randomChance,
+  randomReal,
+} from "@/lib/utils";
 
 export class Shell {
   starLifeVariation: number;

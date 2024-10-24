@@ -1,4 +1,4 @@
-import { randomChance, randomItem } from "./utils";
+import { randomChance, randomItem } from "@/lib/utils";
 
 type RGB = { r: number; g: number; b: number };
 

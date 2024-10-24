@@ -3,13 +3,10 @@ import { SignInWithEmail } from "./components/SignInWithEmail";
 import { AnimatedNames } from "./components/AnimatedNames";
 import { SvgAttribution, SvgGithub } from "@/assets/icons";
 import Link from "next/link";
-import { FireworksCanvas } from "./components/FireworksCanvas";
 
 export default async function Home() {
   return (
     <main className="flex min-h-dvh flex-col items-center px-4">
-      <FireworksCanvas />
-
       <header className="mt-16 flex w-full flex-col items-center">
         <Logo size={1.5} />
         <AnimatedNames />

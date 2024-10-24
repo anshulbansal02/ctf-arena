@@ -6,6 +6,7 @@ import { BurstFlash, Spark, Star } from "./particle";
 import { colorSky } from "./sky";
 import { ShellFactory } from "./shell-factory";
 import { sequences } from "./sequences";
+import { randomInt } from "@/lib/utils";
 
 export class FireworksShow {
   private stageContainer: HTMLElement;
@@ -16,6 +17,8 @@ export class FireworksShow {
 
   private paused: boolean;
   private currentFrame = 0;
+
+  autoTimer?: Timer;
 
   constructor(name: string) {
     const stageSelector = `.fireworks[data-name="${name}"]`;
@@ -40,6 +43,28 @@ export class FireworksShow {
 
   resume() {
     this.paused = false;
+  }
+
+  startAuto() {
+    if (this.autoTimer) return;
+
+    const getNextSequence = () => {
+      const randomness = Math.random();
+      if (randomness < 0.6) return sequences.random;
+      if (randomness < 0.9) return sequences.randomTwo;
+      return sequences.randomTriple;
+    };
+
+    const infiniteSequence = () => {
+      const seq = getNextSequence();
+      seq(this.stage);
+      this.autoTimer = setTimeout(infiniteSequence, randomInt(5000, 10000));
+    };
+
+    infiniteSequence();
+  }
+  stopAuto() {
+    clearTimeout(this.autoTimer);
   }
 
   private handleResize() {

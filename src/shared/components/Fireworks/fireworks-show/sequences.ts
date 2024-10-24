@@ -1,6 +1,7 @@
 import { config } from "./config";
 import { ShellFactory, getRandomShellSize } from "./shell-factory";
 import type { Dimensions } from "./types";
+import { randomChance } from "@/lib/utils";
 
 function seqRandomShell(stage: Dimensions) {
   const size = getRandomShellSize();
@@ -61,8 +62,42 @@ function seqTriple(stage: Dimensions) {
   return 4000;
 }
 
+function seqSmallBarrage(stage: Dimensions) {
+  const barrageCount = 8;
+
+  function launchShell(x: number) {
+    const shell = ShellFactory.getShell("random");
+    const height = (Math.cos(x * 5 * Math.PI + Math.PI / 2) + 1) / 2;
+    shell.launch(x, height * 0.75, stage);
+  }
+
+  let count = 0;
+  let delay = 0;
+  while (count < barrageCount) {
+    if (count === 0) {
+      launchShell(0.5);
+      count += 1;
+    } else {
+      const offset = (count + 1) / barrageCount / 2;
+      const delayOffset = Math.random() * 30 + 30;
+      setTimeout(() => {
+        launchShell(0.5 + offset);
+      }, delay);
+      setTimeout(() => {
+        launchShell(0.5 - offset);
+      }, delay + delayOffset);
+      count += 2;
+    }
+    delay += 200;
+  }
+
+  return 3400 + barrageCount * 120;
+}
+
 export const sequences = {
   random: seqRandomShell,
   randomTwo: seqTwoRandom,
   randomTriple: seqTriple,
+  celebration: seqSmallBarrage,
+  short: seqTriple,
 };

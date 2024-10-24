@@ -1,3 +1,4 @@
+import { FireworksStage } from "@/shared/components";
 import { LastDrawnItem } from "../components/LastDrawnItem";
 import { Announcements } from "./components/Announcements";
 import { ClaimLeaderboard } from "./components/ClaimLeaderboard";
@@ -10,6 +11,8 @@ export default function LeaderboardPage({
 }) {
   return (
     <section className="mt-24 flex flex-col items-center px-4 md:px-12">
+      <FireworksStage name="tambola" />
+
       <div className="flex flex-col items-center">
         <h4 className="">Last Drawn</h4>
         <LastDrawnItem contestId={params.slug} />

@@ -34,16 +34,23 @@ export function useFireworks(opts: { name: string; auto?: boolean }) {
 
   const launch = (
     using: "pointer" | "sequence",
-    sequenceName?: "celebration" | "short" | "showdown",
+    sequenceName?: "celebration" | "short",
   ) => {
     if (using === "pointer")
       return (event: PointerEvent) => {
         show?.launchRandomShell(event);
       };
-    else if (using === "sequence") {
-      // launch sequence
+    else if (using === "sequence" && sequenceName) {
+      show?.launchSequence(sequenceName);
     }
   };
+
+  useEffect(() => {
+    if (opts.auto) show?.startAuto();
+    else show?.stopAuto();
+
+    return () => show?.stopAuto();
+  }, [opts.auto, show]);
 
   return { launch };
 }

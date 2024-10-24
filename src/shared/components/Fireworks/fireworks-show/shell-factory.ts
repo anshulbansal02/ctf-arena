@@ -7,7 +7,7 @@ import {
 } from "./colors";
 import { config } from "./config";
 import { Shell } from "./shell";
-import { randomChance, randomItem } from "./utils";
+import { randomChance, randomItem } from "@/lib/utils";
 
 export class ShellFactory {
   static chrysanthemumShell = (size = 1) => {

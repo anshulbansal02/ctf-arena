@@ -11,7 +11,8 @@ import { ClaimWinButton } from "./components/ClaimWinButton";
 import usePersistedState from "@/shared/hooks/usePersistedState";
 import contestEvents from "@/services/contest/events";
 import { LastDrawnItem } from "../components/LastDrawnItem";
-import { FireworksStage, useFireworks } from "@/shared/components";
+import { FireworksStage } from "@/shared/components";
+import { useFireworks } from "@/shared/components/Fireworks/hook";
 
 interface TambolaArenaProps {
   contest: {
