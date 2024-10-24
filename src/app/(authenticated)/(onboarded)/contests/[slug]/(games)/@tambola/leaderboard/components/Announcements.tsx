@@ -53,7 +53,7 @@ export function Announcements(props: { contestId: number }) {
   });
 
   return (
-    <div className="relative flex h-16 w-full items-center overflow-hidden rounded-md bg-slate-800 px-5 py-3">
+    <div className="relative flex h-16 w-full items-center overflow-hidden rounded-md bg-slate-700 bg-opacity-45 px-5 py-3 backdrop-blur-lg">
       <AnimatePresence>
         <motion.p
           className="absolute left-0 w-full text-center"

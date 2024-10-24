@@ -10,7 +10,7 @@ export default function LeaderboardPage({
   params: { slug: number };
 }) {
   return (
-    <section className="mt-24 flex flex-col items-center px-4 md:px-12">
+    <section className="mt-28 flex flex-col items-center px-4 md:px-12">
       <FireworksStage name="tambola" />
 
       <div className="flex flex-col items-center">

@@ -137,7 +137,7 @@ export function RankLeaderboard(props: { contestId: number }) {
           <div
             key={entry.user.id}
             role="row"
-            className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-950 p-3"
+            className="flex items-center gap-4 rounded-e-xl rounded-s-xl bg-zinc-900 p-3"
           >
             <div role="cell" className="flex flex-1 justify-center">
               <Rank index={i} />
@@ -149,7 +149,7 @@ export function RankLeaderboard(props: { contestId: number }) {
                   username={entry.user.email}
                   title={entry.user.name}
                   size={24}
-                  className="-ml-2 rounded-full border border-zinc-950 bg-slate-400 first:ml-0"
+                  className="-ml-2 rounded-full border border-zinc-900 bg-slate-400 first:ml-0"
                 />
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap text-nowrap">
