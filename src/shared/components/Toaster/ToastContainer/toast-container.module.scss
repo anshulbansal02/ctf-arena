@@ -9,6 +9,31 @@
   pointer-events: none;
 }
 
+@mixin top {
+  top: 24px;
+  flex-direction: column-reverse;
+}
+
+@mixin bottom {
+  bottom: 24px;
+}
+
+@mixin left {
+  left: 16px;
+  align-items: flex-start;
+}
+
+@mixin middle {
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+@mixin right {
+  right: 16px;
+  align-items: flex-end;
+}
+
 .stack {
   position: absolute;
   display: flex;
@@ -17,46 +42,13 @@
   width: 100%;
   max-width: 420px;
   align-items: center;
+  padding: 0 16px;
+  @include bottom;
+  @include right;
 }
 
-.toastWrapper {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-
-  &:nth-last-child(2) {
-    bottom: 16px;
+@media screen and (width <= 780px) {
+  .stack {
+    @include middle;
   }
-
-  &:nth-last-child(3) {
-    bottom: 32px;
-  }
-
-  &:nth-last-child(n + 3) > div {
-    box-shadow: none;
-  }
-}
-
-.top {
-  top: 24px;
-  flex-direction: column-reverse;
-}
-
-.bottom {
-  bottom: 24px;
-}
-
-.left {
-  left: 24px;
-  align-items: flex-start;
-}
-
-.middle {
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.right {
-  right: 24px;
-  align-items: flex-end;
 }

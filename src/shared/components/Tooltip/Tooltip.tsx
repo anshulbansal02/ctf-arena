@@ -20,6 +20,7 @@ export function Tooltip(props: TooltipProps) {
           asChild={props.asChild}
           className={clsx(props.className)}
           type="button"
+          aria-label="Tooltip content"
         >
           {props.children}
         </Tip.Trigger>

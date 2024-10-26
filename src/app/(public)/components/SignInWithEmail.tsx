@@ -18,7 +18,7 @@ export function SignInWithEmail() {
         icon: <SvgEmailSent fill="currentColor" />,
         title: "Check your email",
         content: `An email has been sent to ${email} with a magic link (it may take a while to reach you). Use it to authenticate on CTF Arena. Do not share it with anyone.`,
-        timeout: 20 * 1000,
+        timeout: 20_000,
       });
     },
   );
@@ -47,7 +47,6 @@ export function SignInWithEmail() {
         type="email"
         placeholder="username@organization.com"
         disabled={loading}
-        className="min-w-96"
         rightSlot={
           <Tooltip
             text={`Enter your ${config.app.org.name} email address to sign in with a magic link`}

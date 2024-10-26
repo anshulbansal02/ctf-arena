@@ -13,7 +13,6 @@ const store = create<FireworksShowState>()(() => ({
 }));
 
 function getOrCreateShow(name: string) {
-  if (typeof window === "undefined") return;
   const existingShow = store.getState().showsByName[name];
   if (existingShow) return existingShow;
 
@@ -25,31 +24,35 @@ function getOrCreateShow(name: string) {
 }
 
 export function useFireworks(opts: { name: string; auto?: boolean }) {
-  const [show] = useState(() => getOrCreateShow(opts.name));
+  const [show, setShow] = useState<FireworksShow>();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    show?.resume();
-  }, [show]);
+    const newShow = getOrCreateShow(opts.name);
+    setShow(newShow);
+    newShow.resume();
+  }, [opts.name]);
 
   const launch = (
     using: "pointer" | "sequence",
     sequenceName?: "celebration" | "short",
   ) => {
+    if (!show) return;
     if (using === "pointer")
       return (event: PointerEvent) => {
-        show?.launchRandomShell(event);
+        show.launchRandomShell(event);
       };
     else if (using === "sequence" && sequenceName) {
-      show?.launchSequence(sequenceName);
+      show.launchSequence(sequenceName);
     }
   };
 
   useEffect(() => {
-    if (opts.auto) show?.startAuto();
-    else show?.stopAuto();
+    if (!show) return;
+    if (opts.auto) show.startAuto();
+    else show.stopAuto();
 
-    return () => show?.stopAuto();
+    return () => show.stopAuto();
   }, [opts.auto, show]);
 
   return { launch };

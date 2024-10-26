@@ -32,7 +32,7 @@ export function ToastContainer() {
     isClient &&
     createPortal(
       <div className={styles.container}>
-        <div className={clsx(styles.stack, styles.bottom, styles.right)}>
+        <div className={clsx(styles.bottom, styles.stack)}>
           <AnimatePresence>
             {toasts.map((toastConfig) => (
               <motion.div key={toastConfig.id} {...animationConfig.toast}>

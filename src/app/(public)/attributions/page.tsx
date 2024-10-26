@@ -33,7 +33,7 @@ const attributions = [
   },
   {
     name: "tambola-ticket-generator",
-    url: "http://www.fractalforums.com/non-fractal-related-chit-chat/90-number-bingo-ticket-algorithm/?PHPSESSID=19fb5b949dd49c4d16811fd775dcec9b",
+    url: "http://www.fractalforums.com/non-fractal-related-chit-chat/90-number-bingo-ticket-algorithm",
     title: "Tambola/Housie Ticket Generation Algorithm",
     text: "A complex process of making unique tickets for the game of Tambola or Housie explained simply by Mark Henderson.",
   },
@@ -52,7 +52,7 @@ export default function AttributionPage() {
         <Logo />
       </div>
       <h2 className="mt-8 text-xl font-medium">Attributions</h2>
-      <p className="mt-3 text-center text-sm font-light text-slate-300">
+      <p className="mt-3 text-pretty text-center font-light text-slate-300">
         These acknowledgments recognize the contributions of developers and
         creators whose work has complemented this platform&apos;s experience.
         While this list is not exhaustive, the efforts of all libraries, code
@@ -66,13 +66,15 @@ export default function AttributionPage() {
               <h2 className="text-base font-medium text-slate-200">
                 {attribution.title}
               </h2>
-              <p className="font-light text-slate-200">{attribution.text}</p>
-              <p className="mt-1">
-                <span className="text-slate-300">Source:&nbsp;</span>
+              <p className="text-pretty font-light text-slate-200">
+                {attribution.text}
+              </p>
+              <p className="mt-1 text-pretty">
+                <span className="text-slate-300">Source: </span>
                 <a
                   href={attribution.url}
                   target="_blank"
-                  className="text-[#4EC8C8]"
+                  className="text-[#3D9F93] underline underline-offset-2"
                 >
                   {attribution.url}
                 </a>
