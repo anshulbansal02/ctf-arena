@@ -1,7 +1,7 @@
 "use client";
 
 import { useLeaderboard } from "@/services/contest/client";
-import { Avatar } from "@/shared/components";
+import { Avatar, Spinner } from "@/shared/components";
 import { useMemo } from "react";
 
 type User = {
@@ -82,6 +82,24 @@ export function ClaimLeaderboard(props: { contestId: number }) {
           Winners
         </div>
       </div>
+
+      {!leaderboardByClaim.length && (
+        <div className="flex w-full flex-col items-center">
+          {!lastUpdated && (
+            <Spinner
+              color="rgba(255,255,255,0.25)"
+              className="mt-20"
+              size={24}
+            />
+          )}
+
+          {lastUpdated && (
+            <p className="py-40">
+              Waiting for someone to make the first submission.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="no-scrollbar flex max-h-[360px] w-full flex-col gap-2 overflow-auto rounded-xl">
         {leaderboardByClaim?.map((entry) => (

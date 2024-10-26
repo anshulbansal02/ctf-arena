@@ -7,6 +7,8 @@ import SilverMedal from "@/assets/media/silver-medal.png";
 import BronzeMedal from "@/assets/media/bronze-medal.png";
 import { useMemo } from "react";
 import Image, { StaticImageData } from "next/image";
+import { useAction } from "@/shared/hooks";
+import { getContestChallenges } from "@/services/contest/games/tambola";
 
 const medalURIs: Record<number, StaticImageData> = {
   1: GoldMedal,
@@ -48,6 +50,19 @@ export function RankLeaderboard(props: { contestId: number }) {
     contestId: props.contestId,
     name: "main",
   });
+
+  const { data: challenges, loading: loadingChallenges } = useAction(
+    getContestChallenges,
+    {
+      args: [props.contestId],
+      immediate: true,
+    },
+  );
+
+  const totalWins = challenges?.reduce(
+    (count, challenge) => challenge.config.winningPatterns.length + count,
+    0,
+  );
 
   const leaderboardByRank = useMemo(() => {
     if (!leaderboardItems) return [];
@@ -157,12 +172,16 @@ export function RankLeaderboard(props: { contestId: number }) {
               </div>
             </div>
             <div role="cell" className="flex flex-[4] items-center gap-2">
-              <div className="w-36">
-                <ProgressBar total={5} value={entry.wins.length} />
-              </div>
-              <span className="text-sm text-zinc-400">
-                {entry.wins.length}/{5}
-              </span>
+              {totalWins && (
+                <>
+                  <div className="w-36">
+                    <ProgressBar total={totalWins} value={entry.wins.length} />
+                  </div>
+                  <span className="text-sm text-zinc-400">
+                    {entry.wins.length}/{totalWins}
+                  </span>
+                </>
+              )}
             </div>
             <div role="cell" className="flex-1 text-lg">
               {entry.points}

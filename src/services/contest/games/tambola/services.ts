@@ -274,6 +274,19 @@ export async function getUserChallenge(contestId: number, challengeId: number) {
   return initialState;
 }
 
+export async function getContestChallenges(contestId: number) {
+  const challenges = (await db
+    .select({
+      id: TB_contestChallenges.id,
+      config: TB_contestChallenges.config,
+    })
+    .from(TB_contestChallenges)
+    .where(eq(TB_contestChallenges.contestId, contestId))) as [
+    { id: number; config: TambolaChallengeConfig },
+  ];
+  return challenges;
+}
+
 export async function getGameState(contestId: number) {
   const [contest] = await db
     .select({ gameState: TB_contests.gameState })
