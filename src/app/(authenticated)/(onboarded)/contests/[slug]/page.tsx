@@ -31,21 +31,21 @@ export default async function ContestPage({
   const contestStatus = getEventStatus(contest.startsAt, contest.endsAt);
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-[600px] flex-col items-center">
+    <section className="mx-auto flex min-h-screen w-full max-w-[600px] flex-col items-center px-4">
       <div className="flex flex-col items-center">
         <h2 className="mb-3 mt-12 text-3xl font-medium">{contest.name}</h2>
         {contestStatus === "yet-to-start" && (
           <p className="text-lg">
-            Starts In: <Timer till={contest.startsAt} running />
+            Starts In <Timer till={contest.startsAt} running />
           </p>
         )}
         {contestStatus === "in-progress" && (
-          <p>
-            Ends In: <Timer till={contest.endsAt} running />
+          <p className="text-lg">
+            Ends In <Timer till={contest.endsAt} running />
           </p>
         )}
         {contestStatus === "ended" && (
-          <p>
+          <p className="text-lg">
             Ended {formatDistanceToNow(contest.endsAt, { addSuffix: true })}
           </p>
         )}
@@ -53,8 +53,16 @@ export default async function ContestPage({
 
       <div className="mt-8 flex flex-wrap justify-center gap-2">
         <div>
+          <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm capitalize leading-none">
+            <SvgGameController /> {contest.game}
+          </p>
+        </div>
+
+        <div>
           <p className="flex gap-2 rounded-full bg-slate-700 px-3 py-2 text-sm leading-none">
-            <SvgGameController /> {contest.game.toUpperCase()}
+            {contest.participation === "individual"
+              ? "Individual Participation"
+              : "Team Participation"}
           </p>
         </div>
 
@@ -90,7 +98,7 @@ export default async function ContestPage({
         )}
       </div>
 
-      <div className="mt-8 flex justify-center gap-6">
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-6">
         {user.roles.includes("host") ? (
           <Button as="link" href={`${contest.id}/host`}>
             Host Game
@@ -126,8 +134,8 @@ export default async function ContestPage({
 
       <div
         dangerouslySetInnerHTML={{ __html: contest.description ?? "" }}
-        className="prose prose-invert mt-8 pb-36 pt-8"
+        className="prose prose-invert mb-36 mt-16"
       ></div>
-    </div>
+    </section>
   );
 }
