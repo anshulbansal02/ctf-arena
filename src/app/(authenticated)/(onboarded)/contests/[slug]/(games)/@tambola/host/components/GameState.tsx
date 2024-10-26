@@ -37,7 +37,7 @@ export function GameState(props: { contestId: number }) {
   );
 
   return (
-    <section className="mx-auto mb-10 flex min-h-screen max-w-[600px] flex-col items-center px-4">
+    <section className="mx-auto mb-24 flex min-h-screen max-w-[600px] flex-col items-center px-4">
       <h4 className="mt-8 text-slate-400">Last Drawn</h4>
       <LastDrawnItem
         contestId={props.contestId}

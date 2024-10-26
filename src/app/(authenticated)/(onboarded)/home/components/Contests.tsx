@@ -19,7 +19,7 @@ export async function Contests() {
   ]);
 
   return (
-    <section className="mt-16 max-w-[560px]">
+    <section className="mt-16 w-full max-w-[560px]">
       <h2 className="mb-8 text-2xl">Contests</h2>
       <div className="mb-12">
         <h4 className="mt-4 text-left font-medium text-slate-400">Ongoing</h4>
