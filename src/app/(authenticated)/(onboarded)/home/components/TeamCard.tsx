@@ -63,7 +63,7 @@ export async function TeamCard(props: TeamCardProps) {
       <p className="mt-4 text-center text-slate-400">
         You are not in a team yet
       </p>
-      <div className="mt-8 flex items-center gap-4">
+      <div className="mt-8 flex items-center justify-center gap-4">
         <Button variant="outlined" as="link" href="/team/search">
           Join A Team
         </Button>

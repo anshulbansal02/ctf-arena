@@ -6,7 +6,7 @@ import Link from "next/link";
 
 function Chip(props: { children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-2 rounded-lg bg-[#353a3e] px-2 py-[6px] text-sm font-medium leading-none shadow-sm">
+    <p className="flex items-center gap-2 text-nowrap rounded-lg bg-[#353a3e] px-2 py-[6px] text-sm font-medium leading-none shadow-sm">
       {props.children}
     </p>
   );
