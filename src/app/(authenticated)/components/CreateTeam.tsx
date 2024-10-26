@@ -94,7 +94,7 @@ export function CreateTeamStep(props: Props) {
   }, [teamInfoToastTimer]);
 
   return (
-    <div className="mt-20 min-w-[420px] text-center">
+    <div className="mt-20 text-center">
       <div className="flex items-center justify-center gap-4">
         <Button onClick={props.onBack} variant="outlined">
           <SvgChevronLeft fill="#fff" />
@@ -102,7 +102,7 @@ export function CreateTeamStep(props: Props) {
         <h2 className="text-3xl">Create your Team</h2>
       </div>
       <form
-        className="mx-auto mt-8 flex flex-col gap-4 text-center"
+        className="mt-8 flex flex-col gap-4 text-center"
         onSubmit={handleSubmit(handleNext)}
       >
         <div>

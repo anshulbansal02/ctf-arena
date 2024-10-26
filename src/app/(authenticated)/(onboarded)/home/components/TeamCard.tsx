@@ -17,7 +17,7 @@ export async function TeamCard(props: TeamCardProps) {
   else team = await getTeamDetailsByUserId(props.userId);
 
   return team ? (
-    <div className="team-card mt-4 min-w-[420px] rounded-lg bg-black px-6 py-4">
+    <div className="mt-4 rounded-lg bg-black px-6 py-4">
       <div className="flex flex-col">
         <div className="flex items-start justify-between">
           <div className="text-left">
@@ -59,11 +59,11 @@ export async function TeamCard(props: TeamCardProps) {
       </div>
     </div>
   ) : (
-    <div className="empty-state">
+    <div>
       <p className="mt-4 text-center text-slate-400">
         You are not in a team yet
       </p>
-      <div className="mt-8 flex items-center justify-center gap-4">
+      <div className="mt-8 flex items-center gap-4">
         <Button variant="outlined" as="link" href="/team/search">
           Join A Team
         </Button>

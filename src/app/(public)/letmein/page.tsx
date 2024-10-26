@@ -1,4 +1,4 @@
-import { Button } from "@/shared/components";
+import { Avatar, Button } from "@/shared/components";
 
 export default function LetMeIn({
   searchParams,
@@ -14,10 +14,15 @@ export default function LetMeIn({
       action="/api/auth/callback/magic-link"
     >
       <div className="flex flex-col items-center">
-        <h1 className="text-lg">Authenticate as {identifier}?</h1>
+        <h2 className="text-2xl font-medium">Authenticate as</h2>
+        <div className="mt-6 flex flex-col items-center">
+          <Avatar username={identifier} size={60} />
+          <p className="mt-2 text-lg">{identifier}?</p>
+        </div>
+
         <input name="token" value={token} readOnly hidden></input>
         <input name="email" value={identifier} readOnly hidden></input>
-        <Button className="mt-8">Yes, let me in</Button>
+        <Button className="mt-16 w-[180px]">Yes, let me in</Button>
       </div>
     </form>
   );

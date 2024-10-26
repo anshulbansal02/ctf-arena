@@ -9,10 +9,10 @@ export default async function NewTeamPage() {
   if (isUserInTeam) redirect("/team");
 
   return (
-    <main className="flex min-h-screen flex-col items-center">
-      <section className="max-w-[480px] px-4">
+    <section className="flex min-h-screen flex-col items-center px-4">
+      <div className="w-full max-w-[420px]">
         <CreateTeam />
-      </section>
-    </main>
+      </div>
+    </section>
   );
 }

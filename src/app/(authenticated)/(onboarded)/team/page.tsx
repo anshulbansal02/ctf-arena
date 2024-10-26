@@ -27,18 +27,18 @@ export default async function TeamPage() {
   ]);
 
   return (
-    <section className="mx-auto mb-24 flex min-h-screen max-w-[480px] flex-col items-center">
-      <section className="mt-12 flex w-[420px] flex-col items-center">
+    <section className="mx-auto mb-24 flex min-h-screen max-w-[480px] flex-col items-center px-4">
+      <section className="mt-12 w-full max-w-[420px] text-center">
         <h2 className="text-2xl">My Team</h2>
         <TeamCard userId={user.id} />
       </section>
 
       {receivedInvites && (
-        <section className="mt-16 flex w-[480px] flex-col items-center">
+        <section className="mt-16 flex w-full flex-col items-center">
           <h2 className="text-xl">Team Invites Received</h2>
 
           {receivedInvites.length ? (
-            <p className="mt-2 text-center text-sm leading-snug text-gray-400">
+            <p className="mt-2 text-pretty text-center text-sm leading-snug text-gray-400">
               Following teams have sent you an invite to join their team.
               Accepting an invite will cancel all other invites
             </p>
@@ -48,7 +48,7 @@ export default async function TeamPage() {
             </p>
           )}
 
-          <ul className="mt-2">
+          <ul className="mt-2 w-full">
             {receivedInvites.map((invite) => (
               <li key={invite.id} className="mt-6 flex gap-3">
                 <div>
@@ -80,11 +80,11 @@ export default async function TeamPage() {
       )}
 
       {joinRequests && isUserLeader && (
-        <section className="mt-16 flex w-[560px] flex-col items-center">
+        <section className="mt-16 flex w-full flex-col items-center">
           <h2 className="text-xl">Join Requests</h2>
 
           {joinRequests.length ? (
-            <p className="mt-2 text-center text-sm leading-snug text-gray-400">
+            <p className="mt-2 text-pretty text-center text-sm leading-snug text-gray-400">
               Following users are requesting to join your team. You can only
               accept at most{" "}
               {config.app.team.MEMBERS_LIMIT - team!.members.length} request(s)
@@ -97,15 +97,17 @@ export default async function TeamPage() {
             </p>
           )}
 
-          <ul className="mt-2">
+          <ul className="mt-2 w-full">
             {joinRequests.map((request) => (
               <li key={request.id} className="mt-6 flex items-center gap-3">
                 <Avatar username={request.userEmail!} size={40} />
-                <div className="mr-2">
-                  <p className="font-medium leading-tight">
+                <div className="overflow-hidden">
+                  <p className="overflow-hidden text-ellipsis font-medium leading-tight">
                     {request.userName}
                   </p>
-                  <p className="text-sm text-gray-300">{request.userEmail}</p>
+                  <p className="overflow-hidden text-ellipsis text-sm text-gray-300">
+                    {request.userEmail}
+                  </p>
                 </div>
                 <div className="ml-auto flex gap-2">
                   <RequestResponseButton
@@ -124,7 +126,7 @@ export default async function TeamPage() {
       )}
 
       {sentInvites && (
-        <section className="mt-16 flex w-[480px] flex-col items-center">
+        <section className="mt-16 flex w-full flex-col items-center">
           <div className="flex items-center gap-4">
             <h2 className="text-xl">Team Invites Sent</h2>
             {isUserLeader && (
@@ -134,7 +136,7 @@ export default async function TeamPage() {
               </>
             )}
           </div>
-          <ul className="mt-6">
+          <ul className="mt-6 w-full">
             {sentInvites.map((invite) => (
               <li key={invite.id} className="mb-3 flex items-center gap-2">
                 <SvgEmailSent width={18} height={18} />
@@ -143,7 +145,7 @@ export default async function TeamPage() {
                   <span className="font-medium">{invite.userEmail}</span>
                 </p>
                 <hr className="min-w-4 flex-grow border-gray-600" />
-                <p>
+                <p className="text-sm text-slate-300">
                   {formatDistanceToNowStrict(invite.createdAt, {
                     addSuffix: true,
                   })}
