@@ -34,7 +34,7 @@ export class FireworksShow {
 
     // Compute initial dimensions
     this.handleResize();
-    window.addEventListener("resize", this.handleResize);
+    window.addEventListener("resize", this.handleResize.bind(this));
   }
 
   pause() {
@@ -57,13 +57,14 @@ export class FireworksShow {
     const infiniteSequence = () => {
       const seq = getNextSequence();
       seq(this.stage);
-      this.autoTimer = setTimeout(infiniteSequence, randomInt(5000, 10000));
+      this.autoTimer = setTimeout(infiniteSequence, randomInt(4000, 8000));
     };
 
-    infiniteSequence();
+   infiniteSequence()
   }
   stopAuto() {
     clearTimeout(this.autoTimer);
+    this.autoTimer = undefined;
   }
 
   private handleResize() {
@@ -83,6 +84,7 @@ export class FireworksShow {
   }
 
   launchRandomShell(coords: Coords) {
+    console.log("Launching random shell", coords.x, coords.y);
     // Get random shell from shell factory
     const shell = ShellFactory.getShell("random");
     const w = this.mainStage.width;

@@ -32,7 +32,7 @@ const variants = {
 };
 
 export function Announcements(props: { contestId: number }) {
-  const fireworks = useFireworks({ name: "tambola", auto: true });
+  const fireworks = useFireworks({ name: "tambola" });
 
   const [latestAnnouncement, setLatestAnnouncement] = useState<{
     text: string;

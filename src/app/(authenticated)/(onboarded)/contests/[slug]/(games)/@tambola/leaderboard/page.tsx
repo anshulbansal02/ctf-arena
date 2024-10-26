@@ -11,7 +11,7 @@ export default function LeaderboardPage({
 }) {
   return (
     <section className="mt-28 flex flex-col items-center px-4 md:px-12">
-      <FireworksStage name="tambola" />
+      <FireworksStage name="tambola" auto />
 
       <div className="flex flex-col items-center">
         <h4 className="">Last Drawn</h4>

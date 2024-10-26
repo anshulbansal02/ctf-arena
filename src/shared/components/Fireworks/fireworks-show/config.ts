@@ -1,7 +1,7 @@
 export const config = {
   quality: "high",
-  qualityMagnitude: 1,
-  scaleFactor: 1,
+  qualityMagnitude: 0.7,
+  scaleFactor: 0.9,
   simSpeed: 1,
   shellBaseSize: 1,
   GRAVITY: 0.9,

@@ -15,11 +15,11 @@ const getPersistedState = (key: string, initialState: any) => {
 const usePersistedState = <T>(
   key: string,
   initialState: T,
-  options?: { noPersist?: boolean },
+  options?: { noPersist?: boolean; lazy?: boolean },
 ): [T, React.Dispatch<React.SetStateAction<T>>] => {
   // Initialize the state, retrieve from localStorage if available
   const [state, setState] = useState<T>(() =>
-    getPersistedState(key, initialState),
+    options?.lazy ? initialState : getPersistedState(key, initialState),
   );
 
   useEffect(() => {

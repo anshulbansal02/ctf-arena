@@ -25,7 +25,7 @@ interface TambolaArenaProps {
 
 export function TambolaArena(props: TambolaArenaProps) {
   const toaster = useToaster();
-  const fireworks = useFireworks({ name: "tambola", auto: true });
+  const fireworks = useFireworks({ name: "tambola" });
 
   const {
     execute: getUserChallengeData,
@@ -115,8 +115,8 @@ export function TambolaArena(props: TambolaArenaProps) {
   }
 
   return (
-    <div className="mx-auto mb-20 flex min-h-screen max-w-[600px] flex-col items-center">
-      <FireworksStage name="tambola" />
+    <div className="mx-auto mb-24 flex min-h-screen max-w-[600px] flex-col items-center">
+      <FireworksStage name="tambola" auto />
       {userChallengeData ? (
         <div>
           <div className="mt-8 text-center">

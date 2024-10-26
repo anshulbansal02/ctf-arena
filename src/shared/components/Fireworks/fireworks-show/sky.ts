@@ -25,7 +25,7 @@ export function colorSky(canvasContainer: HTMLElement, speed: number) {
     1,
     targetSkyColor.r,
     targetSkyColor.g,
-    targetSkyColor.b
+    targetSkyColor.b,
   );
 
   // Scale all color components to a max of `maxSkySaturation`, and apply intensity.

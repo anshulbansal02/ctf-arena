@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { FireworksShow } from "../fireworks-show";
-import { useEffect, useState } from "react";
+import { PointerEvent, useEffect, useState } from "react";
 
 type FireworksShowState = {
   showsByName: Record<string, FireworksShow>;
@@ -40,7 +40,7 @@ export function useFireworks(opts: { name: string; auto?: boolean }) {
     if (!show) return;
     if (using === "pointer")
       return (event: PointerEvent) => {
-        show.launchRandomShell(event);
+        show.launchRandomShell(event.nativeEvent);
       };
     else if (using === "sequence" && sequenceName) {
       show.launchSequence(sequenceName);

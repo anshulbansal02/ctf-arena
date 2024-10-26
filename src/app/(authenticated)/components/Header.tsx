@@ -15,12 +15,12 @@ export async function Header({ className }: Props) {
   return (
     <header
       className={clsx(
-        "flex h-[80px] w-full items-center bg-[#212428] p-4 shadow-lg sm:px-4 md:px-8 lg:px-16",
+        "flex h-[80px] w-full items-center justify-between bg-[#212428] p-4 shadow-lg sm:px-4 md:px-8 lg:px-16",
         className,
       )}
     >
-      <div className="w-60"></div>
-      <Logo className="flex-shrink-[0.5] flex-grow" />
+      <div className="hidden w-60 md:block"></div>
+      <Logo className="flex-shrink-[0.5] md:flex-grow" />
 
       <div className="flex w-60 justify-end gap-4">
         <Notifications />
