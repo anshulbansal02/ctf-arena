@@ -91,7 +91,7 @@ export default async function ViewInvitePage({
             Arena
           </h3>
 
-          <div className="mt-16">
+          <div className="mt-16 w-full max-w-[400px]">
             <p className="mb-4 text-center">You need to sign in to continue</p>
             <SignInWithEmail />
           </div>
