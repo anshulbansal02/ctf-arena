@@ -64,8 +64,8 @@ export const config = {
     },
 
     org: {
-      name: "Veersa",
-      domains: ["veersatech.com", "veersalabs.com"],
+      name: process.env.ORG_NAME,
+      domains: (process.env.ORG_DOMAINS?.split(',').filter(Boolean) as string[]).map(s => s.trim()),
     },
 
     sourceEmailAddress: {

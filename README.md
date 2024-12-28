@@ -1,2 +1,5 @@
 ## CTF Arena
-> A Platform for hosting Contests in an organization.
+> A Platform for hosting contests in an organization.
+
+### Architecture
+![CTF Arena Architecture Diagram](./architecture.jpg "Architecture")
